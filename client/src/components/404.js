@@ -6,7 +6,7 @@ export default class Page404 extends Component {
     return (
       <>
         <div className="site-container">
-          <Typography variant="h5">Hello, world!</Typography>
+          <Typography variant="h5">404 Page</Typography>
         </div>
       </>
     );
