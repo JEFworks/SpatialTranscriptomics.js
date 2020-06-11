@@ -32,7 +32,9 @@ class Homepage extends Component {
         .get(`http://localhost:4000/${count}/${numBatches}`)
         .then((response) => {
           const res = JSON.parse(response.data);
+          const batchNum = Number.parseInt(res.count);
           const matrix = new SparseMatrix(res.rows, res.columns);
+
           const elements = matrix.elements;
           elements.distinct = res.elements.distinct;
           elements.freeEntries = res.elements.freeEntries;
@@ -43,23 +45,19 @@ class Homepage extends Component {
           elements.state = res.elements.state;
           elements.table = res.elements.table;
           elements.values = res.elements.values;
-          matrix.elements = elements;
+
           const batches = this.state.batches;
-          batches[res.count] = matrix;
+          batches[batchNum] = matrix;
           this.setState({
+            loading: batchNum + 1 >= numBatches ? false : true,
             batches,
           });
-          console.log("Loaded batch #" + (res.count + 1));
+          console.log("Loaded batch #" + (batchNum + 1));
         })
-        .catch((error) => {
-          console.log(error);
-        });
+        .catch((error) => {});
       count++;
     }
     printBatches(this.state.batches);
-    this.setState({
-      loading: false,
-    });
   }
 
   componentDidMount() {
