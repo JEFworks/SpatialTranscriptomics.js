@@ -13,33 +13,49 @@ const fs = require("fs");
 const readline = require("readline");
 const stream = require("stream");
 
-app.get("/", function (req, res) {
-  const array = new Array(31053).fill(0);
-  for (let i = 0; i < array.length; i++) {
-    array[i] = new Array(2698).fill(0);
-  }
+const { SparseMatrix } = require("ml-sparse-matrix");
+
+app.get("/:count/:numBatches", function (req, res) {
+  const count = Number.parseInt(req.params.count);
+  const numBatches = Number.parseInt(req.params.numBatches);
+  const matrix = new SparseMatrix(31053, 2698);
+
   const instream = fs.createReadStream("../data/matrix/matrix.mtx");
   const outstream = new stream();
   const rl = readline.createInterface(instream, outstream);
-  console.log("Running...");
-  var lineCount = 0;
+
+  const numElements = Math.ceil(15430028 / numBatches);
+  const maxLine = Math.min((count + 1) * numElements + 2, 15430028 + 2);
+  const minLine = count * numElements + 2;
+  console.log(minLine + " -> " + maxLine);
+  let lineCount = 0;
 
   rl.on("line", function (line) {
-    if (lineCount > 3000000) {
+    if (lineCount >= maxLine) {
       rl.close();
       rl.removeAllListeners();
     }
+    if (lineCount >= minLine && lineCount < maxLine) {
+      const delimited = line.split(" ");
+      try {
+        const i = Number.parseInt(delimited[0]);
+        const j = Number.parseInt(delimited[1]);
+        const value = Number.parseInt(delimited[2]);
+        matrix.set(i, j, value);
+      } catch (e) {}
+    }
     lineCount++;
-    const delimited = line.split(" ");
-    try {
-      const i = Number.parseInt(delimited[0]);
-      const j = Number.parseInt(delimited[1]);
-      const value = Number.parseInt(delimited[2]);
-      array[i][j] = value;
-    } catch (e) {}
   }).on("close", function () {
+    console.log("done");
     rl.removeAllListeners();
-    res.json(JSON.stringify(array));
+    res.json(
+      JSON.stringify({
+        rows: matrix.rows,
+        columns: matrix.columns,
+        elements: matrix.elements,
+        count: count,
+      })
+    );
   });
 });
 
