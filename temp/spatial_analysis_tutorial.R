@@ -32,37 +32,9 @@ hist(log10(colSums(cd.filter>0)+1))
 hist(log10(rowSums(cd.filter)+1)) 
 
 ######## Counts per million (CPM) normalization
-normalizeCounts <- function (counts, normFactor = NULL, depthScale = 1e+06, pseudo=1, log=TRUE, verbose = TRUE) {
-  if (!class(counts) %in% c("dgCMatrix", "dgTMatrix")) {
-    if (verbose) {
-      message("Converting to sparse matrix ...")
-    }
-    counts <- Matrix::Matrix(counts, sparse = TRUE)
-  }
-  if (verbose) {
-    message("Normalizing matrix with ", ncol(counts), " cells and ", nrow(counts), " genes.")
-  }
-  if(is.null(normFactor)) {
-    if (verbose) {
-      message('normFactor not provided. Normalizing by library size.')
-    }
-    normFactor <- Matrix::colSums(counts)
-  }
-  if (verbose) {
-    message(paste0("Using depthScale ", depthScale))
-  }
-  counts <- Matrix::t(Matrix::t(counts)/normFactor)
-  counts <- counts * depthScale
-  if(log) {
-    if (verbose) {
-      message("Log10 transforming with pseudocount ", pseudo,".")
-    }
-    counts <- log10(counts + pseudo)
-  }
-  
-  return(counts)
-}
-mat <- normalizeCounts(cd.filter)
+mat <- Matrix::t(Matrix::t(cd)/Matrix::colSums(cd))
+mat <- mat * 1e6
+mat <- log10(mat + 1)
 
 ## Principal components dimensionality reduction
 ## the built in PCA is too slow but feel free to try
@@ -129,7 +101,6 @@ plot(emb, col=col, pch=".")
   
 ## You can also visualize these clusters in different embeddings like in PC space
 ## first 2 PCs for example
-
 plot(pcs[,1:2], col=col, pch=".")  
 
 ## Since this is spatial data, we can also see where these 
