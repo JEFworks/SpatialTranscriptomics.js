@@ -23,7 +23,9 @@ app.get("/:count/:numBatches", function (req, res) {
     return 0;
   }
 
-  const instream = fs.createReadStream("../data/matrix/matrix.mtx");
+  const instream = fs.createReadStream(
+    "../data/filtered_feature_bc_matrix/matrix.mtx"
+  );
   instream.on("error", function () {
     res.status(400).send("Matrix file was not found.\n");
     return 0;
