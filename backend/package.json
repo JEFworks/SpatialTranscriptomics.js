@@ -12,6 +12,7 @@
   "dependencies": {
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
+    "event-stream": "^4.0.1",
     "express": "^4.17.1",
     "ml-sparse-matrix": "^2.0.0"
   },
