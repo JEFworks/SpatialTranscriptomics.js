@@ -32,29 +32,32 @@ app.get("/:count/:numBatches", function (req, res) {
   let minLine = null;
   let lineCount = 0;
   let lastLineReached = false;
+  let indexLineReached = false;
 
   rl.on("line", function (line) {
-    if (lineCount === 2) {
-      const delimited = line.split(" ");
-      rows = Number.parseInt(delimited[0]);
-      cols = Number.parseInt(delimited[1]);
-      numElements = Number.parseInt(delimited[2]);
-      if (
-        Number.isNaN(rows) ||
-        Number.isNaN(cols) ||
-        Number.isNaN(numElements)
-      ) {
-        console.log("Matrix file is not properly formatted.");
-      }
-    } else if (lineCount >= 3 && rows && cols && numElements) {
-      if (lineCount === 3) {
-        maxLine = Math.min(
-          (count + 1) * Math.ceil(numElements / numBatches) + 3,
-          numElements + 3
-        );
-        minLine = count * Math.ceil(numElements / numBatches) + 3;
-        matrix = new SparseMatrix(rows, cols);
-        console.log(minLine + " -> " + maxLine);
+    if (line.trim().charAt(0) !== "%" && !lastLineReached) {
+      if (!indexLineReached) {
+        const delimited = line.split(" ");
+        rows = Number.parseInt(delimited[0]);
+        cols = Number.parseInt(delimited[1]);
+        numElements = Number.parseInt(delimited[2]);
+        if (
+          Number.isNaN(rows) ||
+          Number.isNaN(cols) ||
+          Number.isNaN(numElements)
+        ) {
+          console.log("Matrix file is not properly formatted.");
+          lastLineReached = true;
+        } else {
+          maxLine = Math.min(
+            (count + 1) * Math.ceil(numElements / numBatches) + lineCount + 1,
+            numElements + lineCount + 1
+          );
+          minLine = count * Math.ceil(numElements / numBatches) + lineCount + 1;
+          matrix = new SparseMatrix(rows, cols);
+          console.log(minLine + " -> " + maxLine);
+          indexLineReached = true;
+        }
       }
       if (lineCount >= minLine && lineCount < maxLine) {
         const delimited = line.split(" ");
@@ -62,6 +65,9 @@ app.get("/:count/:numBatches", function (req, res) {
         const j = Number.parseInt(delimited[1]);
         const value = Number.parseInt(delimited[2]);
         if (Number.isNaN(i) || Number.isNaN(j) || Number.isNaN(value)) {
+          console.log("Matrix file is not properly formatted.");
+          matrix = null;
+        } else if (i > rows || j > cols) {
           console.log("Matrix file is not properly formatted.");
           matrix = null;
         } else if (matrix) {
