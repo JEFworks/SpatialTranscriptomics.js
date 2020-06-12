@@ -1,9 +1,9 @@
 const PORT = 4000;
 
-const express = require("express");
 const cors = require("cors");
-const app = express();
+const express = require("express");
 const router = express.Router();
+const app = express();
 
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));
@@ -11,8 +11,6 @@ app.use(express.json());
 
 const fs = require("fs");
 const es = require("event-stream");
-// const readline = require("readline");
-// const stream = require("stream");
 
 const { SparseMatrix } = require("ml-sparse-matrix");
 
@@ -20,12 +18,16 @@ app.get("/:count/:numBatches", function (req, res) {
   const count = Number.parseInt(req.params.count);
   const numBatches = Number.parseInt(req.params.numBatches);
 
+  if (count < 0 || numBatches < 0 || count > numBatches) {
+    res.status(400).send("GET request has invalid parameters.\n");
+    return 0;
+  }
+
   const instream = fs.createReadStream("../data/matrix/matrix.mtx");
   instream.on("error", function () {
-    res.status(400).send("Matrix file was not found.");
+    res.status(400).send("Matrix file was not found.\n");
+    return 0;
   });
-  // const outstream = new stream();
-  // const rl = readline.createInterface(instream, outstream);
 
   let matrix = null;
   let rows = null;
@@ -53,7 +55,6 @@ app.get("/:count/:numBatches", function (req, res) {
               Number.isNaN(numElements) ||
               numElements > rows * cols
             ) {
-              console.log("Matrix file is not properly formatted.");
               lastLineReached = true;
             } else {
               maxLine = Math.min(
@@ -65,7 +66,6 @@ app.get("/:count/:numBatches", function (req, res) {
               minLine =
                 count * Math.ceil(numElements / numBatches) + lineCount + 1;
               matrix = new SparseMatrix(rows, cols);
-              console.log(minLine + " -> " + maxLine);
               indexLineReached = true;
             }
           }
@@ -74,12 +74,15 @@ app.get("/:count/:numBatches", function (req, res) {
             const i = Number.parseInt(delimited[0]);
             const j = Number.parseInt(delimited[1]);
             const value = Number.parseInt(delimited[2]);
-            if (Number.isNaN(i) || Number.isNaN(j) || Number.isNaN(value)) {
-              console.log("Matrix file is not properly formatted.");
+            if (
+              Number.isNaN(i) ||
+              Number.isNaN(j) ||
+              Number.isNaN(value) ||
+              i > rows ||
+              j > cols
+            ) {
               matrix = null;
-            } else if (i > rows || j > cols) {
-              console.log("Matrix file is not properly formatted.");
-              matrix = null;
+              lastLineReached = true;
             } else if (matrix) {
               matrix.set(i, j, value);
             }
@@ -87,25 +90,18 @@ app.get("/:count/:numBatches", function (req, res) {
             lastLineReached = true;
           }
         } else if (lastLineReached) {
-          if (matrix) {
-            console.log("Done");
-            res.json(
-              JSON.stringify({
-                rows: matrix.rows,
-                columns: matrix.columns,
-                elements: matrix.elements,
-                count: count,
-              })
-            );
-          } else {
-            res.status(400).send("Matrix file is not properly formatted.");
-          }
+          return 0;
         }
         lineCount++;
       })
       .on("end", function () {
+        console.log(minLine + " -> " + maxLine);
         if (matrix) {
-          console.log("Done");
+          console.log(
+            "Sparse matrix with " +
+              matrix.elements.distinct +
+              " non-zero elements sent successfully."
+          );
           res.json(
             JSON.stringify({
               rows: matrix.rows,
@@ -115,7 +111,14 @@ app.get("/:count/:numBatches", function (req, res) {
             })
           );
         } else {
-          res.status(400).send("Matrix file is not properly formatted.");
+          console.log(
+            "GET request unsuccessful due to improperly formatted .mtx file."
+          );
+          res
+            .status(400)
+            .send(
+              "GET request unsuccessful due to improperly formatted .mtx file.\n"
+            );
         }
       })
   );

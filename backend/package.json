@@ -1,24 +1,36 @@
 {
   "name": "spatial-transcriptomics-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "SpatialTranscriptomics.js server",
+  "homepage": "",
+  "repository": "https://github.com/JEFworks/SpatialTranscriptomics.js",
+  "private": true,
+  "author": "Arpan Sahoo",
+  "license": "ISC",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node Filereader.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "event-stream": "^4.0.1",
     "express": "^4.17.1",
-    "ml-sparse-matrix": "^2.0.0"
+    "ml-sparse-matrix": "^2.0.0",
+    "prettier": "^2.0.5"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
   },
   "engines": {
     "node": "12.4.x",
     "npm": "6.14.x",
     "yarn": "1.17.x"
+  },
+  "devDependencies": {
+    "husky": "^4.2.5",
+    "pretty-quick": "^2.0.1"
   }
 }

@@ -7,7 +7,12 @@ import { SparseMatrix } from "ml-sparse-matrix";
 const printBatches = (array) => {
   for (let i = 0; i < array.length; i++) {
     const batch = array[i];
-    if (batch) console.log(batch.getNonZeros());
+    if (batch)
+      console.log(
+        batch.to2DArray().filter(function (element, index) {
+          return index === 17466;
+        })
+      );
   }
 };
 
@@ -27,7 +32,8 @@ class Homepage extends Component {
   async loadData() {
     let count = 0;
     const numBatches = this.state.numBatches;
-    while (count < numBatches) {
+    while (count < 1) {
+      // FIXME change to ' count < numBatches '
       await axios
         .get(`http://localhost:4000/${count}/${numBatches}`)
         .then((response) => {
@@ -54,14 +60,14 @@ class Homepage extends Component {
           });
           console.log("Loaded batch #" + (batchNum + 1));
         })
-        .catch((error) => {});
+        .catch(() => {});
       count++;
     }
     printBatches(this.state.batches);
   }
 
   componentDidMount() {
-    this.loadData().catch((error) => {});
+    this.loadData().catch(() => {});
   }
 
   render() {
