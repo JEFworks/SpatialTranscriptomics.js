@@ -1,4 +1,4 @@
-data/matrix/matrix.mtx
 data/.DS_Store
 data/filtered_feature_bc_matrix/matrix.mtx
 temp/Rplots.pdf
+data/filtered_feature_bc_matrix/filtered/filtered_matrix.mtx

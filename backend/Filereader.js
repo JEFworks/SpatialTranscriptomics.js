@@ -24,7 +24,7 @@ app.get("/:count/:numBatches", function (req, res) {
   }
 
   const instream = fs.createReadStream(
-    "../data/filtered_feature_bc_matrix/matrix.mtx"
+    "../data/filtered_feature_bc_matrix/filtered/filtered_matrix.mtx"
   );
   instream.on("error", function () {
     res.status(400).send("Matrix file was not found.\n");
@@ -78,7 +78,7 @@ app.get("/:count/:numBatches", function (req, res) {
                 exit = true;
               }
             } else if (matrix && i >= minRow && i < maxRow) {
-              matrix.set(i, j, value);
+              matrix.set(i - 1, j - 1, value);
             }
           }
         } else if (exit) {

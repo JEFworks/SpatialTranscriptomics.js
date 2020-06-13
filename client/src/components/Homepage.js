@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import axios from "axios";
 
-import { Typography } from "@material-ui/core";
 import { SparseMatrix } from "ml-sparse-matrix";
 
 import QCStats from "./QCStats";
@@ -20,7 +19,7 @@ class Homepage extends Component {
   async loadData() {
     let count = 0;
     const numBatches = this.state.numBatches;
-    const limit = 1;
+    const limit = numBatches;
     while (count < limit) {
       await axios
         .get(`http://localhost:4000/${count}/${numBatches}`)
@@ -65,10 +64,6 @@ class Homepage extends Component {
     return (
       <>
         <div className="site-container">
-          <Typography variant="h5">
-            {this.state.loading ? "Data loading..." : "Data loaded :D"}
-          </Typography>
-          <br />
           <QCStats batches={this.state.batches} loading={this.state.loading} />
         </div>
       </>
