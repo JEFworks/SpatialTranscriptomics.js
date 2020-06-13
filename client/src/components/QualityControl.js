@@ -33,7 +33,7 @@ const colSums = (matrix) => {
 
   for (let i = 0; i < numCells; i++) {
     let count = 0;
-    for (let j = 0; j < matrix.length; j++) {
+    for (let j = 0; j < numGenes; j++) {
       if (matrix[j][i] > 0) count++;
     }
     if (count > 0) {
@@ -53,11 +53,11 @@ const colSums = (matrix) => {
   return obj;
 };
 
-class QCStats extends Component {
+class QualityControl extends Component {
   render() {
     return (
       <>
-        <Typography variant="h5">Quality Control</Typography>
+        <Typography variant="h4">Quality Control</Typography>
         <div style={{ display: "flex" }}>
           <div style={{ height: "350px", width: "600px" }}>
             <BarGraph
@@ -79,4 +79,4 @@ class QCStats extends Component {
   }
 }
 
-export default QCStats;
+export default QualityControl;
