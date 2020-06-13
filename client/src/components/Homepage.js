@@ -8,17 +8,16 @@ import QCStats from "./QCStats";
 class Homepage extends Component {
   constructor(props) {
     super(props);
-    const numBatches = 4;
     this.state = {
-      batches: new Array(numBatches),
-      numBatches,
+      matrix: [],
       loading: true,
     };
   }
 
   async loadData() {
     let count = 0;
-    const numBatches = this.state.numBatches;
+    let merged = [];
+    const numBatches = 4;
     const limit = numBatches;
     while (count < limit) {
       await axios
@@ -39,12 +38,8 @@ class Homepage extends Component {
           elements.table = res.elements.table;
           elements.values = res.elements.values;
 
-          const batches = this.state.batches;
-          batches[batchNum] = matrix;
-          this.setState({
-            loading: batchNum + 1 >= limit ? false : true,
-            batches,
-          });
+          if (elements.distinct !== 0)
+            merged = merged.concat(matrix.to2DArray());
           console.log("Loaded batch #" + (batchNum + 1));
         })
         .catch((error) => {
@@ -52,6 +47,11 @@ class Homepage extends Component {
         });
       count++;
     }
+
+    this.setState({
+      loading: false,
+      matrix: merged,
+    });
   }
 
   componentDidMount() {
@@ -64,7 +64,7 @@ class Homepage extends Component {
     return (
       <>
         <div className="site-container">
-          <QCStats batches={this.state.batches} loading={this.state.loading} />
+          <QCStats matrix={this.state.matrix} loading={this.state.loading} />
         </div>
       </>
     );

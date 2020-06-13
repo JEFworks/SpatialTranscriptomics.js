@@ -28,9 +28,6 @@ class BarGraph extends Component {
           indexBy="range"
           margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
           colors={getColor}
-          borderColor={{ from: "color", modifiers: [["darker", 1.6]] }}
-          axisTop={null}
-          axisRight={null}
           markers={[
             {
               axis: "x",
@@ -42,11 +39,13 @@ class BarGraph extends Component {
               },
             },
           ]}
+          axisTop={null}
+          axisRight={null}
           axisBottom={{
             tickSize: 5,
             tickPadding: 5,
             tickRotation: 0,
-            legend: "% of cells per detected gene",
+            legend: this.props.xLabel,
             legendPosition: "middle",
             legendOffset: 40,
           }}
@@ -62,6 +61,7 @@ class BarGraph extends Component {
           enableLabel={false}
           labelSkipWidth={12}
           labelSkipHeight={12}
+          borderColor={{ from: "color", modifiers: [["darker", 1.6]] }}
           labelTextColor={{ from: "color", modifiers: [["darker", 1.6]] }}
           animate={true}
           motionStiffness={90}
