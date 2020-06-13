@@ -34,44 +34,35 @@ app.get("/:count/:numBatches", function (req, res) {
   let matrix = null;
   let rows = null;
   let cols = null;
-  let numElements = null;
+  let minRow = null;
+  let maxRow = null;
 
-  let maxLine = null;
-  let minLine = null;
-  let lineCount = 0;
-  let lastLineReached = false;
+  let exit = false;
   let indexLineReached = false;
 
   instream.pipe(es.split()).pipe(
     es
       .mapSync(function (line) {
-        if (line.trim().charAt(0) !== "%" && !lastLineReached) {
+        if (line.trim().charAt(0) !== "%" && !exit) {
           if (!indexLineReached) {
             const delimited = line.split(" ");
             rows = Number.parseInt(delimited[0]);
             cols = Number.parseInt(delimited[1]);
-            numElements = Number.parseInt(delimited[2]);
             if (
               Number.isNaN(rows) ||
               Number.isNaN(cols) ||
-              Number.isNaN(numElements) ||
-              numElements > rows * cols
+              Number.isNaN(Number.parseInt(delimited[2])) ||
+              Number.parseInt(delimited[2]) > rows * cols
             ) {
-              lastLineReached = true;
+              exit = true;
             } else {
-              maxLine = Math.min(
-                (count + 1) * Math.ceil(numElements / numBatches) +
-                  lineCount +
-                  1,
-                numElements + lineCount + 1
-              );
-              minLine =
-                count * Math.ceil(numElements / numBatches) + lineCount + 1;
+              minRow = 1 + count * Math.ceil(rows / numBatches);
+              maxRow = 1 + (count + 1) * Math.ceil(rows / numBatches);
+              console.log(minRow + " -> " + maxRow);
               matrix = new SparseMatrix(rows, cols);
               indexLineReached = true;
             }
-          }
-          if (lineCount >= minLine && lineCount < maxLine) {
+          } else {
             const delimited = line.split(" ");
             const i = Number.parseInt(delimited[0]);
             const j = Number.parseInt(delimited[1]);
@@ -83,22 +74,19 @@ app.get("/:count/:numBatches", function (req, res) {
               i > rows ||
               j > cols
             ) {
-              matrix = null;
-              lastLineReached = true;
-            } else if (matrix) {
+              if (line.trim().length !== 0) {
+                exit = true;
+              }
+            } else if (matrix && i >= minRow && i < maxRow) {
               matrix.set(i, j, value);
             }
-          } else if (lineCount >= maxLine) {
-            lastLineReached = true;
           }
-        } else if (lastLineReached) {
+        } else if (exit) {
           return 0;
         }
-        lineCount++;
       })
       .on("end", function () {
-        console.log(minLine + " -> " + maxLine);
-        if (matrix) {
+        if (matrix && !exit) {
           console.log(
             "Sparse matrix with " +
               matrix.elements.distinct +

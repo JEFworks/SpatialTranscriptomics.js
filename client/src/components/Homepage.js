@@ -4,21 +4,9 @@ import axios from "axios";
 import { Typography } from "@material-ui/core";
 import { SparseMatrix } from "ml-sparse-matrix";
 
-const printBatches = (array) => {
-  for (let i = 0; i < array.length; i++) {
-    const batch = array[i];
-    if (batch)
-      console.log(
-        batch.to2DArray().filter(function (element, index) {
-          return index === 17466;
-        })
-      );
-  }
-};
+import QCStats from "./QCStats";
 
 class Homepage extends Component {
-  intervalID;
-
   constructor(props) {
     super(props);
     const numBatches = 4;
@@ -32,8 +20,8 @@ class Homepage extends Component {
   async loadData() {
     let count = 0;
     const numBatches = this.state.numBatches;
-    while (count < 1) {
-      // FIXME change to ' count < numBatches '
+    const limit = 1;
+    while (count < limit) {
       await axios
         .get(`http://localhost:4000/${count}/${numBatches}`)
         .then((response) => {
@@ -55,31 +43,33 @@ class Homepage extends Component {
           const batches = this.state.batches;
           batches[batchNum] = matrix;
           this.setState({
-            loading: batchNum + 1 >= numBatches ? false : true,
+            loading: batchNum + 1 >= limit ? false : true,
             batches,
           });
           console.log("Loaded batch #" + (batchNum + 1));
         })
-        .catch(() => {});
+        .catch((error) => {
+          console.log(error);
+        });
       count++;
     }
-    printBatches(this.state.batches);
   }
 
   componentDidMount() {
-    this.loadData().catch(() => {});
+    this.loadData().catch((error) => {
+      console.log(error);
+    });
   }
 
   render() {
     return (
       <>
         <div className="site-container">
-          {this.state.loading && (
-            <Typography variant="body1">Loading...</Typography>
-          )}
-          {!this.state.loading && (
-            <Typography variant="body1">Data loaded :D</Typography>
-          )}
+          <Typography variant="h5">
+            {this.state.loading ? "Data loading..." : "Data loaded :D"}
+          </Typography>
+          <br />
+          <QCStats batches={this.state.batches} loading={this.state.loading} />
         </div>
       </>
     );
