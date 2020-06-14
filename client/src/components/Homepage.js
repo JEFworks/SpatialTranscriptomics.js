@@ -1,16 +1,7 @@
 import React, { Component } from "react";
 import axios from "axios";
-
-import { SparseMatrix } from "ml-sparse-matrix";
-
 import QualityControl from "./QualityControl";
-
-function ElevationScroll(props) {
-  const { children } = props;
-  return React.cloneElement(children, {
-    elevation: true ? 4 : 0,
-  });
-}
+import { SparseMatrix } from "ml-sparse-matrix";
 
 class Homepage extends Component {
   constructor(props) {

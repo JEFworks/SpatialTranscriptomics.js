@@ -5,15 +5,15 @@ import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
-import MenuIcon from "@material-ui/icons/Menu";
+import Link from "@material-ui/core/Link";
 import GitHubIcon from "@material-ui/icons/GitHub";
 
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
   },
-  menuButton: {
-    marginRight: theme.spacing(2),
+  button: {
+    marginRight: -10,
   },
   title: {
     flexGrow: 1,
@@ -34,21 +34,27 @@ export default function Header() {
       <ElevationScroll>
         <AppBar style={{ backgroundColor: "#242424" }}>
           <Toolbar>
+            <Typography variant="h6" className={classes.title}>
+              <Link underline="none" href="/" color="inherit">
+                SpatialTranscriptomics.js
+              </Link>
+            </Typography>
+            <Button color="inherit">About</Button>
             <IconButton
-              edge="start"
-              className={classes.menuButton}
+              edge="end"
+              className={classes.button}
               color="inherit"
               aria-label="menu"
             >
-              <MenuIcon />
+              <Link
+                href="https://github.com/JEFworks/SpatialTranscriptomics.js"
+                target="_blank"
+                rel="noopener"
+                color="inherit"
+              >
+                <GitHubIcon />
+              </Link>
             </IconButton>
-            <Typography variant="h6" className={classes.title}>
-              SpatialTranscriptomics.js
-            </Typography>
-            <Button color="inherit">About</Button>
-            <Button color="inherit">
-              <GitHubIcon />
-            </Button>
           </Toolbar>
         </AppBar>
       </ElevationScroll>

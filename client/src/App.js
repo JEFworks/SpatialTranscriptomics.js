@@ -6,7 +6,7 @@ import Header from "./components/Header";
 
 const App = () => (
   <>
-    <div style={{ marginBottom: "70px" }}>
+    <div style={{ marginBottom: "60px" }}>
       <Header />
     </div>
     <Router>

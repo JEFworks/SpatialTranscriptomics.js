@@ -1,6 +1,5 @@
 import React, { Component } from "react";
-import { Typography } from "@material-ui/core";
-
+import { Typography, Paper } from "@material-ui/core";
 import BarGraph from "./BarGraph";
 
 const rowSums = (matrix) => {
@@ -57,22 +56,99 @@ class QualityControl extends Component {
   render() {
     return (
       <>
-        <Typography variant="h4">Quality Control</Typography>
-        <div style={{ display: "flex" }}>
-          <div style={{ height: "350px", width: "600px" }}>
-            <BarGraph
-              xLabel={"% of cells per detected gene"}
-              data={this.props.loading ? [] : rowSums(this.props.matrix)}
-              min={0.6}
-            />
+        <Typography style={{ marginBottom: "10px" }} variant="h5">
+          Quality Control
+        </Typography>
+        <Typography style={{ marginBottom: "15px" }} variant="body1">
+          Use the range selectors to set a minimum threshold for each quality
+          control metric. Cells and genes below these thresholds will be removed
+          from the expression matrix, thereby improving downstream analysis.
+        </Typography>
+        <div style={{ width: "100%", display: "flex" }}>
+          <div style={{ width: "50%" }}></div>
+          <div className="GC-flex">
+            <div
+              style={{
+                height: "225px",
+                width: "100%",
+                paddingRight: "20px",
+                paddingBottom: "80px",
+              }}
+            >
+              <Paper
+                style={{
+                  padding: "10px 20px 50px 10px",
+                  width: "300px",
+                  height: "100%",
+                }}
+                variant="outlined"
+                elevation={3}
+              >
+                <Typography variant="h6" align="center">
+                  Figure 1
+                </Typography>
+                <div style={{ width: "100%", height: "100%" }}>
+                  <BarGraph
+                    xLabel={"% of cells detected per gene"}
+                    data={this.props.loading ? [] : rowSums(this.props.matrix)}
+                    min={0.6}
+                  />
+                </div>
+              </Paper>
+            </div>
+            <div
+              style={{
+                height: "225px",
+                width: "100%",
+                paddingRight: "20px",
+                paddingBottom: "80px",
+              }}
+            >
+              <Paper
+                style={{
+                  padding: "10px 20px 50px 10px",
+                  width: "300px",
+                  height: "100%",
+                }}
+                variant="outlined"
+                elevation={3}
+              >
+                <Typography variant="h6" align="center">
+                  Figure 2
+                </Typography>
+                <div style={{ width: "100%", height: "100%" }}>
+                  <BarGraph
+                    xLabel={"% of genes detected per cell"}
+                    data={this.props.loading ? [] : colSums(this.props.matrix)}
+                    min={0.6}
+                  />
+                </div>
+              </Paper>
+            </div>
+            <div style={{ height: "225px", width: "100%" }}>
+              <Paper
+                style={{
+                  padding: "10px 20px 50px 10px",
+                  width: "300px",
+                  height: "100%",
+                }}
+                variant="outlined"
+                elevation={3}
+              >
+                <Typography variant="h6" align="center">
+                  Figure 3
+                </Typography>
+                <div style={{ width: "100%", height: "100%" }}>
+                  <BarGraph
+                    xLabel={"% of cells detected per gene"}
+                    data={this.props.loading ? [] : rowSums(this.props.matrix)}
+                    min={0.6}
+                  />
+                </div>
+              </Paper>
+            </div>
           </div>
-          <div style={{ height: "350px", width: "600px" }}>
-            <BarGraph
-              xLabel={"% of detected genes per cell"}
-              data={this.props.loading ? [] : colSums(this.props.matrix)}
-              min={0.8}
-            />
-          </div>
+          <div style={{ width: "50%" }}></div>
         </div>
       </>
     );
