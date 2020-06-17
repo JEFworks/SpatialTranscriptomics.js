@@ -59,7 +59,7 @@ app.get("/:count/:numBatches", function (req, res) {
             } else {
               minRow = 1 + count * Math.ceil(rows / numBatches);
               maxRow = 1 + (count + 1) * Math.ceil(rows / numBatches);
-              console.log(minRow + " -> " + maxRow);
+              console.log("Sending genes [" + minRow + "," + maxRow + ")");
               matrix = new SparseMatrix(rows, cols);
               indexLineReached = true;
             }
@@ -102,13 +102,48 @@ app.get("/:count/:numBatches", function (req, res) {
             })
           );
         } else {
-          console.log(
-            "GET request unsuccessful due to improperly formatted .mtx file."
-          );
           res
             .status(400)
             .send(
               "GET request unsuccessful due to improperly formatted .mtx file.\n"
+            );
+        }
+      })
+  );
+});
+
+app.get("/get-features", function (req, res) {
+  let filePath =
+    "../data/filtered_feature_bc_matrix/filtered/filtered_features.tsv";
+  // filePath = "../data/filtered_feature_bc_matrix/features.tsv";
+  const instream = fs.createReadStream(filePath);
+  instream.on("error", function () {
+    res.status(400).send("Features tsv file was not found.\n");
+    return 0;
+  });
+
+  const array = [];
+  let exit = false;
+
+  instream.pipe(es.split()).pipe(
+    es
+      .mapSync(function (line) {
+        const delimited = line.split("\t");
+        const geneName = delimited[1];
+        if (geneName && geneName.length > 0) {
+          array.push(geneName);
+        } else if (line.trim().length !== 0) {
+          exit = true;
+        }
+      })
+      .on("end", function () {
+        if (array.length > 0 && !exit) {
+          res.json(JSON.stringify(array));
+        } else {
+          res
+            .status(400)
+            .send(
+              "GET request unsuccessful due to improperly formatted .tsv file.\n"
             );
         }
       })

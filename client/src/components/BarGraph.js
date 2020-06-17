@@ -2,11 +2,11 @@ import React, { Component } from "react";
 import { ResponsiveBar } from "@nivo/bar";
 
 const red = "#ff80ab";
-const green = "#80d8ff";
+const blue = "#80d8ff";
 
 const setColor = (datum, min) => {
   if (datum.range < min) return red;
-  else return green;
+  else return blue;
 };
 
 const getColor = (bar) => bar.data.color;
