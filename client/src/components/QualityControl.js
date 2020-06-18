@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Typography, Paper } from "@material-ui/core";
+import { Typography, Paper, Slider } from "@material-ui/core";
 import BarGraph from "./BarGraph";
 
 const rowSums = (matrix) => {
@@ -85,6 +85,8 @@ const mtSums = (matrix, features) => {
 
 class QualityControl extends Component {
   render() {
+    const { props } = this;
+    console.log(props.filteredMatrix);
     return (
       <>
         <Typography style={{ marginBottom: "10px" }} variant="h5">
@@ -123,10 +125,22 @@ class QualityControl extends Component {
                 <div style={{ width: "100%", height: "100%" }}>
                   <BarGraph
                     xLabel={"% of cells detected per gene"}
-                    data={this.props.loading ? [] : rowSums(this.props.matrix)}
-                    min={0.6}
+                    data={props.loading ? [] : rowSums(props.matrix)}
+                    min={props.thresholds[0]}
                   />
                 </div>
+                <Slider
+                  style={{ color: "#0091ea" }}
+                  onChangeCommitted={(e, value) =>
+                    props.changeThreshold("rowsum", value)
+                  }
+                  defaultValue={60}
+                  step={10}
+                  marks
+                  min={0}
+                  max={90}
+                  valueLabelDisplay="auto"
+                />
               </Paper>
             </div>
             <div
@@ -138,6 +152,7 @@ class QualityControl extends Component {
               }}
             >
               <Paper
+                onClick={() => props.changeThreshold("hi", "hi")}
                 style={{
                   padding: "10px 20px 50px 10px",
                   width: "300px",
@@ -152,8 +167,8 @@ class QualityControl extends Component {
                 <div style={{ width: "100%", height: "100%" }}>
                   <BarGraph
                     xLabel={"% of genes detected per cell"}
-                    data={this.props.loading ? [] : colSums(this.props.matrix)}
-                    min={0.6}
+                    data={props.loading ? [] : colSums(props.matrix)}
+                    min={props.thresholds[1]}
                   />
                 </div>
               </Paper>
@@ -175,11 +190,9 @@ class QualityControl extends Component {
                   <BarGraph
                     xLabel={"% non-MT gene expression per cell"}
                     data={
-                      this.props.loading
-                        ? []
-                        : mtSums(this.props.matrix, this.props.features)
+                      props.loading ? [] : mtSums(props.matrix, props.features)
                     }
-                    min={0.6}
+                    min={props.thresholds[2]}
                   />
                 </div>
               </Paper>

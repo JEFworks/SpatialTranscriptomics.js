@@ -3,14 +3,23 @@ import axios from "axios";
 import { SparseMatrix } from "ml-sparse-matrix";
 import QualityControl from "./QualityControl";
 
+const rowSum = (gene) => {
+  const count = gene.reduce((n, x) => n + (x > 0), 0);
+  return count / gene.length;
+};
+
 class Homepage extends Component {
   constructor(props) {
     super(props);
     this.state = {
       matrix: [],
+      filteredMatrix: [],
       features: [],
+      thresholds: [0.6, 0.6, 0.6],
       loading: true,
     };
+
+    this.changeThreshold = this.changeThreshold.bind(this);
   }
 
   async loadFeatures() {
@@ -71,6 +80,7 @@ class Homepage extends Component {
     }
 
     this.setState({
+      filteredMatrix: this.state.matrix,
       loading: false,
     });
   }
@@ -80,14 +90,38 @@ class Homepage extends Component {
     this.loadMatrix().catch(() => {});
   }
 
+  changeThreshold(filterType, threshold) {
+    const thresholds = this.state.thresholds;
+    if (filterType === "rowsum") {
+      thresholds[0] = threshold / 100;
+    }
+    if (filterType === "colsum") {
+      thresholds[1] = threshold / 100;
+    }
+    if (filterType === "mt") {
+      thresholds[2] = threshold / 100;
+    }
+
+    // only implemented rowSum filtering so far...
+    this.setState({
+      thresholds,
+      filteredMatrix: this.state.matrix.filter((gene) => {
+        return rowSum(gene) >= thresholds[0];
+      }),
+    });
+  }
+
   render() {
     return (
       <>
         <div className="site-container">
           <QualityControl
             matrix={this.state.matrix}
+            filteredMatrix={this.state.filteredMatrix}
             features={this.state.features}
             loading={this.state.loading}
+            thresholds={this.state.thresholds}
+            changeThreshold={this.changeThreshold}
           />
         </div>
       </>
