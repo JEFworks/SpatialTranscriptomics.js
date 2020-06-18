@@ -15,11 +15,11 @@ class Homepage extends Component {
       matrix: [],
       filteredMatrix: [],
       features: [],
-      thresholds: [0.6, 0.6, 0.6],
+      thresholds: [0.9, 0.6, 0.6],
       loading: true,
     };
 
-    this.changeThreshold = this.changeThreshold.bind(this);
+    this.handleFilter = this.handleFilter.bind(this);
   }
 
   async loadFeatures() {
@@ -56,6 +56,7 @@ class Homepage extends Component {
             elements.state = res.elements.state;
             elements.table = res.elements.table;
             elements.values = res.elements.values;
+
             this.setState({
               matrix: this.state.matrix.concat(
                 m.to2DArray().filter((gene, index) => {
@@ -65,6 +66,7 @@ class Homepage extends Component {
                 })
               ),
             });
+            this.handleFilter("all");
           }
           console.log(`Loaded batch #${batchNum + 1}`);
         })
@@ -72,6 +74,7 @@ class Homepage extends Component {
           this.setState({
             loading: false,
             matrix: [],
+            filteredMatrix: [],
           });
           console.log(error);
           throw Error;
@@ -80,7 +83,6 @@ class Homepage extends Component {
     }
 
     this.setState({
-      filteredMatrix: this.state.matrix,
       loading: false,
     });
   }
@@ -90,7 +92,7 @@ class Homepage extends Component {
     this.loadMatrix().catch(() => {});
   }
 
-  changeThreshold(filterType, threshold) {
+  handleFilter(filterType, threshold) {
     const thresholds = this.state.thresholds;
     if (filterType === "rowsum") thresholds[0] = threshold / 100;
     if (filterType === "colsum") thresholds[1] = threshold / 100;
@@ -113,9 +115,9 @@ class Homepage extends Component {
             matrix={this.state.matrix}
             filteredMatrix={this.state.filteredMatrix}
             features={this.state.features}
-            loading={this.state.loading}
             thresholds={this.state.thresholds}
-            changeThreshold={this.changeThreshold}
+            handleFilter={this.handleFilter}
+            loading={this.state.loading}
           />
         </div>
       </>

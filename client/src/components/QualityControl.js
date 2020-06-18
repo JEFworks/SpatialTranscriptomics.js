@@ -132,9 +132,9 @@ class QualityControl extends Component {
                 <Slider
                   style={{ color: "#0091ea" }}
                   onChangeCommitted={(e, value) =>
-                    props.changeThreshold("rowsum", value)
+                    props.handleFilter("rowsum", value)
                   }
-                  defaultValue={60}
+                  defaultValue={90}
                   step={10}
                   marks
                   min={0}
@@ -152,7 +152,6 @@ class QualityControl extends Component {
               }}
             >
               <Paper
-                onClick={() => props.changeThreshold("hi", "hi")}
                 style={{
                   padding: "10px 20px 50px 10px",
                   width: "300px",
