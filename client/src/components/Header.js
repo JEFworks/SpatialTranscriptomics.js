@@ -12,7 +12,7 @@ import GitHubIcon from "@material-ui/icons/GitHub";
 const ElevationScroll = (props) => {
   const { children } = props;
   return React.cloneElement(children, {
-    elevation: true ? 4 : 0,
+    elevation: 4,
   });
 };
 

@@ -62,7 +62,8 @@ const mtSums = (matrix, features) => {
     for (let j = 0; j < numGenes; j++) {
       if (matrix[j][i] > 0) {
         count++;
-        if (matrix[j].feature.substring(0, 3) === "mt-") mtCount++;
+        if (matrix[j].feature && matrix[j].feature.substring(0, 3) === "mt-")
+          mtCount++;
       }
     }
     if (count > 0) {

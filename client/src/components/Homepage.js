@@ -15,7 +15,7 @@ class Homepage extends Component {
 
   async loadFeatures() {
     axios
-      .get(`http://localhost:4000/get-features`)
+      .get(`http://localhost:4000/features`)
       .then((response) => {
         const features = JSON.parse(response.data);
         this.setState({ features });
@@ -28,11 +28,9 @@ class Homepage extends Component {
   async loadMatrix() {
     let count = 0;
     const numBatches = 4;
-    const limit = numBatches;
-    while (count < limit) {
-      const merged = this.state.matrix;
+    while (count < numBatches) {
       await axios
-        .get(`http://localhost:4000/${count}/${numBatches}`)
+        .get(`http://localhost:4000/matrix/${count}/${numBatches}`)
         .then((response) => {
           const res = JSON.parse(response.data);
           const batchNum = Number.parseInt(res.count);
@@ -50,18 +48,24 @@ class Homepage extends Component {
             elements.table = res.elements.table;
             elements.values = res.elements.values;
             this.setState({
-              matrix: merged.concat(
+              matrix: this.state.matrix.concat(
                 m.to2DArray().filter((gene, index) => {
-                  gene.feature = this.state.features[index];
-                  return gene.reduce((n, x) => n + (x > 0), 0) > 0;
+                  const ret = gene.reduce((n, x) => n + (x > 0), 0) > 0;
+                  if (ret) gene.feature = this.state.features[index];
+                  return ret;
                 })
               ),
             });
           }
-          console.log("Loaded batch #" + (batchNum + 1));
+          console.log(`Loaded batch #${batchNum + 1}`);
         })
         .catch((error) => {
+          this.setState({
+            loading: false,
+            matrix: [],
+          });
           console.log(error);
+          throw Error;
         });
       count++;
     }
@@ -72,12 +76,8 @@ class Homepage extends Component {
   }
 
   componentDidMount() {
-    this.loadFeatures().catch((error) => {
-      console.log(error);
-    });
-    this.loadMatrix().catch((error) => {
-      console.log(error);
-    });
+    this.loadFeatures();
+    this.loadMatrix().catch(() => {});
   }
 
   render() {

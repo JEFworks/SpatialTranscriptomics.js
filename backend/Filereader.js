@@ -14,7 +14,7 @@ const es = require("event-stream");
 
 const { SparseMatrix } = require("ml-sparse-matrix");
 
-app.get("/:count/:numBatches", function (req, res) {
+app.get("/matrix/:count/:numBatches", function (req, res) {
   const count = Number.parseInt(req.params.count);
   const numBatches = Number.parseInt(req.params.numBatches);
 
@@ -58,7 +58,10 @@ app.get("/:count/:numBatches", function (req, res) {
               exit = true;
             } else {
               minRow = 1 + count * Math.ceil(rows / numBatches);
-              maxRow = 1 + (count + 1) * Math.ceil(rows / numBatches);
+              maxRow = Math.min(
+                1 + (count + 1) * Math.ceil(rows / numBatches),
+                1 + rows
+              );
               console.log("Sending genes [" + minRow + "," + maxRow + ")");
               matrix = new SparseMatrix(rows, cols);
               indexLineReached = true;
@@ -112,7 +115,7 @@ app.get("/:count/:numBatches", function (req, res) {
   );
 });
 
-app.get("/get-features", function (req, res) {
+app.get("/features", function (req, res) {
   let filePath =
     "../data/filtered_feature_bc_matrix/filtered/filtered_features.tsv";
   // filePath = "../data/filtered_feature_bc_matrix/features.tsv";
