@@ -92,15 +92,9 @@ class Homepage extends Component {
 
   changeThreshold(filterType, threshold) {
     const thresholds = this.state.thresholds;
-    if (filterType === "rowsum") {
-      thresholds[0] = threshold / 100;
-    }
-    if (filterType === "colsum") {
-      thresholds[1] = threshold / 100;
-    }
-    if (filterType === "mt") {
-      thresholds[2] = threshold / 100;
-    }
+    if (filterType === "rowsum") thresholds[0] = threshold / 100;
+    if (filterType === "colsum") thresholds[1] = threshold / 100;
+    if (filterType === "mt") thresholds[2] = threshold / 100;
 
     // only implemented rowSum filtering so far...
     this.setState({
