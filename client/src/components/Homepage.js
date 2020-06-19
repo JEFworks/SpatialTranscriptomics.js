@@ -3,14 +3,12 @@ import axios from "axios";
 import { SparseMatrix } from "ml-sparse-matrix";
 import QualityControl from "./QualityControl";
 
-const rowSum = (gene) => {
+const poorGene = (gene, threshold) => {
   const count = gene.reduce((n, x) => n + (x > 0), 0);
-  return count / gene.length;
+  return count / gene.length < threshold;
 };
 
-const poorCols = (matrix, threshold) => {
-  if (!matrix[0]) return null;
-
+const poorCells = (matrix, threshold) => {
   const list = [];
   const numCells = matrix[0].length;
   const numGenes = matrix.length;
@@ -21,17 +19,14 @@ const poorCols = (matrix, threshold) => {
       if (matrix[j][i] > 0) count++;
     }
     if (count >= 0) {
-      count /= numGenes;
-      if (count < threshold) list.push(i);
+      if ((count /= numGenes) < threshold) list.push(i);
     }
   }
 
   return list;
 };
 
-const poorColsMT = (matrix, threshold) => {
-  if (!matrix[0]) return null;
-
+const poorCellsMT = (matrix, threshold) => {
   const list = [];
   const numCells = matrix[0].length;
   const numGenes = matrix.length;
@@ -143,24 +138,25 @@ class Homepage extends Component {
   }
 
   handleFilter(filterType, threshold) {
+    const matrix = this.state.matrix;
+    if (!matrix[0]) return 0;
+
     const thresholds = this.state.thresholds;
     if (filterType === "rowsum") thresholds[0] = threshold / 100;
     if (filterType === "colsum") thresholds[1] = threshold / 100;
     if (filterType === "mt") thresholds[2] = threshold / 100;
 
-    const matrix = this.state.matrix;
-
     // rowSum filtering
     let filteredMatrix = matrix.filter((gene) => {
-      return rowSum(gene) >= thresholds[0];
+      return !poorGene(gene, thresholds[0]);
     });
 
     // colSum filtering and MT filtering
-    const poorColsList = poorCols(matrix, thresholds[1]);
-    const poorColsMTList = poorColsMT(matrix, thresholds[2]);
+    const badCells = poorCells(matrix, thresholds[1]);
+    const badCellsMT = poorCellsMT(matrix, thresholds[2]);
     filteredMatrix.forEach((gene, index) => {
       filteredMatrix[index] = gene.filter((cell, index) => {
-        return !poorColsList.includes(index) && !poorColsMTList.includes(index);
+        return !badCells.includes(index) && !badCellsMT.includes(index);
       });
     });
 
