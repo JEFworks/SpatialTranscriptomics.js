@@ -42,12 +42,29 @@ const poorCellsMT = (matrix, threshold) => {
       }
     }
     if (count > 0) {
-      const nonMT = (count - mtCount) / count;
-      if (nonMT < threshold) list.push(i);
+      if ((count - mtCount) / count < threshold) list.push(i);
     }
   }
 
   return list;
+};
+
+const getFilteredMatrix = (matrix, thresholds) => {
+  // rowSum filtering
+  const filteredMatrix = matrix.filter((gene) => {
+    return !poorGene(gene, thresholds[0]);
+  });
+
+  // colSum filtering and MT filtering
+  const badCells = poorCells(matrix, thresholds[1]);
+  const badCellsMT = poorCellsMT(matrix, thresholds[2]);
+  filteredMatrix.forEach((gene, index) => {
+    filteredMatrix[index] = gene.filter((cell, index) => {
+      return !badCells.includes(index) && !badCellsMT.includes(index);
+    });
+  });
+
+  return filteredMatrix;
 };
 
 class Homepage extends Component {
@@ -115,9 +132,7 @@ class Homepage extends Component {
         .catch((error) => {
           this.setState({
             loading: false,
-            matrix: [],
             merged: [],
-            filteredMatrix: [],
           });
           console.log(error);
           throw Error;
@@ -127,9 +142,12 @@ class Homepage extends Component {
 
     this.setState({
       matrix: this.state.merged,
+      filteredMatrix: getFilteredMatrix(
+        this.state.merged,
+        this.state.thresholds
+      ),
       loading: false,
     });
-    this.handleFilter("all");
   }
 
   componentDidMount() {
@@ -146,20 +164,7 @@ class Homepage extends Component {
     if (filterType === "colsum") thresholds[1] = threshold / 100;
     if (filterType === "mt") thresholds[2] = threshold / 100;
 
-    // rowSum filtering
-    let filteredMatrix = matrix.filter((gene) => {
-      return !poorGene(gene, thresholds[0]);
-    });
-
-    // colSum filtering and MT filtering
-    const badCells = poorCells(matrix, thresholds[1]);
-    const badCellsMT = poorCellsMT(matrix, thresholds[2]);
-    filteredMatrix.forEach((gene, index) => {
-      filteredMatrix[index] = gene.filter((cell, index) => {
-        return !badCells.includes(index) && !badCellsMT.includes(index);
-      });
-    });
-
+    let filteredMatrix = getFilteredMatrix(matrix, thresholds);
     this.setState({
       thresholds,
       filteredMatrix,
@@ -167,12 +172,16 @@ class Homepage extends Component {
   }
 
   render() {
+    if (this.state.filteredMatrix.length > 0) {
+      console.log(
+        `Filtered matrix has ${this.state.filteredMatrix.length} genes and ${this.state.filteredMatrix[0].length} cells`
+      );
+    }
     return (
       <>
         <div className="site-container">
           <QualityControl
             matrix={this.state.matrix}
-            filteredMatrix={this.state.filteredMatrix}
             thresholds={this.state.thresholds}
             handleFilter={this.handleFilter}
             loading={this.state.loading}

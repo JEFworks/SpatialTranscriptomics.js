@@ -8,8 +8,8 @@ const rowSums = (matrix) => {
   matrix.forEach((gene) => {
     let count = gene.reduce((n, x) => n + (x > 0), 0);
     count /= gene.length;
-    const index = Math.min(Math.floor(count * 10), 9);
-    sums[index]++;
+    count = Math.min(Math.floor(count * 10), 9);
+    sums[count]++;
   });
 
   const obj = [];
@@ -35,8 +35,8 @@ const colSums = (matrix) => {
     }
     if (count >= 0) {
       count /= numGenes;
-      const index = Math.min(Math.floor(count * 10), 9);
-      sums[index]++;
+      count = Math.min(Math.floor(count * 10), 9);
+      sums[count]++;
     }
   }
 
@@ -67,9 +67,9 @@ const mtSums = (matrix) => {
       }
     }
     if (count > 0) {
-      const nonMT = (count - mtCount) / count;
-      const index = Math.min(Math.floor(nonMT * 10), 9);
-      sums[index]++;
+      let nonMT = (count - mtCount) / count;
+      nonMT = Math.min(Math.floor(nonMT * 10), 9);
+      sums[nonMT]++;
     }
   }
 
@@ -129,11 +129,6 @@ const marks = [
 class QualityControl extends Component {
   render() {
     const { props } = this;
-    if (props.filteredMatrix.length > 0) {
-      console.log(
-        `Filtered matrix has ${props.filteredMatrix.length} genes and ${props.filteredMatrix[0].length} cells`
-      );
-    }
     return (
       <>
         <Typography style={{ marginBottom: "10px" }} variant="h5">
