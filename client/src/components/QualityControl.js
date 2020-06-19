@@ -50,7 +50,7 @@ const colSums = (matrix) => {
   return obj;
 };
 
-const mtSums = (matrix, features) => {
+const mtSums = (matrix) => {
   if (!matrix[0]) return [];
   const sums = new Array(10).fill(0);
   const numCells = matrix[0].length;
@@ -83,16 +83,63 @@ const mtSums = (matrix, features) => {
   return obj;
 };
 
+const marks = [
+  {
+    value: 0,
+    label: "0%",
+  },
+  {
+    value: 10,
+    label: "10%",
+  },
+  {
+    value: 20,
+    label: "20%",
+  },
+  {
+    value: 30,
+    label: "30%",
+  },
+  {
+    value: 40,
+    label: "40%",
+  },
+  {
+    value: 50,
+    label: "50%",
+  },
+  {
+    value: 60,
+    label: "60%",
+  },
+  {
+    value: 70,
+    label: "70%",
+  },
+  {
+    value: 80,
+    label: "80%",
+  },
+  {
+    value: 90,
+    label: "90%",
+  },
+];
+
 class QualityControl extends Component {
   render() {
     const { props } = this;
-    console.log(props.filteredMatrix);
+    if (props.filteredMatrix.length > 0) {
+      console.log(
+        `Filtered matrix has ${props.filteredMatrix.length} genes and ${props.filteredMatrix[0].length} cells`
+      );
+    }
     return (
       <>
         <Typography style={{ marginBottom: "10px" }} variant="h5">
           Quality Control
         </Typography>
-        <Typography style={{ marginBottom: "15px" }} variant="body1">
+        <Typography style={{ marginBottom: "20px" }} variant="body1">
           Use the range selectors to change the minimum threshold for each
           quality control metric. Cells and genes below these thresholds will be
           removed from the expression matrix, thereby improving downstream
@@ -104,16 +151,16 @@ class QualityControl extends Component {
           <div className="GC-flex">
             <div
               style={{
-                height: "225px",
+                height: "250px",
                 width: "100%",
                 paddingRight: "20px",
-                paddingBottom: "80px",
+                paddingBottom: "120px",
               }}
             >
               <Paper
                 style={{
-                  padding: "10px 20px 50px 10px",
-                  width: "300px",
+                  padding: "10px 15px 90px 10px",
+                  width: "325px",
                   height: "100%",
                 }}
                 variant="outlined"
@@ -130,13 +177,13 @@ class QualityControl extends Component {
                   />
                 </div>
                 <Slider
-                  style={{ color: "#0091ea" }}
-                  onChangeCommitted={(e, value) =>
+                  style={{ marginLeft: "20px", width: "90%", color: "#0091ea" }}
+                  onChangeCommitted={(event, value) =>
                     props.handleFilter("rowsum", value)
                   }
-                  defaultValue={90}
+                  marks={marks}
+                  defaultValue={60}
                   step={10}
-                  marks
                   min={0}
                   max={90}
                   valueLabelDisplay="auto"
@@ -145,16 +192,16 @@ class QualityControl extends Component {
             </div>
             <div
               style={{
-                height: "225px",
+                height: "250px",
                 width: "100%",
                 paddingRight: "20px",
-                paddingBottom: "80px",
+                paddingBottom: "120px",
               }}
             >
               <Paper
                 style={{
-                  padding: "10px 20px 50px 10px",
-                  width: "300px",
+                  padding: "10px 15px 90px 10px",
+                  width: "325px",
                   height: "100%",
                 }}
                 variant="outlined"
@@ -170,13 +217,31 @@ class QualityControl extends Component {
                     min={props.thresholds[1]}
                   />
                 </div>
+                <Slider
+                  style={{ marginLeft: "20px", width: "90%", color: "#0091ea" }}
+                  onChangeCommitted={(event, value) =>
+                    props.handleFilter("colsum", value)
+                  }
+                  marks={marks}
+                  defaultValue={60}
+                  step={10}
+                  min={0}
+                  max={90}
+                  valueLabelDisplay="auto"
+                />
               </Paper>
             </div>
-            <div style={{ height: "225px", width: "100%" }}>
+            <div
+              style={{
+                height: "250px",
+                width: "100%",
+                paddingBottom: "120px",
+              }}
+            >
               <Paper
                 style={{
-                  padding: "10px 20px 50px 10px",
-                  width: "300px",
+                  padding: "10px 15px 90px 10px",
+                  width: "325px",
                   height: "100%",
                 }}
                 variant="outlined"
@@ -188,12 +253,22 @@ class QualityControl extends Component {
                 <div style={{ width: "100%", height: "100%" }}>
                   <BarGraph
                     xLabel={"% non-MT gene expression per cell"}
-                    data={
-                      props.loading ? [] : mtSums(props.matrix, props.features)
-                    }
+                    data={props.loading ? [] : mtSums(props.matrix)}
                     min={props.thresholds[2]}
                   />
                 </div>
+                <Slider
+                  style={{ marginLeft: "20px", width: "90%", color: "#0091ea" }}
+                  onChangeCommitted={(event, value) =>
+                    props.handleFilter("mt", value)
+                  }
+                  marks={marks}
+                  defaultValue={60}
+                  step={10}
+                  min={0}
+                  max={90}
+                  valueLabelDisplay="auto"
+                />
               </Paper>
             </div>
           </div>

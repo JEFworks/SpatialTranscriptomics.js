@@ -26,7 +26,7 @@ class BarGraph extends Component {
           data={data}
           keys={["frequency"]}
           indexBy="range"
-          margin={{ top: 5, right: 0, bottom: 50, left: 40 }}
+          margin={{ top: 5, right: 0, bottom: 50, left: 45 }}
           colors={getColor}
           markers={[
             {
@@ -55,7 +55,7 @@ class BarGraph extends Component {
             tickRotation: 0,
             legend: "frequency",
             legendPosition: "middle",
-            legendOffset: -35,
+            legendOffset: -40,
           }}
           enableGridY={true}
           enableLabel={false}

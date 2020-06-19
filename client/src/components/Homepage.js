@@ -8,14 +8,62 @@ const rowSum = (gene) => {
   return count / gene.length;
 };
 
+const poorCols = (matrix, threshold) => {
+  if (!matrix[0]) return null;
+
+  const list = [];
+  const numCells = matrix[0].length;
+  const numGenes = matrix.length;
+
+  for (let i = 0; i < numCells; i++) {
+    let count = 0;
+    for (let j = 0; j < numGenes; j++) {
+      if (matrix[j][i] > 0) count++;
+    }
+    if (count >= 0) {
+      count /= numGenes;
+      if (count < threshold) list.push(i);
+    }
+  }
+
+  return list;
+};
+
+const poorColsMT = (matrix, threshold) => {
+  if (!matrix[0]) return null;
+
+  const list = [];
+  const numCells = matrix[0].length;
+  const numGenes = matrix.length;
+
+  for (let i = 0; i < numCells; i++) {
+    let count = 0;
+    let mtCount = 0;
+    for (let j = 0; j < numGenes; j++) {
+      if (matrix[j][i] > 0) {
+        count++;
+        if (matrix[j].feature && matrix[j].feature.substring(0, 3) === "mt-")
+          mtCount++;
+      }
+    }
+    if (count > 0) {
+      const nonMT = (count - mtCount) / count;
+      if (nonMT < threshold) list.push(i);
+    }
+  }
+
+  return list;
+};
+
 class Homepage extends Component {
   constructor(props) {
     super(props);
     this.state = {
       matrix: [],
+      merged: [],
       filteredMatrix: [],
       features: [],
-      thresholds: [0.9, 0.6, 0.6],
+      thresholds: [0.6, 0.6, 0.6],
       loading: true,
     };
 
@@ -58,7 +106,7 @@ class Homepage extends Component {
             elements.values = res.elements.values;
 
             this.setState({
-              matrix: this.state.matrix.concat(
+              merged: this.state.merged.concat(
                 m.to2DArray().filter((gene, index) => {
                   const ret = gene.reduce((n, x) => n + (x > 0), 0) > 0;
                   if (ret) gene.feature = this.state.features[index];
@@ -66,7 +114,6 @@ class Homepage extends Component {
                 })
               ),
             });
-            this.handleFilter("all");
           }
           console.log(`Loaded batch #${batchNum + 1}`);
         })
@@ -74,6 +121,7 @@ class Homepage extends Component {
           this.setState({
             loading: false,
             matrix: [],
+            merged: [],
             filteredMatrix: [],
           });
           console.log(error);
@@ -83,8 +131,10 @@ class Homepage extends Component {
     }
 
     this.setState({
+      matrix: this.state.merged,
       loading: false,
     });
+    this.handleFilter("all");
   }
 
   componentDidMount() {
@@ -98,12 +148,25 @@ class Homepage extends Component {
     if (filterType === "colsum") thresholds[1] = threshold / 100;
     if (filterType === "mt") thresholds[2] = threshold / 100;
 
-    // only implemented rowSum filtering so far...
+    const matrix = this.state.matrix;
+
+    // rowSum filtering
+    let filteredMatrix = matrix.filter((gene) => {
+      return rowSum(gene) >= thresholds[0];
+    });
+
+    // colSum filtering and MT filtering
+    const poorColsList = poorCols(matrix, thresholds[1]);
+    const poorColsMTList = poorColsMT(matrix, thresholds[2]);
+    filteredMatrix.forEach((gene, index) => {
+      filteredMatrix[index] = gene.filter((cell, index) => {
+        return !poorColsList.includes(index) && !poorColsMTList.includes(index);
+      });
+    });
+
     this.setState({
       thresholds,
-      filteredMatrix: this.state.matrix.filter((gene) => {
-        return rowSum(gene) >= thresholds[0];
-      }),
+      filteredMatrix,
     });
   }
 
@@ -114,7 +177,6 @@ class Homepage extends Component {
           <QualityControl
             matrix={this.state.matrix}
             filteredMatrix={this.state.filteredMatrix}
-            features={this.state.features}
             thresholds={this.state.thresholds}
             handleFilter={this.handleFilter}
             loading={this.state.loading}
