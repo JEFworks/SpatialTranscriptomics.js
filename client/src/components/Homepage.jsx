@@ -1,11 +1,11 @@
 import React, { Component } from "react";
 import axios from "axios";
 import { SparseMatrix } from "ml-sparse-matrix";
-import QualityControl from "./QualityControl";
+import QualityControl from "./QualityControl.jsx";
 
 const poorGene = (gene, threshold) => {
-  const count = gene.reduce((n, x) => n + (x > 0), 0);
-  return count / gene.length < threshold;
+  const cellCount = gene.reduce((n, x) => n + (x > 0), 0);
+  return cellCount / gene.length < threshold;
 };
 
 const poorCells = (matrix, threshold) => {
@@ -14,13 +14,11 @@ const poorCells = (matrix, threshold) => {
   const numGenes = matrix.length;
 
   for (let i = 0; i < numCells; i++) {
-    let count = 0;
+    let geneCount = 0;
     for (let j = 0; j < numGenes; j++) {
-      if (matrix[j][i] > 0) count++;
+      if (matrix[j][i] > 0) geneCount++;
     }
-    if (count >= 0) {
-      if ((count /= numGenes) < threshold) list.push(i);
-    }
+    if (geneCount / numGenes < threshold) list.push(i);
   }
 
   return list;
@@ -32,17 +30,17 @@ const poorCellsMT = (matrix, threshold) => {
   const numGenes = matrix.length;
 
   for (let i = 0; i < numCells; i++) {
-    let count = 0;
-    let mtCount = 0;
+    let geneCount = 0;
+    let mtGeneCount = 0;
     for (let j = 0; j < numGenes; j++) {
       if (matrix[j][i] > 0) {
-        count++;
+        geneCount++;
         if (matrix[j].feature && matrix[j].feature.substring(0, 3) === "mt-")
-          mtCount++;
+          mtGeneCount++;
       }
     }
-    if (count > 0) {
-      if ((count - mtCount) / count < threshold) list.push(i);
+    if (geneCount > 0) {
+      if ((geneCount - mtGeneCount) / geneCount < threshold) list.push(i);
     }
   }
 
@@ -50,12 +48,12 @@ const poorCellsMT = (matrix, threshold) => {
 };
 
 const getFilteredMatrix = (matrix, thresholds) => {
-  // rowSum filtering
+  // rowsum filtering
   const filteredMatrix = matrix.filter((gene) => {
     return !poorGene(gene, thresholds[0]);
   });
 
-  // colSum filtering and MT filtering
+  // colsum filtering and mt filtering
   const badCells = poorCells(matrix, thresholds[1]);
   const badCellsMT = poorCellsMT(matrix, thresholds[2]);
   filteredMatrix.forEach((gene, index) => {
@@ -72,7 +70,7 @@ class Homepage extends Component {
     super(props);
     this.state = {
       matrix: [],
-      merged: [],
+      mergedBatches: [],
       filteredMatrix: [],
       features: [],
       thresholds: [0.6, 0.6, 0.6],
@@ -118,11 +116,11 @@ class Homepage extends Component {
             elements.values = res.elements.values;
 
             this.setState({
-              merged: this.state.merged.concat(
+              mergedBatches: this.state.mergedBatches.concat(
                 m.to2DArray().filter((gene, index) => {
-                  const ret = gene.reduce((n, x) => n + (x > 0), 0) > 0;
-                  if (ret) gene.feature = this.state.features[index];
-                  return ret;
+                  const expressed = gene.reduce((n, x) => n + (x > 0), 0) > 0;
+                  if (expressed) gene.feature = this.state.features[index];
+                  return expressed;
                 })
               ),
             });
@@ -132,7 +130,7 @@ class Homepage extends Component {
         .catch((error) => {
           this.setState({
             loading: false,
-            merged: [],
+            mergedBatches: [],
           });
           // console.log(error);
           throw Error;
@@ -141,9 +139,9 @@ class Homepage extends Component {
     }
 
     this.setState({
-      matrix: this.state.merged,
+      matrix: this.state.mergedBatches,
       filteredMatrix: getFilteredMatrix(
-        this.state.merged,
+        this.state.mergedBatches,
         this.state.thresholds
       ),
       loading: false,
@@ -164,7 +162,7 @@ class Homepage extends Component {
     if (filterType === "colsum") thresholds[1] = threshold / 100;
     if (filterType === "mt") thresholds[2] = threshold / 100;
 
-    let filteredMatrix = getFilteredMatrix(matrix, thresholds);
+    const filteredMatrix = getFilteredMatrix(matrix, thresholds);
     this.setState({
       thresholds,
       filteredMatrix,

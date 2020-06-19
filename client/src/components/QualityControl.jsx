@@ -1,15 +1,15 @@
 import React, { Component } from "react";
 import { Typography, Paper, Slider } from "@material-ui/core";
-import BarGraph from "./BarGraph";
+import BarGraph from "./BarGraph.jsx";
 
 const rowSums = (matrix) => {
   if (!matrix[0]) return [];
   const sums = new Array(10).fill(0);
   matrix.forEach((gene) => {
-    let count = gene.reduce((n, x) => n + (x > 0), 0);
-    count /= gene.length;
-    count = Math.min(Math.floor(count * 10), 9);
-    sums[count]++;
+    let cellCount = gene.reduce((n, x) => n + (x > 0), 0);
+    cellCount /= gene.length;
+    cellCount = Math.min(Math.floor(cellCount * 10), 9);
+    sums[cellCount]++;
   });
 
   const obj = [];
@@ -29,15 +29,13 @@ const colSums = (matrix) => {
   const numGenes = matrix.length;
 
   for (let i = 0; i < numCells; i++) {
-    let count = 0;
+    let geneCount = 0;
     for (let j = 0; j < numGenes; j++) {
-      if (matrix[j][i] > 0) count++;
+      if (matrix[j][i] > 0) geneCount++;
     }
-    if (count >= 0) {
-      count /= numGenes;
-      count = Math.min(Math.floor(count * 10), 9);
-      sums[count]++;
-    }
+    geneCount /= numGenes;
+    geneCount = Math.min(Math.floor(geneCount * 10), 9);
+    sums[geneCount]++;
   }
 
   const obj = [];
@@ -57,17 +55,17 @@ const mtSums = (matrix) => {
   const numGenes = matrix.length;
 
   for (let i = 0; i < numCells; i++) {
-    let count = 0;
-    let mtCount = 0;
+    let geneCount = 0;
+    let mtGeneCount = 0;
     for (let j = 0; j < numGenes; j++) {
       if (matrix[j][i] > 0) {
-        count++;
+        geneCount++;
         if (matrix[j].feature && matrix[j].feature.substring(0, 3) === "mt-")
-          mtCount++;
+          mtGeneCount++;
       }
     }
-    if (count > 0) {
-      let nonMT = (count - mtCount) / count;
+    if (geneCount > 0) {
+      let nonMT = (geneCount - mtGeneCount) / geneCount;
       nonMT = Math.min(Math.floor(nonMT * 10), 9);
       sums[nonMT]++;
     }
@@ -83,48 +81,10 @@ const mtSums = (matrix) => {
   return obj;
 };
 
-const marks = [
-  {
-    value: 0,
-    label: "0%",
-  },
-  {
-    value: 10,
-    label: "10%",
-  },
-  {
-    value: 20,
-    label: "20%",
-  },
-  {
-    value: 30,
-    label: "30%",
-  },
-  {
-    value: 40,
-    label: "40%",
-  },
-  {
-    value: 50,
-    label: "50%",
-  },
-  {
-    value: 60,
-    label: "60%",
-  },
-  {
-    value: 70,
-    label: "70%",
-  },
-  {
-    value: 80,
-    label: "80%",
-  },
-  {
-    value: 90,
-    label: "90%",
-  },
-];
+const marks = [];
+for (let i = 0; i < 100; i += 10) {
+  marks.push({ value: i, label: i + "%" });
+}
 
 const Figure = (props, type) => {
   return (
