@@ -1,7 +1,8 @@
-data/.DS_Store
 data/filtered_feature_bc_matrix/matrix.mtx
-temp/Rplots.pdf
 data/filtered_feature_bc_matrix/filtered/filtered_matrix.mtx
-.DS_Store
 data/filtered_feature_bc_matrix/features.tsv
 data/filtered_feature_bc_matrix/filtered/filtered_features.tsv
+temp/Rplots.pdf
+.vscode
+.DS_Store
+data/.DS_Store

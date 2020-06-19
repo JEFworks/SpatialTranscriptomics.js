@@ -13,8 +13,9 @@ const getColor = (bar) => bar.data.color;
 
 class BarGraph extends Component {
   render() {
-    const min = this.props.min;
-    const data = this.props.data.map((datum) => ({
+    const { props } = this;
+    const min = props.min;
+    const data = props.data.map((datum) => ({
       ...datum,
       color: setColor(datum, min),
       range: datum.range * 100 + "%",
@@ -45,7 +46,7 @@ class BarGraph extends Component {
             tickSize: 5,
             tickPadding: 5,
             tickRotation: 0,
-            legend: this.props.xLabel,
+            legend: props.xLabel,
             legendPosition: "middle",
             legendOffset: 40,
           }}

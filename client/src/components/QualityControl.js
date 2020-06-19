@@ -126,6 +126,78 @@ const marks = [
   },
 ];
 
+const Figure = (props, type) => {
+  return (
+    <>
+      <div
+        style={{
+          height: "250px",
+          width: "100%",
+          paddingRight: type === "rowsum" || type === "colsum" ? "20px" : "0px",
+          paddingBottom: "120px",
+        }}
+      >
+        <Paper
+          style={{
+            padding: "10px 15px 90px 10px",
+            width: "330px",
+            height: "100%",
+          }}
+          variant="outlined"
+          elevation={3}
+        >
+          <Typography variant="h6" align="center">
+            {type === "rowsum"
+              ? "Figure 1"
+              : type === "colsum"
+              ? "Figure 2"
+              : "Figure 3"}
+          </Typography>
+          <div style={{ width: "100%", height: "100%" }}>
+            <BarGraph
+              xLabel={
+                type === "rowsum"
+                  ? "% of cells detected per gene"
+                  : type === "colsum"
+                  ? "% of genes detected per cell"
+                  : "% non-MT gene expression per cell"
+              }
+              data={
+                props.loading
+                  ? []
+                  : type === "rowsum"
+                  ? rowSums(props.matrix)
+                  : type === "colsum"
+                  ? colSums(props.matrix)
+                  : mtSums(props.matrix)
+              }
+              min={
+                type === "rowsum"
+                  ? props.thresholds[0]
+                  : type === "colsum"
+                  ? props.thresholds[1]
+                  : props.thresholds[2]
+              }
+            />
+          </div>
+          <Slider
+            style={{ marginLeft: "20px", width: "90%", color: "#0091ea" }}
+            onChangeCommitted={(event, value) =>
+              props.handleFilter(type, value)
+            }
+            marks={marks}
+            defaultValue={60}
+            step={10}
+            min={0}
+            max={90}
+            valueLabelDisplay="auto"
+          />
+        </Paper>
+      </div>
+    </>
+  );
+};
+
 class QualityControl extends Component {
   render() {
     const { props } = this;
@@ -144,128 +216,9 @@ class QualityControl extends Component {
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>
           <div className="GC-flex">
-            <div
-              style={{
-                height: "250px",
-                width: "100%",
-                paddingRight: "20px",
-                paddingBottom: "120px",
-              }}
-            >
-              <Paper
-                style={{
-                  padding: "10px 15px 90px 10px",
-                  width: "325px",
-                  height: "100%",
-                }}
-                variant="outlined"
-                elevation={3}
-              >
-                <Typography variant="h6" align="center">
-                  Figure 1
-                </Typography>
-                <div style={{ width: "100%", height: "100%" }}>
-                  <BarGraph
-                    xLabel={"% of cells detected per gene"}
-                    data={props.loading ? [] : rowSums(props.matrix)}
-                    min={props.thresholds[0]}
-                  />
-                </div>
-                <Slider
-                  style={{ marginLeft: "20px", width: "90%", color: "#0091ea" }}
-                  onChangeCommitted={(event, value) =>
-                    props.handleFilter("rowsum", value)
-                  }
-                  marks={marks}
-                  defaultValue={60}
-                  step={10}
-                  min={0}
-                  max={90}
-                  valueLabelDisplay="auto"
-                />
-              </Paper>
-            </div>
-            <div
-              style={{
-                height: "250px",
-                width: "100%",
-                paddingRight: "20px",
-                paddingBottom: "120px",
-              }}
-            >
-              <Paper
-                style={{
-                  padding: "10px 15px 90px 10px",
-                  width: "325px",
-                  height: "100%",
-                }}
-                variant="outlined"
-                elevation={3}
-              >
-                <Typography variant="h6" align="center">
-                  Figure 2
-                </Typography>
-                <div style={{ width: "100%", height: "100%" }}>
-                  <BarGraph
-                    xLabel={"% of genes detected per cell"}
-                    data={props.loading ? [] : colSums(props.matrix)}
-                    min={props.thresholds[1]}
-                  />
-                </div>
-                <Slider
-                  style={{ marginLeft: "20px", width: "90%", color: "#0091ea" }}
-                  onChangeCommitted={(event, value) =>
-                    props.handleFilter("colsum", value)
-                  }
-                  marks={marks}
-                  defaultValue={60}
-                  step={10}
-                  min={0}
-                  max={90}
-                  valueLabelDisplay="auto"
-                />
-              </Paper>
-            </div>
-            <div
-              style={{
-                height: "250px",
-                width: "100%",
-                paddingBottom: "120px",
-              }}
-            >
-              <Paper
-                style={{
-                  padding: "10px 15px 90px 10px",
-                  width: "325px",
-                  height: "100%",
-                }}
-                variant="outlined"
-                elevation={3}
-              >
-                <Typography variant="h6" align="center">
-                  Figure 3
-                </Typography>
-                <div style={{ width: "100%", height: "100%" }}>
-                  <BarGraph
-                    xLabel={"% non-MT gene expression per cell"}
-                    data={props.loading ? [] : mtSums(props.matrix)}
-                    min={props.thresholds[2]}
-                  />
-                </div>
-                <Slider
-                  style={{ marginLeft: "20px", width: "90%", color: "#0091ea" }}
-                  onChangeCommitted={(event, value) =>
-                    props.handleFilter("mt", value)
-                  }
-                  marks={marks}
-                  defaultValue={60}
-                  step={10}
-                  min={0}
-                  max={90}
-                  valueLabelDisplay="auto"
-                />
-              </Paper>
-            </div>
+            {Figure(props, "rowsum")}
+            {Figure(props, "colsum")}
+            {Figure(props, "mt")}
           </div>
           <div style={{ width: "50%" }}></div>
         </div>

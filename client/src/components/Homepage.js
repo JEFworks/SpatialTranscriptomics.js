@@ -90,7 +90,7 @@ class Homepage extends Component {
         this.setState({ features });
       })
       .catch((error) => {
-        console.log(error);
+        // console.log(error);
       });
   }
 
@@ -102,7 +102,7 @@ class Homepage extends Component {
         .get(`http://localhost:4000/matrix/${count}/${numBatches}`)
         .then((response) => {
           const res = JSON.parse(response.data);
-          const batchNum = Number.parseInt(res.count);
+          // const batchNum = Number.parseInt(res.count);
           const m = new SparseMatrix(res.rows, res.columns);
 
           if (res.elements.distinct !== 0) {
@@ -127,14 +127,14 @@ class Homepage extends Component {
               ),
             });
           }
-          console.log(`Loaded batch #${batchNum + 1}`);
+          // console.log(`Loaded batch #${batchNum + 1}`);
         })
         .catch((error) => {
           this.setState({
             loading: false,
             merged: [],
           });
-          console.log(error);
+          // console.log(error);
           throw Error;
         });
       count++;
