@@ -7,21 +7,27 @@
 library(Matrix)
 
 ######## read in data
-dir <- '~/Dropbox (HMS)/Github/SpatialTranscriptomics.js/data/'
-cd <- readMM(paste0(dir, 'filtered_feature_bc_matrix/matrix.mtx.gz'))
-genes <- read.csv(paste0(dir, 'filtered_feature_bc_matrix/features.tsv.gz'), sep='\t', header=FALSE)
-cells <- read.csv(paste0(dir, 'filtered_feature_bc_matrix/barcodes.tsv.gz'), sep='\t', header=FALSE)
-head(genes)
-head(cells)
-rownames(cd) <- genes[,2]
-colnames(cd) <- cells[,1]
-head(cd)
+#dir <- '~/Dropbox (HMS)/Github/SpatialTranscriptomics.js/data/coronal_brain/'
+#cd <- readMM(paste0(dir, 'filtered_feature_bc_matrix/matrix.mtx.gz'))
+#genes <- read.csv(paste0(dir, 'filtered_feature_bc_matrix/features.tsv.gz'), sep='\t', header=FALSE)
+#cells <- read.csv(paste0(dir, 'filtered_feature_bc_matrix/barcodes.tsv.gz'), sep='\t', header=FALSE)
+#head(genes)
+#head(cells)
+#rownames(cd) <- genes[,2]
+#colnames(cd) <- cells[,1]
+#head(cd)
+
+######## smaller dataset
+library(MERingue)
+data(mOB)
+names(mOB)
+cd <- mOB$counts
 
 ######### QC
 hist(log10(colSums(cd)+1)) ## distribution of genes per cell ie. library size (log scale) 
 hist(log10(colSums(cd>0)+1)) ## distribution of unique gene species per cell ie. library complexity (log scale) 
 hist(log10(rowSums(cd)+1)) ## distribution of cells per gene (log scale)
-vi <- rowSums(cd) > 3000 ## pick a filtering threshold
+vi <- rowSums(cd) > 1000 ## pick a filtering threshold
 table(vi)
 cd.filter <- cd[vi,]
 vi <- colSums(cd) > 3000 ## pick a filtering threshold
@@ -107,12 +113,20 @@ plot(pcs[,1:2], col=col, pch=".")
 ## transcriptional clusters are spatially
 positions <- read.csv(paste0(dir, 'spatial/tissue_positions_list.csv.gz'),
                 header=FALSE)
-head(positions)
+#head(positions)
 ## we only care about the x-y pixel coordinates for now
-pos <- positions[,c(5,6)]
-rownames(pos) <- positions[,1]
-head(pos)
+#pos <- positions[,c(5,6)]
+#rownames(pos) <- positions[,1]
+#head(pos)
+pos <- mOB$pos
 ## plot (note positions may be in different order to gene expression matrix)
-plot(pos[names(col),], col=col, pch=".")  
+plot(pos[names(col),], col=col, pch=16)  
 
+######## Output data
+library(Matrix)
+dir <- '~/Dropbox (HMS)/Github/SpatialTranscriptomics.js/data/olfactory_bulb/'
+writeMM(obj = Matrix(cd, sparse=TRUE), file = paste0(dir, 'filtered_feature_bc_matrix/matrix.mtx'))
+write.table(rownames(cd), paste0(dir, 'filtered_feature_bc_matrix/features.tsv'), sep='\t', quote=FALSE, col.names=FALSE)
+write.table(colnames(cd), paste0(dir, 'filtered_feature_bc_matrix/barcodes.tsv'), sep='\t', quote=FALSE, col.names=FALSE)
+write.table(pos, paste0(dir, 'spatial/tissue_positions_list.csv'), sep='\t', quote=FALSE, col.names=FALSE)
 
