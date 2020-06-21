@@ -73,7 +73,7 @@ class Homepage extends Component {
       mergedBatches: [],
       filteredMatrix: [],
       features: [],
-      thresholds: [0.6, 0.6, 0.6],
+      thresholds: [0.3, 0.3, 0.6],
       loading: true,
     };
 
@@ -87,9 +87,7 @@ class Homepage extends Component {
         const features = JSON.parse(response.data);
         this.setState({ features });
       })
-      .catch((error) => {
-        // console.log(error);
-      });
+      .catch(() => {});
   }
 
   async loadMatrix() {
@@ -100,7 +98,6 @@ class Homepage extends Component {
         .get(`http://localhost:4000/matrix/${count}/${numBatches}`)
         .then((response) => {
           const res = JSON.parse(response.data);
-          // const batchNum = Number.parseInt(res.count);
           const m = new SparseMatrix(res.rows, res.columns);
 
           if (res.elements.distinct !== 0) {
@@ -125,14 +122,12 @@ class Homepage extends Component {
               ),
             });
           }
-          // console.log(`Loaded batch #${batchNum + 1}`);
         })
-        .catch((error) => {
+        .catch(() => {
           this.setState({
             loading: false,
             mergedBatches: [],
           });
-          // console.log(error);
           throw Error;
         });
       count++;

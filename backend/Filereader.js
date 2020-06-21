@@ -23,8 +23,7 @@ app.get("/matrix/:count/:numBatches", function (req, res) {
     return 0;
   }
 
-  let filePath =
-    "../data/filtered_feature_bc_matrix/filtered/filtered_matrix.mtx";
+  let filePath = "../data/olfactory_bulb/filtered_feature_bc_matrix/matrix.mtx";
   // filePath = "../data/filtered_feature_bc_matrix/matrix.mtx";
   const instream = fs.createReadStream(filePath);
   instream.on("error", function () {
@@ -101,7 +100,6 @@ app.get("/matrix/:count/:numBatches", function (req, res) {
               rows: matrix.rows,
               columns: matrix.columns,
               elements: matrix.elements,
-              count: count,
             })
           );
         } else {
@@ -117,7 +115,7 @@ app.get("/matrix/:count/:numBatches", function (req, res) {
 
 app.get("/features", function (req, res) {
   let filePath =
-    "../data/filtered_feature_bc_matrix/filtered/filtered_features.tsv";
+    "../data/olfactory_bulb/filtered_feature_bc_matrix/features.tsv";
   // filePath = "../data/filtered_feature_bc_matrix/features.tsv";
   const instream = fs.createReadStream(filePath);
   instream.on("error", function () {

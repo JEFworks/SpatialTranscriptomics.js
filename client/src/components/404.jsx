@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Typography, Link } from "@material-ui/core";
 
-export default class Page404 extends Component {
+class Page404 extends Component {
   render() {
     return (
       <>
@@ -21,3 +21,5 @@ export default class Page404 extends Component {
     );
   }
 }
+
+export default Page404;
