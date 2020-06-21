@@ -73,7 +73,7 @@ class Homepage extends Component {
       mergedBatches: [],
       filteredMatrix: [],
       features: [],
-      thresholds: [0.3, 0.3, 0.6],
+      thresholds: [0.6, 0.6, 0.6],
       loading: true,
     };
 
@@ -179,6 +179,7 @@ class Homepage extends Component {
             handleFilter={this.handleFilter}
             loading={this.state.loading}
           />
+          <div style={{ paddingTop: "50px" }}></div>
         </div>
       </>
     );

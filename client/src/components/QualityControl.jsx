@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import { Typography, Paper, Slider } from "@material-ui/core";
 import BarGraph from "./BarGraph.jsx";
 
+const darkgrey = "#424242";
+
 const rowSums = (matrix) => {
   if (!matrix[0]) return [];
   const sums = new Array(10).fill(0);
@@ -93,25 +95,30 @@ const Figure = (props, type) => {
         style={{
           height: "250px",
           width: "100%",
-          paddingRight: type === "rowsum" || type === "colsum" ? "20px" : "0px",
-          paddingBottom: "120px",
+          paddingRight: "15px",
+          paddingLeft: "15px",
+          paddingBottom: type == "rowsum" || type == "colsum" ? "125px" : "0px",
         }}
       >
         <Paper
           style={{
-            padding: "10px 15px 90px 10px",
+            padding: "12px 15px 90px 10px",
             width: "330px",
             height: "100%",
           }}
           variant="outlined"
           elevation={3}
         >
-          <Typography variant="h6" align="center">
+          <Typography
+            variant="body1"
+            align="center"
+            style={{ fontWeight: "500", paddingBottom: "5px" }}
+          >
             {type === "rowsum"
-              ? "Figure 1"
+              ? "% of cells detected per gene"
               : type === "colsum"
-              ? "Figure 2"
-              : "Figure 3"}
+              ? "% of genes detected per cell"
+              : "% non-MT gene expression per cell"}
           </Typography>
           <div style={{ width: "100%", height: "100%" }}>
             <BarGraph
@@ -163,10 +170,16 @@ class QualityControl extends Component {
     const { props } = this;
     return (
       <>
-        <Typography style={{ marginBottom: "10px" }} variant="h5">
+        <Typography
+          style={{ marginBottom: "10px", fontWeight: "400" }}
+          variant="h5"
+        >
           Quality Control
         </Typography>
-        <Typography style={{ marginBottom: "20px" }} variant="body1">
+        <Typography
+          style={{ marginBottom: "20px", fontWeight: "300", color: darkgrey }}
+          variant="body1"
+        >
           Use the range selectors to change the minimum threshold for each
           quality control metric. Cells and genes below these thresholds will be
           removed from the expression matrix, thereby improving downstream

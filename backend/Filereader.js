@@ -24,7 +24,8 @@ app.get("/matrix/:count/:numBatches", function (req, res) {
   }
 
   let filePath = "../data/olfactory_bulb/filtered_feature_bc_matrix/matrix.mtx";
-  // filePath = "../data/filtered_feature_bc_matrix/matrix.mtx";
+  filePath =
+    "../data/coronal_brain/filtered_feature_bc_matrix/filtered/filtered_matrix.mtx";
   const instream = fs.createReadStream(filePath);
   instream.on("error", function () {
     res.status(400).send("Matrix file was not found.\n");
@@ -116,7 +117,8 @@ app.get("/matrix/:count/:numBatches", function (req, res) {
 app.get("/features", function (req, res) {
   let filePath =
     "../data/olfactory_bulb/filtered_feature_bc_matrix/features.tsv";
-  // filePath = "../data/filtered_feature_bc_matrix/features.tsv";
+  filePath =
+    "../data/coronal_brain/filtered_feature_bc_matrix/filtered/filtered_features.tsv";
   const instream = fs.createReadStream(filePath);
   instream.on("error", function () {
     res.status(400).send("Features tsv file was not found.\n");
