@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import {
   AppBar,
-  Button,
   IconButton,
   Link,
   Toolbar,
@@ -9,38 +8,52 @@ import {
 } from "@material-ui/core";
 import GitHubIcon from "@material-ui/icons/GitHub";
 
+const background = "#fffffe";
+const headline = "#094067";
+const weight = "500";
+
 class Header extends Component {
   render() {
     return (
       <>
         <AppBar
           style={{
-            backgroundColor: "#242424",
-            boxShadow: "0 8px 16px rgba(10,10,10,.1)",
+            backgroundColor: background,
+            boxShadow: "0 2px 20px rgba(10,10,10,.1)",
           }}
         >
           <Toolbar>
             <Typography
-              style={{ flexGrow: 1, fontWeight: "400", fontSize: "1.4em" }}
+              variant="h6"
+              style={{
+                flexGrow: 1,
+                fontWeight: weight,
+              }}
             >
-              <Link underline="none" href="/" color="inherit">
+              <Link style={{ color: headline }} underline="none" href="/">
                 SpatialTranscriptomics.js
               </Link>
             </Typography>
-            <Button
-              color="inherit"
+            <Typography
               style={{
-                fontWeight: "400",
-                fontSize: "1em",
-                marginBottom: "-2px",
+                fontSize: "1.1em",
+                fontWeight: weight,
               }}
             >
-              About
-            </Button>
+              <Link style={{ color: headline }} underline="none" href="/about">
+                about
+              </Link>
+            </Typography>
             <IconButton
+              disableRipple
               edge="end"
-              style={{ marginRight: "-10px", marginBottom: "-4px" }}
-              color="inherit"
+              style={{
+                marginLeft: "5px",
+                marginRight: "-10px",
+                marginBottom: "-4px",
+                color: headline,
+                backgroundColor: "transparent",
+              }}
               aria-label="menu"
             >
               <Link

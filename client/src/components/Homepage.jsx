@@ -57,7 +57,7 @@ const getFilteredMatrix = (matrix, thresholds) => {
   const badCells = poorCells(matrix, thresholds[1]);
   const badCellsMT = poorCellsMT(matrix, thresholds[2]);
   filteredMatrix.forEach((gene, index) => {
-    filteredMatrix[index] = gene.filter((cell, index) => {
+    filteredMatrix[index] = gene.filter((_cell, index) => {
       return !badCells.includes(index) && !badCellsMT.includes(index);
     });
   });
@@ -70,7 +70,6 @@ class Homepage extends Component {
     super(props);
     this.state = {
       matrix: [],
-      mergedBatches: [],
       filteredMatrix: [],
       features: [],
       thresholds: [0.6, 0.6, 0.6],
@@ -113,7 +112,7 @@ class Homepage extends Component {
             elements.values = res.elements.values;
 
             this.setState({
-              mergedBatches: this.state.mergedBatches.concat(
+              matrix: this.state.matrix.concat(
                 m.to2DArray().filter((gene, index) => {
                   const expressed = gene.reduce((n, x) => n + (x > 0), 0) > 0;
                   if (expressed) gene.feature = this.state.features[index];
@@ -126,7 +125,7 @@ class Homepage extends Component {
         .catch(() => {
           this.setState({
             loading: false,
-            mergedBatches: [],
+            matrix: [],
           });
           throw Error;
         });
@@ -134,9 +133,8 @@ class Homepage extends Component {
     }
 
     this.setState({
-      matrix: this.state.mergedBatches,
       filteredMatrix: getFilteredMatrix(
-        this.state.mergedBatches,
+        this.state.matrix,
         this.state.thresholds
       ),
       loading: false,
@@ -179,7 +177,7 @@ class Homepage extends Component {
             handleFilter={this.handleFilter}
             loading={this.state.loading}
           />
-          <div style={{ paddingTop: "50px" }}></div>
+          <div style={{ paddingTop: "100px" }}></div>
         </div>
       </>
     );

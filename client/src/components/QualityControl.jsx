@@ -2,7 +2,9 @@ import React, { Component } from "react";
 import { Typography, Paper, Slider } from "@material-ui/core";
 import BarGraph from "./BarGraph.jsx";
 
-const darkgrey = "#424242";
+const headline = "#094067";
+const paragraph = "#5f6c7b";
+const slider = "#90b4ce";
 
 const rowSums = (matrix) => {
   if (!matrix[0]) return [];
@@ -97,7 +99,8 @@ const Figure = (props, type) => {
           width: "100%",
           paddingRight: "15px",
           paddingLeft: "15px",
-          paddingBottom: type == "rowsum" || type == "colsum" ? "125px" : "0px",
+          paddingBottom:
+            type === "rowsum" || type === "colsum" ? "125px" : "0px",
         }}
       >
         <Paper
@@ -112,7 +115,11 @@ const Figure = (props, type) => {
           <Typography
             variant="body1"
             align="center"
-            style={{ fontWeight: "500", paddingBottom: "5px" }}
+            style={{
+              fontWeight: "500",
+              paddingBottom: "5px",
+              color: headline,
+            }}
           >
             {type === "rowsum"
               ? "% of cells detected per gene"
@@ -148,8 +155,8 @@ const Figure = (props, type) => {
             />
           </div>
           <Slider
-            style={{ marginLeft: "20px", width: "90%", color: "#0091ea" }}
-            onChangeCommitted={(event, value) =>
+            style={{ marginLeft: "20px", width: "90%", color: slider }}
+            onChangeCommitted={(_event, value) =>
               props.handleFilter(type, value)
             }
             marks={marks}
@@ -171,13 +178,13 @@ class QualityControl extends Component {
     return (
       <>
         <Typography
-          style={{ marginBottom: "10px", fontWeight: "400" }}
+          style={{ marginBottom: "10px", fontWeight: "500", color: headline }}
           variant="h5"
         >
           Quality Control
         </Typography>
         <Typography
-          style={{ marginBottom: "20px", fontWeight: "300", color: darkgrey }}
+          style={{ marginBottom: "20px", fontWeight: "400", color: paragraph }}
           variant="body1"
         >
           Use the range selectors to change the minimum threshold for each
