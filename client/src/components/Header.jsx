@@ -10,7 +10,7 @@ import GitHubIcon from "@material-ui/icons/GitHub";
 
 const background = "#fffffe";
 const headline = "#094067";
-const weight = "500";
+const weight = 500;
 
 class Header extends Component {
   render() {
@@ -19,27 +19,19 @@ class Header extends Component {
         <AppBar
           style={{
             backgroundColor: background,
-            boxShadow: "0 2px 20px rgba(10,10,10,.1)",
+            boxShadow: "rgba(0, 0, 0, 0.1) 0px 0px 12px",
           }}
         >
           <Toolbar>
             <Typography
               variant="h6"
-              style={{
-                flexGrow: 1,
-                fontWeight: weight,
-              }}
+              style={{ flexGrow: 1, fontWeight: weight }}
             >
               <Link style={{ color: headline }} underline="none" href="/">
                 SpatialTranscriptomics.js
               </Link>
             </Typography>
-            <Typography
-              style={{
-                fontSize: "1.1em",
-                fontWeight: weight,
-              }}
-            >
+            <Typography style={{ fontSize: "1.1em", fontWeight: weight }}>
               <Link style={{ color: headline }} underline="none" href="/about">
                 about
               </Link>

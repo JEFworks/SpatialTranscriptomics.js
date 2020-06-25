@@ -11,6 +11,13 @@ const setColor = (datum, min) => {
 
 const getColor = (bar) => bar.data.color;
 
+const graphSettings = {
+  theme: {
+    textColor: "black",
+    textWeight: "300",
+  },
+};
+
 class BarGraph extends Component {
   render() {
     const { props } = this;
@@ -24,6 +31,7 @@ class BarGraph extends Component {
     return (
       <>
         <ResponsiveBar
+          theme={graphSettings.theme}
           data={data}
           keys={["frequency"]}
           indexBy="range"

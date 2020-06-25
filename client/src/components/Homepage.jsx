@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import axios from "axios";
 import { SparseMatrix } from "ml-sparse-matrix";
 import QualityControl from "./QualityControl.jsx";
+import TissueVisualizer from "./TissueVisualizer.jsx";
 
 const poorGene = (gene, threshold) => {
   const cellCount = gene.reduce((n, x) => n + (x > 0), 0);
@@ -72,7 +73,7 @@ class Homepage extends Component {
       matrix: [],
       filteredMatrix: [],
       features: [],
-      thresholds: [0.6, 0.6, 0.6],
+      thresholds: [0.3, 0.3, 0.3],
       loading: true,
     };
 
@@ -177,6 +178,8 @@ class Homepage extends Component {
             handleFilter={this.handleFilter}
             loading={this.state.loading}
           />
+          <br />
+          <TissueVisualizer />
           <div style={{ paddingTop: "100px" }}></div>
         </div>
       </>

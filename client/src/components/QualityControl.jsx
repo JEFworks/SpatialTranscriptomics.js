@@ -99,8 +99,7 @@ const Figure = (props, type) => {
           width: "100%",
           paddingRight: "15px",
           paddingLeft: "15px",
-          paddingBottom:
-            type === "rowsum" || type === "colsum" ? "125px" : "0px",
+          paddingBottom: type === "mtsum" ? "0px" : "125px",
         }}
       >
         <Paper
@@ -108,6 +107,7 @@ const Figure = (props, type) => {
             padding: "12px 15px 90px 10px",
             width: "330px",
             height: "100%",
+            backgroundColor: "transparent",
           }}
           variant="outlined"
           elevation={3}
@@ -115,11 +115,7 @@ const Figure = (props, type) => {
           <Typography
             variant="body1"
             align="center"
-            style={{
-              fontWeight: "500",
-              paddingBottom: "5px",
-              color: headline,
-            }}
+            style={{ paddingBottom: "5px", fontWeight: 500, color: headline }}
           >
             {type === "rowsum"
               ? "% of cells detected per gene"
@@ -160,7 +156,7 @@ const Figure = (props, type) => {
               props.handleFilter(type, value)
             }
             marks={marks}
-            defaultValue={60}
+            defaultValue={30}
             step={10}
             min={0}
             max={90}
@@ -178,13 +174,13 @@ class QualityControl extends Component {
     return (
       <>
         <Typography
-          style={{ marginBottom: "10px", fontWeight: "500", color: headline }}
+          style={{ marginBottom: "10px", fontWeight: 500, color: headline }}
           variant="h5"
         >
           Quality Control
         </Typography>
         <Typography
-          style={{ marginBottom: "20px", fontWeight: "400", color: paragraph }}
+          style={{ marginBottom: "20px", fontWeight: 400, color: paragraph }}
           variant="body1"
         >
           Use the range selectors to change the minimum threshold for each

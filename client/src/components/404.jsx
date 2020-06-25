@@ -1,32 +1,14 @@
 import React, { Component } from "react";
 import { Typography, Link } from "@material-ui/core";
-import icon404 from "../icon404.svg";
 
 const headline = "#094067";
-const paragraph = "#5f6c7b";
-const blue = "#90b4ce";
+const highlight = "#90b4ce";
 
 class Page404 extends Component {
   render() {
     return (
       <>
         <div className="site-container">
-          {/* <Typography
-            variant="h5"
-            style={{ marginBottom: "10px", fontWeight: "500", color: headline }}
-          >
-            Oops, we can't find the page you're looking for.
-          </Typography>
-          <Typography
-            variant="body1"
-            style={{ fontWeight: "400", color: paragraph }}
-          >
-            Click{" "}
-            <Link style={{ color: blue }} href="/">
-              here
-            </Link>{" "}
-            to go back to the main page.
-          </Typography> */}
           <img
             style={{
               display: "block",
@@ -36,7 +18,7 @@ class Page404 extends Component {
               width: "60%",
               minWidth: "350px",
             }}
-            src={icon404}
+            src="/images/icon404.svg"
             alt="404"
           />
           <Typography
@@ -52,7 +34,7 @@ class Page404 extends Component {
             }}
           >
             Click{" "}
-            <Link style={{ color: blue }} href="/">
+            <Link style={{ color: highlight }} href="/">
               here
             </Link>{" "}
             to go back to the main page.

@@ -8,3 +8,4 @@ temp/Rplots.pdf
 data/.DS_Store
 *.tsv
 *.mtx
+*.csv
