@@ -14,6 +14,8 @@ const es = require("event-stream");
 
 const { SparseMatrix } = require("ml-sparse-matrix");
 
+const fileNum = 0; // 0 is filtered coronal brains, 1 is original coronal brain , 2 is olfactory bulb
+
 app.get("/matrix/:count/:numBatches", function (req, res) {
   const count = Number.parseInt(req.params.count);
   const numBatches = Number.parseInt(req.params.numBatches);
@@ -23,9 +25,13 @@ app.get("/matrix/:count/:numBatches", function (req, res) {
     return 0;
   }
 
-  let filePath = "../data/olfactory_bulb/filtered_feature_bc_matrix/matrix.mtx";
-  filePath =
-    "../data/coronal_brain/filtered_feature_bc_matrix/filtered/filtered_matrix.mtx";
+  let filePath =
+    fileNum === 0
+      ? "../data/coronal_brain/filtered_feature_bc_matrix/filtered/filtered_matrix.mtx"
+      : fileNum === 1
+      ? "../data/coronal_brain/filtered_feature_bc_matrix/matrix.mtx"
+      : "../data/olfactory_bulb/filtered_feature_bc_matrix/matrix.mtx";
+
   const instream = fs.createReadStream(filePath);
   instream.on("error", function () {
     res.status(400).send("Matrix file was not found.\n");
@@ -114,11 +120,14 @@ app.get("/matrix/:count/:numBatches", function (req, res) {
   );
 });
 
-app.get("/features", function (req, res) {
+app.get("/features", function (_req, res) {
   let filePath =
-    "../data/olfactory_bulb/filtered_feature_bc_matrix/features.tsv";
-  filePath =
-    "../data/coronal_brain/filtered_feature_bc_matrix/filtered/filtered_features.tsv";
+    fileNum === 0
+      ? "../data/coronal_brain/filtered_feature_bc_matrix/filtered/filtered_features.tsv"
+      : fileNum === 1
+      ? "../data/coronal_brain/filtered_feature_bc_matrix/features.tsv"
+      : "../data/olfactory_bulb/filtered_feature_bc_matrix/features.tsv";
+
   const instream = fs.createReadStream(filePath);
   instream.on("error", function () {
     res.status(400).send("Features tsv file was not found.\n");
@@ -131,12 +140,14 @@ app.get("/features", function (req, res) {
   instream.pipe(es.split()).pipe(
     es
       .mapSync(function (line) {
-        const delimited = line.split("\t");
-        const geneName = delimited[1];
-        if (geneName && geneName.length > 0) {
-          array.push(geneName);
-        } else if (line.trim().length !== 0) {
-          exit = true;
+        if (!exit) {
+          const delimited = line.split("\t");
+          const geneName = delimited[1];
+          if (geneName && geneName.length > 0) {
+            array.push(geneName);
+          } else if (line.trim().length !== 0) {
+            exit = true;
+          }
         }
       })
       .on("end", function () {
@@ -146,7 +157,92 @@ app.get("/features", function (req, res) {
           res
             .status(400)
             .send(
-              "GET request unsuccessful due to improperly formatted .tsv file.\n"
+              "GET request unsuccessful due to improperly formatted features.tsv file.\n"
+            );
+        }
+      })
+  );
+});
+
+app.get("/barcodes", function (_req, res) {
+  let filePath =
+    fileNum === 0
+      ? "../data/coronal_brain/filtered_feature_bc_matrix/filtered/barcodes.tsv"
+      : fileNum === 1
+      ? "../data/coronal_brain/filtered_feature_bc_matrix/barcodes.tsv"
+      : "../data/olfactory_bulb/filtered_feature_bc_matrix/barcodes.tsv";
+
+  const instream = fs.createReadStream(filePath);
+  instream.on("error", function () {
+    res.status(400).send("Barcodes tsv file was not found.\n");
+    return 0;
+  });
+
+  const array = [];
+
+  instream.pipe(es.split()).pipe(
+    es
+      .mapSync(function (line) {
+        const delimited = line.split("\t");
+        const str = delimited[delimited.length - 1].trim();
+        if (str.length > 0) array.push(str);
+      })
+      .on("end", function () {
+        if (array.length > 0) {
+          res.json(JSON.stringify(array));
+        } else {
+          res
+            .status(400)
+            .send("GET request unsuccessful due to empty barcodes.tsv file.\n");
+        }
+      })
+  );
+});
+
+app.get("/pixels", function (_req, res) {
+  let filePath =
+    fileNum === 0
+      ? "../data/coronal_brain/spatial/tissue_positions_list.csv"
+      : fileNum === 1
+      ? "../data/coronal_brain/spatial/tissue_positions_list.csv"
+      : "../data/olfactory_bulb/spatial/tissue_positions_list.csv";
+
+  const instream = fs.createReadStream(filePath);
+  instream.on("error", function () {
+    res.status(400).send("Positions csv file was not found.\n");
+    return 0;
+  });
+
+  const array = [];
+  let exit = false;
+
+  instream.pipe(es.split()).pipe(
+    es
+      .mapSync(function (line) {
+        if (!exit) {
+          const delimited = line.split(",");
+          if (delimited.length >= 3) {
+            const barcode = delimited[0].trim();
+            const x = delimited[delimited.length - 2].trim();
+            const y = delimited[delimited.length - 1].trim();
+            array.push({
+              barcode: barcode,
+              x: x,
+              y: y,
+            });
+          } else if (line.trim().length !== 0) {
+            exit = true;
+          }
+        }
+      })
+      .on("end", function () {
+        if (array.length > 0 && !exit) {
+          res.json(JSON.stringify(array));
+        } else {
+          res
+            .status(400)
+            .send(
+              "GET request unsuccessful due to poorly formatted positions.csv file.\n"
             );
         }
       })

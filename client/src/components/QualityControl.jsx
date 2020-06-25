@@ -143,10 +143,10 @@ const Figure = (props, type) => {
               }
               min={
                 type === "rowsum"
-                  ? props.thresholds[0]
+                  ? props.thresholds.minRowSum
                   : type === "colsum"
-                  ? props.thresholds[1]
-                  : props.thresholds[2]
+                  ? props.thresholds.minColSum
+                  : props.thresholds.minMTSum
               }
             />
           </div>
@@ -185,9 +185,8 @@ class QualityControl extends Component {
         >
           Use the range selectors to change the minimum threshold for each
           quality control metric. Cells and genes below these thresholds will be
-          removed from the expression matrix, thereby improving downstream
-          analysis. Genes not expressed in any cells were removed before
-          computing quality control.
+          removed from the expression matrix for downstream analysis. Genes not
+          expressed in any cells were removed before computing quality control.
         </Typography>
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>

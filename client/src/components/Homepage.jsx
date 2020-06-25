@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import axios from "axios";
 import { SparseMatrix } from "ml-sparse-matrix";
 import QualityControl from "./QualityControl.jsx";
-import TissueVisualizer from "./TissueVisualizer.jsx";
+import TissueVisualization from "./TissueVisualization.jsx";
 
 const poorGene = (gene, threshold) => {
   const cellCount = gene.reduce((n, x) => n + (x > 0), 0);
@@ -48,22 +48,33 @@ const poorCellsMT = (matrix, threshold) => {
   return list;
 };
 
-const getFilteredMatrix = (matrix, thresholds) => {
+const getFilteredData = (matrix, features, barcodes, thresholds) => {
+  const filteredFeatures = [];
+  const filteredBarcodes = [];
   // rowsum filtering
-  const filteredMatrix = matrix.filter((gene) => {
-    return !poorGene(gene, thresholds[0]);
+  const filteredMatrix = matrix.filter((gene, index) => {
+    const badGene = poorGene(gene, thresholds.minRowSum);
+    if (features.length > 0 && !badGene) filteredFeatures.push(features[index]);
+    return !badGene;
   });
 
   // colsum filtering and mt filtering
-  const badCells = poorCells(matrix, thresholds[1]);
-  const badCellsMT = poorCellsMT(matrix, thresholds[2]);
+  const badCells = poorCells(matrix, thresholds.minColSum);
+  const badCellsMT = poorCellsMT(matrix, thresholds.minMTSum);
   filteredMatrix.forEach((gene, index) => {
-    filteredMatrix[index] = gene.filter((_cell, index) => {
-      return !badCells.includes(index) && !badCellsMT.includes(index);
+    filteredMatrix[index] = gene.filter((_cell, i) => {
+      const badCell = badCells.includes(i) || badCellsMT.includes(i);
+      if (barcodes.length > 0 && index === 0 && !badCell)
+        filteredBarcodes.push(barcodes[i]);
+      return !badCell;
     });
   });
 
-  return filteredMatrix;
+  return {
+    matrix: filteredMatrix,
+    features: filteredFeatures,
+    barcodes: filteredBarcodes,
+  };
 };
 
 class Homepage extends Component {
@@ -73,7 +84,10 @@ class Homepage extends Component {
       matrix: [],
       filteredMatrix: [],
       features: [],
-      thresholds: [0.3, 0.3, 0.3],
+      filteredFeatures: [],
+      barcodes: [],
+      filteredBarcodes: [],
+      thresholds: { minRowSum: 0.3, minColSum: 0.3, minMTSum: 0.3 },
       loading: true,
     };
 
@@ -86,6 +100,33 @@ class Homepage extends Component {
       .then((response) => {
         const features = JSON.parse(response.data);
         this.setState({ features });
+      })
+      .catch(() => {});
+  }
+
+  async loadBarcodes() {
+    axios
+      .get(`http://localhost:4000/barcodes`)
+      .then((response) => {
+        const barcodes = JSON.parse(response.data);
+        this.setState({ barcodes });
+        this.loadPixels(barcodes);
+      })
+      .catch(() => {
+        return [];
+      });
+  }
+
+  async loadPixels(barcodes) {
+    axios
+      .get(`http://localhost:4000/pixels`)
+      .then((response) => {
+        const pixels = JSON.parse(response.data);
+        this.setState({
+          barcodes: pixels.filter((pixel) => {
+            return barcodes.includes(pixel.barcode);
+          }),
+        });
       })
       .catch(() => {});
   }
@@ -114,10 +155,8 @@ class Homepage extends Component {
 
             this.setState({
               matrix: this.state.matrix.concat(
-                m.to2DArray().filter((gene, index) => {
-                  const expressed = gene.reduce((n, x) => n + (x > 0), 0) > 0;
-                  if (expressed) gene.feature = this.state.features[index];
-                  return expressed;
+                m.to2DArray().filter((gene) => {
+                  return gene.reduce((n, x) => n + (x > 0), 0) > 0;
                 })
               ),
             });
@@ -125,25 +164,32 @@ class Homepage extends Component {
         })
         .catch(() => {
           this.setState({
-            loading: false,
             matrix: [],
+            loading: false,
           });
-          throw Error;
+          throw Error("Batch failed, exiting early");
         });
       count++;
     }
 
+    const filteredData = getFilteredData(
+      this.state.matrix,
+      this.state.features,
+      this.state.barcodes,
+      this.state.thresholds
+    );
+
     this.setState({
-      filteredMatrix: getFilteredMatrix(
-        this.state.matrix,
-        this.state.thresholds
-      ),
+      filteredMatrix: filteredData.matrix,
+      filteredFeatures: filteredData.features,
+      filteredBarcodes: filteredData.barcodes,
       loading: false,
     });
   }
 
-  componentDidMount() {
-    this.loadFeatures();
+  async componentDidMount() {
+    await this.loadFeatures();
+    await this.loadBarcodes(); // this loads pixels too
     this.loadMatrix().catch(() => {});
   }
 
@@ -152,14 +198,23 @@ class Homepage extends Component {
     if (!matrix[0]) return 0;
 
     const thresholds = this.state.thresholds;
-    if (filterType === "rowsum") thresholds[0] = threshold / 100;
-    if (filterType === "colsum") thresholds[1] = threshold / 100;
-    if (filterType === "mt") thresholds[2] = threshold / 100;
+    if (filterType === "rowsum") thresholds.minRowSum = threshold / 100;
+    if (filterType === "colsum") thresholds.minColSum = threshold / 100;
+    if (filterType === "mt") thresholds.minMTSum = threshold / 100;
 
-    const filteredMatrix = getFilteredMatrix(matrix, thresholds);
+    const features = this.state.features;
+    const barcodes = this.state.barcodes;
+    const filteredData = getFilteredData(
+      matrix,
+      features,
+      barcodes,
+      thresholds
+    );
     this.setState({
       thresholds,
-      filteredMatrix,
+      filteredMatrix: filteredData.matrix,
+      filteredFeatures: filteredData.features,
+      filteredBarcodes: filteredData.barcodes,
     });
   }
 
@@ -179,7 +234,11 @@ class Homepage extends Component {
             loading={this.state.loading}
           />
           <br />
-          <TissueVisualizer />
+          <TissueVisualization
+            matrix={this.state.filteredMatrix}
+            features={this.state.filteredFeatures}
+            barcodes={this.state.filteredBarcodes}
+          />
           <div style={{ paddingTop: "100px" }}></div>
         </div>
       </>
