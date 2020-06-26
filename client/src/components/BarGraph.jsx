@@ -21,12 +21,15 @@ const graphSettings = {
 class BarGraph extends Component {
   render() {
     const { props } = this;
-    const min = props.min;
-    const data = props.data.map((datum) => ({
-      ...datum,
-      color: setColor(datum, min),
-      range: datum.range * 100 + "%",
-    }));
+    const { min, leftLimit, rightLimit } = props;
+
+    const data = props.data.slice(leftLimit, rightLimit).map((datum) => {
+      return {
+        color: setColor(datum, min),
+        range: Number(datum.range).toFixed(1),
+        frequency: datum.frequency,
+      };
+    });
 
     return (
       <>
@@ -40,7 +43,7 @@ class BarGraph extends Component {
           markers={[
             {
               axis: "x",
-              value: min * 100 + "%",
+              value: Number(min).toFixed(1),
               lineStyle: {
                 stroke: data.length > 0 ? red : "transparent",
                 strokeWidth: 1,

@@ -8,18 +8,19 @@ const slider = "#90b4ce";
 
 const rowSums = (matrix) => {
   if (!matrix[0]) return [];
-  const sums = new Array(10).fill(0);
+  const sums = new Array(20).fill(0);
   matrix.forEach((gene) => {
-    let cellCount = gene.reduce((n, x) => n + (x > 0), 0);
-    cellCount /= gene.length;
-    cellCount = Math.min(Math.floor(cellCount * 10), 9);
-    sums[cellCount]++;
+    const cellCount = gene.reduce((a, b) => {
+      return a + b;
+    }, 0);
+    const index = Math.floor(Math.log10(cellCount + 1) * 2);
+    sums[index]++;
   });
 
   const obj = [];
   sums.forEach((i, index) => {
     obj.push({
-      range: Number(index / 10).toFixed(1),
+      range: index / 2,
       frequency: i,
     });
   });
@@ -28,69 +29,59 @@ const rowSums = (matrix) => {
 
 const colSums = (matrix) => {
   if (!matrix[0]) return [];
-  const sums = new Array(10).fill(0);
+  const sums = new Array(20).fill(0);
   const numCells = matrix[0].length;
   const numGenes = matrix.length;
 
   for (let i = 0; i < numCells; i++) {
     let geneCount = 0;
-    for (let j = 0; j < numGenes; j++) {
-      if (matrix[j][i] > 0) geneCount++;
-    }
-    geneCount /= numGenes;
-    geneCount = Math.min(Math.floor(geneCount * 10), 9);
-    sums[geneCount]++;
+    for (let j = 0; j < numGenes; j++) geneCount += matrix[j][i];
+    const index = Math.floor(Math.log10(geneCount + 1) * 2);
+    sums[index]++;
   }
 
   const obj = [];
   sums.forEach((i, index) => {
     obj.push({
-      range: Number(index / 10).toFixed(1),
+      range: index / 2,
       frequency: i,
     });
   });
   return obj;
 };
 
-const mtSums = (matrix) => {
-  if (!matrix[0]) return [];
-  const sums = new Array(10).fill(0);
-  const numCells = matrix[0].length;
-  const numGenes = matrix.length;
-
-  for (let i = 0; i < numCells; i++) {
-    let geneCount = 0;
-    let mtGeneCount = 0;
-    for (let j = 0; j < numGenes; j++) {
-      if (matrix[j][i] > 0) {
-        geneCount++;
-        if (matrix[j].feature && matrix[j].feature.substring(0, 3) === "mt-")
-          mtGeneCount++;
-      }
-    }
-    if (geneCount > 0) {
-      let nonMT = (geneCount - mtGeneCount) / geneCount;
-      nonMT = Math.min(Math.floor(nonMT * 10), 9);
-      sums[nonMT]++;
-    }
+const marks = (min, max) => {
+  const m = [];
+  for (let i = min; i < max; i += 0.5) {
+    m.push({ value: i, label: Number(i).toFixed(1) });
   }
-
-  const obj = [];
-  sums.forEach((i, index) => {
-    obj.push({
-      range: Number(index / 10).toFixed(1),
-      frequency: i,
-    });
-  });
-  return obj;
+  return m;
 };
-
-const marks = [];
-for (let i = 0; i < 100; i += 10) {
-  marks.push({ value: i, label: i + "%" });
-}
 
 const Figure = (props, type) => {
+  const sums = props.loading
+    ? []
+    : type === "rowsum"
+    ? rowSums(props.matrix)
+    : colSums(props.matrix);
+
+  let minIndex;
+  let maxIndex;
+  if (sums) {
+    minIndex = -1;
+    maxIndex = sums.length;
+    sums.forEach((datum, index) => {
+      if (datum.frequency > 0 && minIndex === -1) {
+        minIndex = index;
+      }
+      if (datum.frequency > 0) {
+        maxIndex = index;
+      }
+    });
+    minIndex = Math.max(0, minIndex - 1);
+    maxIndex = Math.min(maxIndex + 2, sums.length);
+  }
+
   return (
     <>
       <div
@@ -117,37 +108,21 @@ const Figure = (props, type) => {
             align="center"
             style={{ paddingBottom: "5px", fontWeight: 500, color: headline }}
           >
-            {type === "rowsum"
-              ? "% of cells detected per gene"
-              : type === "colsum"
-              ? "% of genes detected per cell"
-              : "% non-MT gene expression per cell"}
+            {type === "rowsum" ? "log10(rowSum + 1)" : "log10(colSum + 1)"}
           </Typography>
           <div style={{ width: "100%", height: "100%" }}>
             <BarGraph
               xLabel={
-                type === "rowsum"
-                  ? "% of cells detected per gene"
-                  : type === "colsum"
-                  ? "% of genes detected per cell"
-                  : "% non-MT gene expression per cell"
+                type === "rowsum" ? "log10(rowSum + 1)" : "log10(colSum + 1)"
               }
-              data={
-                props.loading
-                  ? []
-                  : type === "rowsum"
-                  ? rowSums(props.matrix)
-                  : type === "colsum"
-                  ? colSums(props.matrix)
-                  : mtSums(props.matrix)
-              }
+              data={sums}
               min={
                 type === "rowsum"
                   ? props.thresholds.minRowSum
-                  : type === "colsum"
-                  ? props.thresholds.minColSum
-                  : props.thresholds.minMTSum
+                  : props.thresholds.minColSum
               }
+              leftLimit={minIndex}
+              rightLimit={maxIndex}
             />
           </div>
           <Slider
@@ -155,11 +130,11 @@ const Figure = (props, type) => {
             onChangeCommitted={(_event, value) =>
               props.handleFilter(type, value)
             }
-            marks={marks}
-            defaultValue={30}
-            step={10}
-            min={0}
-            max={90}
+            marks={marks(minIndex / 2, maxIndex / 2)}
+            defaultValue={2.0}
+            step={0.5}
+            min={minIndex / 2}
+            max={maxIndex / 2 - 0.5}
             valueLabelDisplay="auto"
           />
         </Paper>
@@ -193,7 +168,6 @@ class QualityControl extends Component {
           <div className="GC-flex">
             {Figure(props, "rowsum")}
             {Figure(props, "colsum")}
-            {Figure(props, "mt")}
           </div>
           <div style={{ width: "50%" }}></div>
         </div>
