@@ -65,7 +65,7 @@ const LeafletContainer = (getPixels) => {
   );
 };
 
-class TissueVisualization extends Component {
+class FeatureVis extends Component {
   constructor(props) {
     super(props);
     const topFeatures = [];
@@ -81,12 +81,8 @@ class TissueVisualization extends Component {
       });
     });
 
-    // summedGenes = summedGenes.sort((a, b) => {
-    //   return b.sum - a.sum;
-    // });
-
     for (let i = 0; i < summedGenes.length; i++) {
-      if (i > 50) break;
+      if (i > 10) break;
       topFeatures.push(props.features[summedGenes[i].index]);
       geneIndices.push(summedGenes[i].index);
     }
@@ -116,43 +112,50 @@ class TissueVisualization extends Component {
 
       const sd = d3.deviation(gene);
       const mean = d3.mean(gene);
-      const upperLim = mean + 5 * sd;
-      const lowerLim = mean - 5 * sd;
+      const upperLim = mean + 2 * sd;
+      const lowerLim = mean - 2 * sd;
 
       const max = Math.min(d3.max(gene), upperLim);
       const min = Math.max(lowerLim, d3.min(gene));
 
       gene.forEach((cell, index) => {
         try {
-          const { x, y } = barcodes[index];
-          const value = normalize(cell, min, max) * 2;
-
-          const color = [
+          const colors = [
             [0, 0, 255],
             [255, 255, 255],
             [255, 0, 0],
           ];
+          const { x, y } = barcodes[index];
 
-          let idx1 = Math.floor(value);
-          let idx2 = idx1 + 1;
-          let fractBetween = value - idx1;
+          let value = normalize(cell, min, max);
+          let index1;
+          let index2;
+          let fract = 0;
           if (value <= 0) {
-            idx1 = 0;
-            idx2 = 0;
+            index1 = 0;
+            index2 = 0;
           } else if (value >= 1) {
-            idx1 = 2;
-            idx2 = 2;
+            index1 = colors.length - 1;
+            index2 = colors.length - 1;
+          } else {
+            value = value * (colors.length - 1);
+            index1 = Math.floor(value);
+            index2 = index1 + 1;
+            fract = value - index1;
           }
 
           const r =
-            (color[idx2][0] - color[idx1][0]) * fractBetween + color[idx1][0];
+            (colors[index2][0] - colors[index1][0]) * fract + colors[index1][0];
           const g =
-            (color[idx2][1] - color[idx1][1]) * fractBetween + color[idx1][1];
+            (colors[index2][1] - colors[index1][1]) * fract + colors[index1][1];
           const b =
-            (color[idx2][2] - color[idx1][2]) * fractBetween + color[idx1][2];
+            (colors[index2][2] - colors[index1][2]) * fract + colors[index1][2];
+
+          const centerX = (-x + 11200) / 5.7;
+          const centerY = y / 5.7;
 
           pixels.push({
-            center: [Number.parseFloat(x) / 5.7, Number.parseFloat(y) / 5.7],
+            center: [centerX, centerY],
             color: "rgb(" + r + "," + g + "," + b + ")",
           });
         } catch (error) {}
@@ -171,7 +174,7 @@ class TissueVisualization extends Component {
           style={{ marginBottom: "10px", fontWeight: 500, color: headline }}
           variant="h5"
         >
-          Tissue Visualization
+          Feature Visualization
         </Typography>
         <Typography
           style={{ marginBottom: "0px", fontWeight: 400, color: paragraph }}
@@ -188,4 +191,4 @@ class TissueVisualization extends Component {
   }
 }
 
-export default TissueVisualization;
+export default FeatureVis;
