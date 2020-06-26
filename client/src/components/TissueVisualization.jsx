@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Typography, Select, MenuItem } from "@material-ui/core";
 import { Map, ImageOverlay, Circle } from "react-leaflet";
 import L from "leaflet";
+import * as d3 from "d3";
 
 const headline = "#094067";
 const paragraph = "#5f6c7b";
@@ -10,45 +11,27 @@ const bounds = [
   [1921, 2000],
 ];
 
-const normalize = (value, mean, sd) => {
+const log = (value) => {
+  return Math.log10(value + 1);
+};
+
+const normalize = (value, min, max) => {
+  return (value - min) / (max - min);
+};
+
+const zscore = (value, mean, sd) => {
   return (value - mean) / sd;
-};
-
-const standardDeviation = (values) => {
-  var avg = average(values);
-
-  var squareDiffs = values.map(function (value) {
-    var diff = value - avg;
-    var sqrDiff = diff * diff;
-    return sqrDiff;
-  });
-
-  var avgSquareDiff = average(squareDiffs);
-
-  var stdDev = Math.sqrt(avgSquareDiff);
-  return stdDev;
-};
-
-const average = (data) => {
-  var sum = data.reduce(function (sum, value) {
-    return sum + value;
-  }, 0);
-
-  var avg = sum / data.length;
-  return avg;
 };
 
 const Selector = (list, indices, value, handleChange) => {
   return (
     <>
       <Select
-        defaultValue={list.length > 0 ? value : ""}
-        value={list.length > 0 ? value : ""}
         style={{ width: "150px", marginTop: "10px" }}
+        value={list.length > 0 ? value : ""}
         onChange={handleChange}
-        displayEmpty
       >
-        <MenuItem key={""} value={""}>
+        <MenuItem key="" value="">
           <em>Select a Gene</em>
         </MenuItem>
         {list.map((element, index) => {
@@ -106,12 +89,12 @@ class TissueVisualization extends Component {
       });
     });
 
-    summedGenes = summedGenes.sort((a, b) => {
-      return b.sum - a.sum;
-    });
+    // summedGenes = summedGenes.sort((a, b) => {
+    //   return b.sum - a.sum;
+    // });
 
     for (let i = 0; i < summedGenes.length; i++) {
-      // if (i > 10) break;
+      if (i > 50) break;
       topFeatures.push(props.features[summedGenes[i].index]);
       geneIndices.push(summedGenes[i].index);
     }
@@ -136,32 +119,34 @@ class TissueVisualization extends Component {
     const barcodes = props.barcodes;
     const pixels = [];
 
-    const color = [
-      [0, 0, 255], // blue
-      [255, 255, 255], // white
-      [255, 0, 0], // red
-    ];
-
     if (gene && barcodes[0]) {
       if (!barcodes[0].x || !barcodes[0].y) return [];
-      let mean = average(gene);
-      let sd = standardDeviation(gene);
 
-      let min = normalize(gene[0], mean, sd);
-      let max = 0;
-      gene.forEach((cell) => {
-        const val = normalize(cell, mean, sd);
-        if (val < min) min = val;
-        if (val > max) max = val;
-      });
+      const mean = d3.mean(gene);
+      const sd = d3.deviation(gene);
+      const max = d3.max(gene);
+      const min = d3.min(gene);
 
       gene.forEach((cell, index) => {
         try {
-          const x = barcodes[index].x;
-          const y = barcodes[index].y;
-          let value = normalize(cell, mean, sd);
-          value = (value - min) / (max - min);
+          const { x, y } = barcodes[index];
 
+          // let value = zscore(cell, mean, sd); // meh
+          let value = normalize(cell, min, max); // good
+          // let value = normalize(log(cell), log(min), log(max)); // ass
+
+          // const start = { r: 0, g: 0, b: 255 };
+          // const end = { r: 255, g: 0, b: 0 };
+
+          // const r = (end.r - start.r) * value + start.r;
+          // const g = (end.g - start.g) * value + start.g;
+          // const b = (end.b - start.b) * value + start.b;
+
+          const color = [
+            [0, 0, 255],
+            [255, 255, 255],
+            [255, 0, 0],
+          ];
           value *= 2;
           let idx1 = Math.floor(value);
           let idx2 = idx1 + 1;
@@ -189,7 +174,6 @@ class TissueVisualization extends Component {
         } catch (error) {}
       });
     }
-    console.log(pixels);
     return pixels;
   }
 
