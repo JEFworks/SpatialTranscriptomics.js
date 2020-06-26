@@ -10,7 +10,35 @@ const bounds = [
   [1921, 2000],
 ];
 
-const Selector = (list, value, handleChange) => {
+const normalize = (value, mean, sd) => {
+  return (value - mean) / sd;
+};
+
+const standardDeviation = (values) => {
+  var avg = average(values);
+
+  var squareDiffs = values.map(function (value) {
+    var diff = value - avg;
+    var sqrDiff = diff * diff;
+    return sqrDiff;
+  });
+
+  var avgSquareDiff = average(squareDiffs);
+
+  var stdDev = Math.sqrt(avgSquareDiff);
+  return stdDev;
+};
+
+const average = (data) => {
+  var sum = data.reduce(function (sum, value) {
+    return sum + value;
+  }, 0);
+
+  var avg = sum / data.length;
+  return avg;
+};
+
+const Selector = (list, indices, value, handleChange) => {
   return (
     <>
       <Select
@@ -25,7 +53,7 @@ const Selector = (list, value, handleChange) => {
         </MenuItem>
         {list.map((element, index) => {
           return (
-            <MenuItem key={index} value={index}>
+            <MenuItem key={element} value={indices[index]}>
               {element}
             </MenuItem>
           );
@@ -66,6 +94,36 @@ class TissueVisualization extends Component {
   constructor(props) {
     super(props);
     this.state = { geneIndex: 0 };
+
+    const topFeatures = [];
+    const geneIndices = [];
+    let summedGenes = [];
+
+    props.matrix.forEach((gene, index) => {
+      summedGenes.push({
+        sum: gene.reduce((a, b) => {
+          return a + b;
+        }, 0),
+        index: index,
+      });
+    });
+
+    summedGenes = summedGenes.sort((a, b) => {
+      return b.sum - a.sum;
+    });
+
+    for (let i = 0; i < summedGenes.length; i++) {
+      // if (i > 10) break;
+      topFeatures.push(props.features[summedGenes[i].index]);
+      geneIndices.push(summedGenes[i].index);
+    }
+
+    this.state = {
+      geneIndex: geneIndices[0],
+      topFeatures,
+      geneIndices,
+    };
+
     this.selectGene = this.selectGene.bind(this);
     this.getPixels = this.getPixels.bind(this);
   }
@@ -82,29 +140,23 @@ class TissueVisualization extends Component {
 
     if (gene && barcodes[0]) {
       if (!barcodes[0].x || !barcodes[0].y) return [];
-      let max = 0;
-      let min = Math.log10(gene[0] + 1);
-      for (let i = 0; i < gene.length; i++) {
-        const val = Math.log(gene[i] + 1);
-        if (val > max) max = val;
-        if (val < min) min = val;
-      }
+      let mean = average(gene);
+      let sd = standardDeviation(gene);
 
       gene.forEach((cell, index) => {
         try {
           const x = barcodes[index].x;
           const y = barcodes[index].y;
-          const value = Math.log(cell + 1);
+          let value = normalize(cell, mean, sd);
+
+          let r = 255 * value + 0;
+          let g = 0;
+          let b = -255 * value + 255;
+
+          // red is 255,0,0, white is 255, 255, 255,  blue is 0, 0, 255,
           pixels.push({
             center: [Number.parseFloat(x) / 5.7, Number.parseFloat(y) / 5.7],
-            color:
-              "rgb(" +
-              (255 * ((value - min) / (max - min)) + 0) +
-              "," +
-              0 +
-              "," +
-              (-255 * ((value - min) / (max - min)) + 255) +
-              ")",
+            color: "rgb(" + r + "," + g + "," + b + ")",
           });
         } catch (error) {}
       });
@@ -113,7 +165,9 @@ class TissueVisualization extends Component {
   }
 
   render() {
-    const { props, selectGene, getPixels } = this;
+    const { selectGene, getPixels } = this;
+    const { topFeatures, geneIndices, geneIndex } = this.state;
+
     return (
       <>
         <Typography
@@ -129,11 +183,7 @@ class TissueVisualization extends Component {
           Enter description here.
         </Typography>
 
-        {Selector(
-          props.features.slice(0, 10),
-          this.state.geneIndex,
-          selectGene
-        )}
+        {Selector(topFeatures, geneIndices, geneIndex, selectGene)}
         <div style={{ marginBottom: "20px" }}></div>
         {LeafletContainer(getPixels)}
       </>

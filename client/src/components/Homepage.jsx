@@ -219,11 +219,6 @@ class Homepage extends Component {
   }
 
   render() {
-    if (this.state.filteredMatrix.length > 0) {
-      console.log(
-        `Filtered matrix has ${this.state.filteredMatrix.length} genes and ${this.state.filteredMatrix[0].length} cells`
-      );
-    }
     return (
       <>
         <div className="site-container">
@@ -235,6 +230,7 @@ class Homepage extends Component {
           />
           <br />
           <TissueVisualization
+            key={Math.random(10000)}
             matrix={this.state.filteredMatrix}
             features={this.state.filteredFeatures}
             barcodes={this.state.filteredBarcodes}
