@@ -11,16 +11,8 @@ const bounds = [
   [1921, 2000],
 ];
 
-const log = (value) => {
-  return Math.log10(value + 1);
-};
-
 const normalize = (value, min, max) => {
   return (value - min) / (max - min);
-};
-
-const zscore = (value, mean, sd) => {
-  return (value - mean) / sd;
 };
 
 const Selector = (list, indices, value, handleChange) => {
@@ -122,36 +114,28 @@ class TissueVisualization extends Component {
     if (gene && barcodes[0]) {
       if (!barcodes[0].x || !barcodes[0].y) return [];
 
-      const mean = d3.mean(gene);
       const sd = d3.deviation(gene);
-      const max = d3.max(gene);
-      const min = d3.min(gene);
+      const mean = d3.mean(gene);
+      const upperLim = mean + 5 * sd;
+      const lowerLim = mean - 5 * sd;
+
+      const max = Math.min(d3.max(gene), upperLim);
+      const min = Math.max(lowerLim, d3.min(gene));
 
       gene.forEach((cell, index) => {
         try {
           const { x, y } = barcodes[index];
-
-          // let value = zscore(cell, mean, sd); // meh
-          let value = normalize(cell, min, max); // good
-          // let value = normalize(log(cell), log(min), log(max)); // ass
-
-          // const start = { r: 0, g: 0, b: 255 };
-          // const end = { r: 255, g: 0, b: 0 };
-
-          // const r = (end.r - start.r) * value + start.r;
-          // const g = (end.g - start.g) * value + start.g;
-          // const b = (end.b - start.b) * value + start.b;
+          const value = normalize(cell, min, max) * 2;
 
           const color = [
             [0, 0, 255],
             [255, 255, 255],
             [255, 0, 0],
           ];
-          value *= 2;
+
           let idx1 = Math.floor(value);
           let idx2 = idx1 + 1;
           let fractBetween = value - idx1;
-
           if (value <= 0) {
             idx1 = 0;
             idx2 = 0;
@@ -160,11 +144,11 @@ class TissueVisualization extends Component {
             idx2 = 2;
           }
 
-          let r =
+          const r =
             (color[idx2][0] - color[idx1][0]) * fractBetween + color[idx1][0];
-          let g =
+          const g =
             (color[idx2][1] - color[idx1][1]) * fractBetween + color[idx1][1];
-          let b =
+          const b =
             (color[idx2][2] - color[idx1][2]) * fractBetween + color[idx1][2];
 
           pixels.push({
