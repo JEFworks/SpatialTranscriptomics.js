@@ -93,8 +93,6 @@ const LeafletContainer = (getPixels) => {
 class TissueVisualization extends Component {
   constructor(props) {
     super(props);
-    this.state = { geneIndex: 0 };
-
     const topFeatures = [];
     const geneIndices = [];
     let summedGenes = [];
@@ -138,22 +136,52 @@ class TissueVisualization extends Component {
     const barcodes = props.barcodes;
     const pixels = [];
 
+    const color = [
+      [0, 0, 255], // blue
+      [255, 255, 255], // white
+      [255, 0, 0], // red
+    ];
+
     if (gene && barcodes[0]) {
       if (!barcodes[0].x || !barcodes[0].y) return [];
       let mean = average(gene);
       let sd = standardDeviation(gene);
+
+      let min = normalize(gene[0], mean, sd);
+      let max = 0;
+      gene.forEach((cell) => {
+        const val = normalize(cell, mean, sd);
+        if (val < min) min = val;
+        if (val > max) max = val;
+      });
 
       gene.forEach((cell, index) => {
         try {
           const x = barcodes[index].x;
           const y = barcodes[index].y;
           let value = normalize(cell, mean, sd);
+          value = (value - min) / (max - min);
 
-          let r = 255 * value + 0;
-          let g = 0;
-          let b = -255 * value + 255;
+          value *= 2;
+          let idx1 = Math.floor(value);
+          let idx2 = idx1 + 1;
+          let fractBetween = value - idx1;
 
-          // red is 255,0,0, white is 255, 255, 255,  blue is 0, 0, 255,
+          if (value <= 0) {
+            idx1 = 0;
+            idx2 = 0;
+          } else if (value >= 1) {
+            idx1 = 2;
+            idx2 = 2;
+          }
+
+          let r =
+            (color[idx2][0] - color[idx1][0]) * fractBetween + color[idx1][0];
+          let g =
+            (color[idx2][1] - color[idx1][1]) * fractBetween + color[idx1][1];
+          let b =
+            (color[idx2][2] - color[idx1][2]) * fractBetween + color[idx1][2];
+
           pixels.push({
             center: [Number.parseFloat(x) / 5.7, Number.parseFloat(y) / 5.7],
             color: "rgb(" + r + "," + g + "," + b + ")",
@@ -161,6 +189,7 @@ class TissueVisualization extends Component {
         } catch (error) {}
       });
     }
+    console.log(pixels);
     return pixels;
   }
 
