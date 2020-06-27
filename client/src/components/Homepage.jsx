@@ -103,6 +103,12 @@ class Homepage extends Component {
     this.handleFilter = this.handleFilter.bind(this);
   }
 
+  async componentDidMount() {
+    await this.loadFeatures();
+    await this.loadBarcodes();
+    this.loadMatrix().catch(() => {});
+  }
+
   async loadFeatures() {
     axios
       .get(`http://localhost:4000/features`)
@@ -216,17 +222,10 @@ class Homepage extends Component {
     });
   }
 
-  async componentDidMount() {
-    await this.loadFeatures();
-    await this.loadBarcodes(); // this loads pixels too
-    this.loadMatrix().catch(() => {});
-  }
-
   handleFilter(filterType, threshold) {
     const { matrix, thresholds, adjustedFeatures, barcodes } = this.state;
     if (!matrix[0]) return 0;
 
-    console.log(threshold);
     if (filterType === "rowsum") thresholds.minRowSum = threshold;
     if (filterType === "colsum") thresholds.minColSum = threshold;
 
@@ -242,21 +241,16 @@ class Homepage extends Component {
     );
 
     this.setState({
-      thresholds,
       filteredMatrix: filteredData.matrix,
       filteredFeatures: filteredData.features,
       filteredBarcodes: filteredData.barcodes,
+      thresholds,
       colSums: colsums,
       rowSums: rowsums,
     });
   }
 
   render() {
-    if (this.state.filteredMatrix.length > 0) {
-      console.log(
-        `${this.state.filteredMatrix.length} genes && ${this.state.filteredMatrix[0].length} cells`
-      );
-    }
     return (
       <>
         <div className="site-container">

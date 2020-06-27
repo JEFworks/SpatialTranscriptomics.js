@@ -6,10 +6,6 @@ import * as d3 from "d3";
 
 const headline = "#094067";
 const paragraph = "#5f6c7b";
-const bounds = [
-  [0, 0],
-  [1921, 2000],
-];
 
 const normalize = (value, min, max) => {
   return (value - min) / (max - min);
@@ -29,6 +25,11 @@ const Selector = (handleChange) => {
 };
 
 const LeafletWrapper = (getPixels) => {
+  const bounds = [
+    [0, 0],
+    [1921, 2000],
+  ];
+
   return (
     <>
       <Map

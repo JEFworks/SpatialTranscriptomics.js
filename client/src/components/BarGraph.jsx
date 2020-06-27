@@ -4,12 +4,12 @@ import { ResponsiveBar } from "@nivo/bar";
 const red = "#ff80ab";
 const blue = "#80d8ff";
 
+const getColor = (bar) => bar.data.color;
+
 const setColor = (val, min) => {
   if (val < min) return red;
   else return blue;
 };
-
-const getColor = (bar) => bar.data.color;
 
 class BarGraph extends Component {
   render() {
