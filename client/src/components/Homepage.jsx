@@ -5,7 +5,7 @@ import QualityControl from "./QualityControl.jsx";
 import FeatureVis from "./FeatureVis.jsx";
 
 const rowSums = (matrix, threshold) => {
-  if (!matrix[0]) return [];
+  if (!matrix[0]) return {};
   const sums = new Array(20).fill(0);
   const badGenes = [];
 
@@ -16,7 +16,7 @@ const rowSums = (matrix, threshold) => {
 
     const log = Math.log10(cellCount + 1);
     sums[Math.floor(log * 2)]++;
-    if (Math.floor(log) < threshold) badGenes.push(index);
+    if (log < threshold) badGenes.push(index);
   });
 
   const obj = [];
@@ -30,7 +30,7 @@ const rowSums = (matrix, threshold) => {
 };
 
 const colSums = (matrix, threshold) => {
-  if (!matrix[0]) return [];
+  if (!matrix[0]) return {};
   const sums = new Array(20).fill(0);
   const numCells = matrix[0].length;
   const numGenes = matrix.length;
@@ -42,7 +42,7 @@ const colSums = (matrix, threshold) => {
 
     const log = Math.log10(geneCount + 1);
     sums[Math.floor(log * 2)]++;
-    if (Math.floor(log) < threshold) badCells.push(i);
+    if (log < threshold) badCells.push(i);
   }
 
   const obj = [];
@@ -226,6 +226,7 @@ class Homepage extends Component {
     const { matrix, thresholds, adjustedFeatures, barcodes } = this.state;
     if (!matrix[0]) return 0;
 
+    console.log(threshold);
     if (filterType === "rowsum") thresholds.minRowSum = threshold;
     if (filterType === "colsum") thresholds.minColSum = threshold;
 
@@ -251,6 +252,11 @@ class Homepage extends Component {
   }
 
   render() {
+    if (this.state.filteredMatrix.length > 0) {
+      console.log(
+        `${this.state.filteredMatrix.length} genes && ${this.state.filteredMatrix[0].length} cells`
+      );
+    }
     return (
       <>
         <div className="site-container">
