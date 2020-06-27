@@ -148,7 +148,7 @@ class Homepage extends Component {
                 if (expressed) {
                   adjustedFeatures[
                     this.state.matrix.length + idx++
-                  ] = this.state.features[index];
+                  ] = this.state.features[index].toLowerCase();
                 }
                 return expressed;
               })

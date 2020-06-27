@@ -20,7 +20,6 @@ const Selector = (handleChange) => {
     <>
       <TextField
         style={{ width: "150px", marginTop: "7px" }}
-        id="standard-basic"
         helperText="Feature name"
         defaultValue="Nptxr"
         onChange={handleChange}
@@ -59,13 +58,13 @@ const LeafletWrapper = (getPixels) => {
 class FeatureVis extends Component {
   constructor(props) {
     super(props);
-    this.state = { feature: "Nptxr" };
+    this.state = { feature: "nptxr" };
     this.selectGene = this.selectGene.bind(this);
     this.getPixels = this.getPixels.bind(this);
   }
 
   selectGene(event) {
-    this.setState({ feature: event.target.value.trim() });
+    this.setState({ feature: event.target.value.trim().toLowerCase() });
   }
 
   getPixels() {
