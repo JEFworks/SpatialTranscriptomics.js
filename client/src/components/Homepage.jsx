@@ -4,42 +4,69 @@ import { SparseMatrix } from "ml-sparse-matrix";
 import QualityControl from "./QualityControl.jsx";
 import FeatureVis from "./FeatureVis.jsx";
 
-const poorGene = (gene, threshold) => {
-  const cellCount = gene.reduce((a, b) => {
-    return a + b;
-  }, 0);
-  return Math.floor(Math.log10(cellCount + 1)) < threshold;
+const rowSums = (matrix, threshold) => {
+  if (!matrix[0]) return [];
+  const sums = new Array(20).fill(0);
+  const badGenes = [];
+
+  matrix.forEach((gene, index) => {
+    const cellCount = gene.reduce((a, b) => {
+      return a + b;
+    }, 0);
+
+    const log = Math.log10(cellCount + 1);
+    sums[Math.floor(log * 2)]++;
+    if (Math.floor(log) < threshold) badGenes.push(index);
+  });
+
+  const obj = [];
+  sums.forEach((freq, index) => {
+    obj.push({
+      range: index / 2,
+      frequency: freq,
+    });
+  });
+  return { sums: obj, badGenes: badGenes };
 };
 
-const poorCells = (matrix, threshold) => {
-  const list = [];
+const colSums = (matrix, threshold) => {
+  if (!matrix[0]) return [];
+  const sums = new Array(20).fill(0);
   const numCells = matrix[0].length;
   const numGenes = matrix.length;
+  const badCells = [];
 
   for (let i = 0; i < numCells; i++) {
     let geneCount = 0;
-    for (let j = 0; j < numGenes; j++) {
-      geneCount += matrix[j][i];
-    }
-    if (Math.floor(Math.log10(geneCount + 1)) < threshold) list.push(i);
+    for (let j = 0; j < numGenes; j++) geneCount += matrix[j][i];
+
+    const log = Math.log10(geneCount + 1);
+    sums[Math.floor(log * 2)]++;
+    if (Math.floor(log) < threshold) badCells.push(i);
   }
 
-  return list;
+  const obj = [];
+  sums.forEach((freq, index) => {
+    obj.push({
+      range: index / 2,
+      frequency: freq,
+    });
+  });
+  return { sums: obj, badCells: badCells };
 };
 
-const getFilteredData = (matrix, features, barcodes, thresholds) => {
+const getFilteredData = (matrix, features, barcodes, badCells, badGenes) => {
   const filteredFeatures = [];
   const filteredBarcodes = [];
 
   // rowsum filtering
-  const filteredMatrix = matrix.filter((gene, index) => {
-    const badGene = poorGene(gene, thresholds.minRowSum);
+  const filteredMatrix = matrix.filter((_gene, index) => {
+    const badGene = badGenes.includes(index);
     if (features.length > 0 && !badGene) filteredFeatures.push(features[index]);
     return !badGene;
   });
 
   // colsum filtering
-  const badCells = poorCells(matrix, thresholds.minColSum);
   filteredMatrix.forEach((gene, index) => {
     filteredMatrix[index] = gene.filter((_cell, i) => {
       const badCell = badCells.includes(i);
@@ -68,6 +95,8 @@ class Homepage extends Component {
       barcodes: [],
       filteredBarcodes: [],
       thresholds: { minRowSum: 2, minColSum: 2 },
+      colSums: [],
+      rowSums: [],
       loading: true,
     };
 
@@ -133,8 +162,7 @@ class Homepage extends Component {
             elements.table = res.elements.table;
             elements.values = res.elements.values;
 
-            const adjustedFeatures = this.state.adjustedFeatures;
-            let idx = 0;
+            const { adjustedFeatures } = this.state;
             const matrix = this.state.matrix.concat(
               m.to2DArray().filter((gene, index) => {
                 let expressed = false;
@@ -146,9 +174,9 @@ class Homepage extends Component {
                 }
 
                 if (expressed) {
-                  adjustedFeatures[
-                    this.state.matrix.length + idx++
-                  ] = this.state.features[index].toLowerCase();
+                  adjustedFeatures.push(
+                    this.state.features[index].toLowerCase()
+                  );
                 }
                 return expressed;
               })
@@ -166,17 +194,24 @@ class Homepage extends Component {
       count++;
     }
 
+    const { matrix, thresholds, adjustedFeatures, barcodes } = this.state;
+    const colsums = colSums(matrix, thresholds.minColSum);
+    const rowsums = rowSums(matrix, thresholds.minRowSum);
+
     const filteredData = getFilteredData(
-      this.state.matrix,
-      this.state.adjustedFeatures,
-      this.state.barcodes,
-      this.state.thresholds
+      matrix,
+      adjustedFeatures,
+      barcodes,
+      colsums.badCells,
+      rowsums.badGenes
     );
 
     this.setState({
       filteredMatrix: filteredData.matrix,
       filteredFeatures: filteredData.features,
       filteredBarcodes: filteredData.barcodes,
+      colSums: colsums,
+      rowSums: rowsums,
       loading: false,
     });
   }
@@ -188,20 +223,21 @@ class Homepage extends Component {
   }
 
   handleFilter(filterType, threshold) {
-    const matrix = this.state.matrix;
+    const { matrix, thresholds, adjustedFeatures, barcodes } = this.state;
     if (!matrix[0]) return 0;
 
-    const thresholds = this.state.thresholds;
     if (filterType === "rowsum") thresholds.minRowSum = threshold;
     if (filterType === "colsum") thresholds.minColSum = threshold;
 
-    const features = this.state.adjustedFeatures;
-    const barcodes = this.state.barcodes;
+    const colsums = colSums(matrix, thresholds.minColSum);
+    const rowsums = rowSums(matrix, thresholds.minRowSum);
+
     const filteredData = getFilteredData(
       matrix,
-      features,
+      adjustedFeatures,
       barcodes,
-      thresholds
+      colsums.badCells,
+      rowsums.badGenes
     );
 
     this.setState({
@@ -209,6 +245,8 @@ class Homepage extends Component {
       filteredMatrix: filteredData.matrix,
       filteredFeatures: filteredData.features,
       filteredBarcodes: filteredData.barcodes,
+      colSums: colsums,
+      rowSums: rowsums,
     });
   }
 
@@ -219,6 +257,8 @@ class Homepage extends Component {
           <QualityControl
             matrix={this.state.matrix}
             thresholds={this.state.thresholds}
+            colSums={this.state.colSums.sums}
+            rowSums={this.state.rowSums.sums}
             handleFilter={this.handleFilter}
             loading={this.state.loading}
           />
@@ -228,7 +268,7 @@ class Homepage extends Component {
             features={this.state.filteredFeatures}
             barcodes={this.state.filteredBarcodes}
           />
-          <div style={{ paddingTop: "100px" }}></div>
+          <div style={{ paddingTop: "70px" }}></div>
         </div>
       </>
     );

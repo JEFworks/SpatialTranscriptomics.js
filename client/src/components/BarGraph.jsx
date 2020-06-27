@@ -4,8 +4,8 @@ import { ResponsiveBar } from "@nivo/bar";
 const red = "#ff80ab";
 const blue = "#80d8ff";
 
-const setColor = (datum, min) => {
-  if (datum.range < min) return red;
+const setColor = (val, min) => {
+  if (val < min) return red;
   else return blue;
 };
 
@@ -14,15 +14,17 @@ const getColor = (bar) => bar.data.color;
 class BarGraph extends Component {
   render() {
     const { props } = this;
-    const { min, leftLimit, rightLimit } = props;
+    const { min, lowerLimit, upperLimit } = props;
 
-    const data = props.data.slice(leftLimit, rightLimit).map((datum) => {
-      return {
-        color: setColor(datum, min),
-        range: Number(datum.range).toFixed(1),
-        frequency: datum.frequency,
-      };
-    });
+    const data = !props.data
+      ? []
+      : props.data.slice(lowerLimit, upperLimit).map((datum) => {
+          return {
+            range: Number(datum.range).toFixed(1),
+            frequency: datum.frequency,
+            color: setColor(datum.range, min),
+          };
+        });
 
     return (
       <>

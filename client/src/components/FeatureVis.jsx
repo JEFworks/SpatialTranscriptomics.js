@@ -70,19 +70,19 @@ class FeatureVis extends Component {
   getPixels() {
     const { props } = this;
     const gene = props.matrix[props.features.indexOf(this.state.feature)];
-    const barcodes = props.barcodes;
+    const { barcodes } = props;
     const pixels = [];
 
     if (gene && barcodes[0]) {
       if (!barcodes[0].x || !barcodes[0].y) return [];
 
-      const sd = d3.deviation(gene);
       const mean = d3.mean(gene);
-      const upperLim = mean + 2 * sd;
-      const lowerLim = mean - 2 * sd;
+      const sd = d3.deviation(gene);
+      const upperLimit = mean + 2 * sd;
+      const lowerLimit = mean - 2 * sd;
 
-      const max = Math.min(d3.max(gene), upperLim);
-      const min = Math.max(lowerLim, d3.min(gene));
+      const max = Math.min(d3.max(gene), upperLimit);
+      const min = Math.max(lowerLimit, d3.min(gene));
 
       gene.forEach((cell, index) => {
         try {

@@ -6,77 +6,29 @@ const headline = "#094067";
 const paragraph = "#5f6c7b";
 const slider = "#90b4ce";
 
-const rowSums = (matrix) => {
-  if (!matrix[0]) return [];
-  const sums = new Array(20).fill(0);
-  matrix.forEach((gene) => {
-    const cellCount = gene.reduce((a, b) => {
-      return a + b;
-    }, 0);
-    const index = Math.floor(Math.log10(cellCount + 1) * 2);
-    sums[index]++;
-  });
-
-  const obj = [];
-  sums.forEach((i, index) => {
-    obj.push({
-      range: index / 2,
-      frequency: i,
-    });
-  });
-  return obj;
-};
-
-const colSums = (matrix) => {
-  if (!matrix[0]) return [];
-  const sums = new Array(20).fill(0);
-  const numCells = matrix[0].length;
-  const numGenes = matrix.length;
-
-  for (let i = 0; i < numCells; i++) {
-    let geneCount = 0;
-    for (let j = 0; j < numGenes; j++) geneCount += matrix[j][i];
-    const index = Math.floor(Math.log10(geneCount + 1) * 2);
-    sums[index]++;
-  }
-
-  const obj = [];
-  sums.forEach((i, index) => {
-    obj.push({
-      range: index / 2,
-      frequency: i,
-    });
-  });
-  return obj;
-};
-
 const marks = (min, max) => {
-  const m = [];
+  const list = [];
   for (let i = min; i < max; i += 0.5) {
-    m.push({ value: i, label: Number(i).toFixed(1) });
+    list.push({ value: i, label: Number(i).toFixed(1) });
   }
-  return m;
+  return list;
 };
 
 const Figure = (props, type) => {
   const sums = props.loading
     ? []
     : type === "rowsum"
-    ? rowSums(props.matrix)
-    : colSums(props.matrix);
+    ? props.rowSums
+    : props.colSums;
 
-  let minIndex;
-  let maxIndex;
+  let minIndex = 0;
+  let maxIndex = 10;
   if (sums) {
     minIndex = -1;
     maxIndex = sums.length;
     sums.forEach((datum, index) => {
-      if (datum.frequency > 0 && minIndex === -1) {
-        minIndex = index;
-      }
-      if (datum.frequency > 0) {
-        maxIndex = index;
-      }
+      if (datum.frequency > 0 && minIndex === -1) minIndex = index;
+      if (datum.frequency > 0) maxIndex = index;
     });
     minIndex = Math.max(0, minIndex - 1);
     maxIndex = Math.min(maxIndex + 2, sums.length);
@@ -121,8 +73,8 @@ const Figure = (props, type) => {
                   ? props.thresholds.minRowSum
                   : props.thresholds.minColSum
               }
-              leftLimit={minIndex}
-              rightLimit={maxIndex}
+              lowerLimit={minIndex}
+              upperLimit={maxIndex}
             />
           </div>
           <Slider
