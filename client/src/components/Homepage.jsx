@@ -63,6 +63,7 @@ class Homepage extends Component {
       matrix: [],
       filteredMatrix: [],
       features: [],
+      adjustedFeatures: [],
       filteredFeatures: [],
       barcodes: [],
       filteredBarcodes: [],
@@ -101,16 +102,11 @@ class Homepage extends Component {
       .get(`http://localhost:4000/pixels`)
       .then((response) => {
         const pixels = JSON.parse(response.data);
-        const b = barcodes.slice();
-
         pixels.forEach((pixel) => {
-          const index = b.indexOf(pixel.barcode);
-          if (index >= 0) b[index] = pixel;
+          const index = barcodes.indexOf(pixel.barcode);
+          if (index !== -1) barcodes[index] = pixel;
         });
-
-        this.setState({
-          barcodes: b,
-        });
+        this.setState({ barcodes });
       })
       .catch(() => {});
   }
@@ -137,13 +133,27 @@ class Homepage extends Component {
             elements.table = res.elements.table;
             elements.values = res.elements.values;
 
-            this.setState({
-              matrix: this.state.matrix.concat(
-                m.to2DArray().filter((gene) => {
-                  return gene.reduce((n, x) => n + (x > 0), 0) > 0;
-                })
-              ),
-            });
+            const adjustedFeatures = this.state.adjustedFeatures;
+            let idx = 0;
+            const matrix = this.state.matrix.concat(
+              m.to2DArray().filter((gene, index) => {
+                let expressed = false;
+                for (let cell of gene) {
+                  if (cell > 0) {
+                    expressed = true;
+                    break;
+                  }
+                }
+
+                if (expressed) {
+                  adjustedFeatures[
+                    this.state.matrix.length + idx++
+                  ] = this.state.features[index];
+                }
+                return expressed;
+              })
+            );
+            this.setState({ matrix, adjustedFeatures });
           }
         })
         .catch(() => {
@@ -151,14 +161,14 @@ class Homepage extends Component {
             matrix: [],
             loading: false,
           });
-          throw Error("Batch failed, exiting early");
+          throw Error("A batch failed, exiting early.");
         });
       count++;
     }
 
     const filteredData = getFilteredData(
       this.state.matrix,
-      this.state.features,
+      this.state.adjustedFeatures,
       this.state.barcodes,
       this.state.thresholds
     );
@@ -185,7 +195,7 @@ class Homepage extends Component {
     if (filterType === "rowsum") thresholds.minRowSum = threshold;
     if (filterType === "colsum") thresholds.minColSum = threshold;
 
-    const features = this.state.features;
+    const features = this.state.adjustedFeatures;
     const barcodes = this.state.barcodes;
     const filteredData = getFilteredData(
       matrix,
@@ -193,6 +203,7 @@ class Homepage extends Component {
       barcodes,
       thresholds
     );
+
     this.setState({
       thresholds,
       filteredMatrix: filteredData.matrix,
