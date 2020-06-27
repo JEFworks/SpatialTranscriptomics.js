@@ -163,6 +163,7 @@ class QualityControl extends Component {
           removed from the expression matrix for downstream analysis. Genes not
           expressed in any cells were removed before computing quality control.
         </Typography>
+
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>
           <div className="GC-flex">

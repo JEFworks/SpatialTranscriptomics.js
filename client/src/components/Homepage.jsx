@@ -213,7 +213,6 @@ class Homepage extends Component {
           />
           <br />
           <FeatureVis
-            key={Math.random(10000)}
             matrix={this.state.filteredMatrix}
             features={this.state.filteredFeatures}
             barcodes={this.state.filteredBarcodes}

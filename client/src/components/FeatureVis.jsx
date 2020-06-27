@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Typography, Select, MenuItem } from "@material-ui/core";
+import { Typography, TextField } from "@material-ui/core";
 import { Map, ImageOverlay, Circle } from "react-leaflet";
 import L from "leaflet";
 import * as d3 from "d3";
@@ -15,30 +15,21 @@ const normalize = (value, min, max) => {
   return (value - min) / (max - min);
 };
 
-const Selector = (list, indices, value, handleChange) => {
+const Selector = (handleChange) => {
   return (
     <>
-      <Select
-        style={{ width: "150px", marginTop: "10px" }}
-        value={list.length > 0 ? value : ""}
+      <TextField
+        style={{ width: "150px", marginTop: "7px" }}
+        id="standard-basic"
+        helperText="Feature name"
+        defaultValue="Nptxr"
         onChange={handleChange}
-      >
-        <MenuItem key="" value="">
-          <em>Select a Gene</em>
-        </MenuItem>
-        {list.map((element, index) => {
-          return (
-            <MenuItem key={element} value={indices[index]}>
-              {element}
-            </MenuItem>
-          );
-        })}
-      </Select>
+      />
     </>
   );
 };
 
-const LeafletContainer = (getPixels) => {
+const LeafletWrapper = (getPixels) => {
   return (
     <>
       <Map
@@ -68,42 +59,18 @@ const LeafletContainer = (getPixels) => {
 class FeatureVis extends Component {
   constructor(props) {
     super(props);
-    const topFeatures = [];
-    const geneIndices = [];
-    let summedGenes = [];
-
-    props.matrix.forEach((gene, index) => {
-      summedGenes.push({
-        sum: gene.reduce((a, b) => {
-          return a + b;
-        }, 0),
-        index: index,
-      });
-    });
-
-    for (let i = 0; i < summedGenes.length; i++) {
-      if (i > 10) break;
-      topFeatures.push(props.features[summedGenes[i].index]);
-      geneIndices.push(summedGenes[i].index);
-    }
-
-    this.state = {
-      geneIndex: geneIndices[0],
-      topFeatures,
-      geneIndices,
-    };
-
+    this.state = { feature: "Nptxr" };
     this.selectGene = this.selectGene.bind(this);
     this.getPixels = this.getPixels.bind(this);
   }
 
   selectGene(event) {
-    this.setState({ geneIndex: event.target.value });
+    this.setState({ feature: event.target.value.trim() });
   }
 
   getPixels() {
     const { props } = this;
-    const gene = props.matrix[this.state.geneIndex];
+    const gene = props.matrix[props.features.indexOf(this.state.feature)];
     const barcodes = props.barcodes;
     const pixels = [];
 
@@ -166,8 +133,6 @@ class FeatureVis extends Component {
 
   render() {
     const { selectGene, getPixels } = this;
-    const { topFeatures, geneIndices, geneIndex } = this.state;
-
     return (
       <>
         <Typography
@@ -183,9 +148,9 @@ class FeatureVis extends Component {
           Enter description here.
         </Typography>
 
-        {Selector(topFeatures, geneIndices, geneIndex, selectGene)}
-        <div style={{ marginBottom: "20px" }}></div>
-        {LeafletContainer(getPixels)}
+        {Selector(selectGene)}
+        <div style={{ marginBottom: "15px" }}></div>
+        {LeafletWrapper(getPixels)}
       </>
     );
   }
