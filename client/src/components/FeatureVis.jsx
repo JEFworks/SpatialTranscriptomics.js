@@ -4,7 +4,7 @@ import { Map, ImageOverlay, Circle } from "react-leaflet";
 import L from "leaflet";
 import * as d3 from "d3";
 
-const headline = "#094067";
+const primary = "#094067";
 const paragraph = "#5f6c7b";
 
 const normalize = (value, min, max) => {
@@ -29,7 +29,7 @@ const LeafletWrapper = (getPixels) => {
         {getPixels().map((pixel) => {
           return (
             <Circle
-              key={pixel.center.toString()}
+              key={pixel.center}
               center={pixel.center}
               color="transparent"
               fillColor={pixel.color}
@@ -122,7 +122,7 @@ class FeatureVis extends Component {
     return (
       <>
         <Typography
-          style={{ marginBottom: "10px", fontWeight: 500, color: headline }}
+          style={{ marginBottom: "10px", fontWeight: 500, color: primary }}
           variant="h5"
         >
           Feature Visualization

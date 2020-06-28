@@ -97,7 +97,6 @@ class Homepage extends Component {
       thresholds: { minRowSum: 2, minColSum: 2 },
       rowsums: [],
       colsums: [],
-      loading: true,
     };
 
     this.handleFilter = this.handleFilter.bind(this);
@@ -171,24 +170,21 @@ class Homepage extends Component {
             const { adjustedFeatures } = this.state;
             const matrix = this.state.matrix.concat(
               m.to2DArray().filter((gene, index) => {
-                let expressed = false;
                 for (let cell of gene) {
+                  const feature = this.state.features[index];
                   if (cell > 0) {
-                    expressed = true;
-                    adjustedFeatures.push(
-                      this.state.features[index].toLowerCase()
-                    );
-                    break;
+                    if (feature) adjustedFeatures.push(feature.toLowerCase());
+                    return true;
                   }
                 }
-                return expressed;
+                return false;
               })
             );
             this.setState({ matrix, adjustedFeatures });
           }
         })
         .catch((error) => {
-          this.setState({ matrix: [], loading: false });
+          this.setState({ matrix: [] });
           throw Error(error);
         });
       count++;
@@ -196,12 +192,11 @@ class Homepage extends Component {
 
     const { thresholds } = this.state;
     this.handleFilter(thresholds.minRowSum, thresholds.minColSum);
-    this.setState({ loading: false });
   }
 
   handleFilter(minRowSum, minColSum) {
     const { matrix } = this.state;
-    if (!matrix[0]) return 0;
+    if (!matrix[0]) return;
     const { thresholds, adjustedFeatures, barcodes } = this.state;
     let { rowsums, colsums } = this.state;
 
@@ -242,7 +237,6 @@ class Homepage extends Component {
             rowsums={this.state.rowsums.sums}
             colsums={this.state.colsums.sums}
             handleFilter={this.handleFilter}
-            loading={this.state.loading}
           />
           <br />
           <FeatureVis

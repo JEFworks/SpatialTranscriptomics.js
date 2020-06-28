@@ -3,12 +3,41 @@ import { ResponsiveBar } from "@nivo/bar";
 
 const red = "#ff80ab";
 const blue = "#80d8ff";
-
 const getColor = (bar) => bar.data.color;
 
 const setColor = (val, min) => {
   if (val < min) return red;
   else return blue;
+};
+
+const markers = (min, loading) => [
+  {
+    axis: "x",
+    value: Number(min).toFixed(1),
+    lineStyle: {
+      stroke: !loading ? red : "transparent",
+      strokeWidth: 1,
+      borderStyle: "dotted",
+    },
+  },
+];
+
+const xAxis = (label) => ({
+  tickSize: 5,
+  tickPadding: 5,
+  tickRotation: 0,
+  legend: label,
+  legendPosition: "middle",
+  legendOffset: 40,
+});
+
+const yAxis = {
+  tickSize: 1,
+  tickPadding: 5,
+  tickRotation: 0,
+  legend: "frequency",
+  legendPosition: "middle",
+  legendOffset: -40,
 };
 
 class BarGraph extends Component {
@@ -35,35 +64,11 @@ class BarGraph extends Component {
           indexBy="range"
           margin={{ top: 5, right: 0, bottom: 50, left: 45 }}
           colors={getColor}
-          markers={[
-            {
-              axis: "x",
-              value: Number(min).toFixed(1),
-              lineStyle: {
-                stroke: data.length > 0 ? red : "transparent",
-                strokeWidth: 1,
-                borderStyle: "dotted",
-              },
-            },
-          ]}
+          markers={markers(min, data.length < 1)}
           axisTop={null}
           axisRight={null}
-          axisBottom={{
-            tickSize: 5,
-            tickPadding: 5,
-            tickRotation: 0,
-            legend: props.xLabel,
-            legendPosition: "middle",
-            legendOffset: 40,
-          }}
-          axisLeft={{
-            tickSize: 1,
-            tickPadding: 5,
-            tickRotation: 0,
-            legend: "frequency",
-            legendPosition: "middle",
-            legendOffset: -40,
-          }}
+          axisBottom={xAxis(props.xLabel)}
+          axisLeft={yAxis}
           enableGridY={true}
           enableLabel={false}
           labelSkipWidth={12}

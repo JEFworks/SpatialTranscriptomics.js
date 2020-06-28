@@ -2,20 +2,19 @@ import React, { Component } from "react";
 import { Typography, Paper, Slider } from "@material-ui/core";
 import BarGraph from "./BarGraph.jsx";
 
-const headline = "#094067";
+const primary = "#094067";
 const paragraph = "#5f6c7b";
-const slider = "#90b4ce";
+const sliderColor = "#90b4ce";
 
 const marks = (min, max) => {
   const list = [];
-  for (let i = min; i < max; i += 0.5) {
+  for (let i = min; i < max; i += 0.5)
     list.push({ value: i, label: Number(i).toFixed(1) });
-  }
   return list;
 };
 
 const Figure = (props, type) => {
-  const sums = props.loading
+  const sums = !props.matrix[0]
     ? []
     : type === "rowsum"
     ? props.rowsums
@@ -23,7 +22,7 @@ const Figure = (props, type) => {
 
   let minIndex = 0;
   let maxIndex = 10;
-  if (sums) {
+  if (sums && sums.length > 0) {
     minIndex = -1;
     maxIndex = sums.length;
     sums.forEach((datum, index) => {
@@ -34,6 +33,56 @@ const Figure = (props, type) => {
     maxIndex = Math.min(maxIndex + 2, sums.length);
   }
 
+  const Title = (
+    <>
+      <Typography
+        variant="body1"
+        align="center"
+        style={{ paddingBottom: "5px", fontWeight: 500, color: primary }}
+      >
+        {type === "rowsum" ? "log10(rowSum + 1)" : "log10(colSum + 1)"}
+      </Typography>
+    </>
+  );
+
+  const Histogram = (
+    <>
+      <div style={{ width: "100%", height: "100%" }}>
+        <BarGraph
+          xLabel={type === "rowsum" ? "log10(rowSum + 1)" : "log10(colSum + 1)"}
+          data={sums}
+          min={
+            type === "rowsum"
+              ? props.thresholds.minRowSum
+              : props.thresholds.minColSum
+          }
+          lowerLimit={minIndex}
+          upperLimit={maxIndex}
+        />
+      </div>
+    </>
+  );
+
+  const Toggle = (
+    <>
+      <Slider
+        style={{ marginLeft: "20px", width: "90%", color: sliderColor }}
+        onChangeCommitted={(_event, value) =>
+          props.handleFilter(
+            type === "rowsum" ? value : null,
+            type === "colsum" ? value : null
+          )
+        }
+        marks={marks(minIndex / 2, maxIndex / 2)}
+        defaultValue={2.0}
+        step={0.5}
+        min={minIndex / 2}
+        max={maxIndex / 2 - 0.5}
+        valueLabelDisplay="auto"
+      />
+    </>
+  );
+
   return (
     <>
       <div
@@ -42,7 +91,7 @@ const Figure = (props, type) => {
           width: "100%",
           paddingRight: "15px",
           paddingLeft: "15px",
-          paddingBottom: type === "mtsum" ? "0px" : "125px",
+          paddingBottom: "125px",
         }}
       >
         <Paper
@@ -55,43 +104,9 @@ const Figure = (props, type) => {
           variant="outlined"
           elevation={3}
         >
-          <Typography
-            variant="body1"
-            align="center"
-            style={{ paddingBottom: "5px", fontWeight: 500, color: headline }}
-          >
-            {type === "rowsum" ? "log10(rowSum + 1)" : "log10(colSum + 1)"}
-          </Typography>
-          <div style={{ width: "100%", height: "100%" }}>
-            <BarGraph
-              xLabel={
-                type === "rowsum" ? "log10(rowSum + 1)" : "log10(colSum + 1)"
-              }
-              data={sums}
-              min={
-                type === "rowsum"
-                  ? props.thresholds.minRowSum
-                  : props.thresholds.minColSum
-              }
-              lowerLimit={minIndex}
-              upperLimit={maxIndex}
-            />
-          </div>
-          <Slider
-            style={{ marginLeft: "20px", width: "90%", color: slider }}
-            onChangeCommitted={(_event, value) =>
-              props.handleFilter(
-                type === "rowsum" ? value : null,
-                type === "colsum" ? value : null
-              )
-            }
-            marks={marks(minIndex / 2, maxIndex / 2)}
-            defaultValue={2.0}
-            step={0.5}
-            min={minIndex / 2}
-            max={maxIndex / 2 - 0.5}
-            valueLabelDisplay="auto"
-          />
+          {Title}
+          {Histogram}
+          {Toggle}
         </Paper>
       </div>
     </>
@@ -104,7 +119,7 @@ class QualityControl extends Component {
     return (
       <>
         <Typography
-          style={{ marginBottom: "10px", fontWeight: 500, color: headline }}
+          style={{ marginBottom: "10px", fontWeight: 500, color: primary }}
           variant="h5"
         >
           Quality Control
