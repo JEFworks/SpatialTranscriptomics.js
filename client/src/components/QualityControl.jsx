@@ -18,8 +18,8 @@ const Figure = (props, type) => {
   const sums = props.loading
     ? []
     : type === "rowsum"
-    ? props.rowSums
-    : props.colSums;
+    ? props.rowsums
+    : props.colsums;
 
   let minIndex = 0;
   let maxIndex = 10;
@@ -80,7 +80,10 @@ const Figure = (props, type) => {
           <Slider
             style={{ marginLeft: "20px", width: "90%", color: slider }}
             onChangeCommitted={(_event, value) =>
-              props.handleFilter(type, value)
+              props.handleFilter(
+                type === "rowsum" ? value : null,
+                type === "colsum" ? value : null
+              )
             }
             marks={marks(minIndex / 2, maxIndex / 2)}
             defaultValue={2.0}

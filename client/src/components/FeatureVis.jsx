@@ -11,19 +11,6 @@ const normalize = (value, min, max) => {
   return (value - min) / (max - min);
 };
 
-const Selector = (handleChange) => {
-  return (
-    <>
-      <TextField
-        style={{ width: "150px", marginTop: "7px" }}
-        helperText="Feature name"
-        defaultValue="Nptxr"
-        onChange={handleChange}
-      />
-    </>
-  );
-};
-
 const LeafletWrapper = (getPixels) => {
   const bounds = [
     [0, 0],
@@ -70,9 +57,9 @@ class FeatureVis extends Component {
 
   getPixels() {
     const { props } = this;
-    const gene = props.matrix[props.features.indexOf(this.state.feature)];
     const { barcodes } = props;
     const pixels = [];
+    const gene = props.matrix[props.features.indexOf(this.state.feature)];
 
     if (gene && barcodes[0]) {
       if (!barcodes[0].x || !barcodes[0].y) return [];
@@ -81,7 +68,6 @@ class FeatureVis extends Component {
       const sd = d3.deviation(gene);
       const upperLimit = mean + 2 * sd;
       const lowerLimit = mean - 2 * sd;
-
       const max = Math.min(d3.max(gene), upperLimit);
       const min = Math.max(lowerLimit, d3.min(gene));
 
@@ -148,8 +134,12 @@ class FeatureVis extends Component {
           Enter description here.
         </Typography>
 
-        {Selector(selectGene)}
-        <div style={{ marginBottom: "15px" }}></div>
+        <TextField
+          style={{ width: "150px", marginTop: "7px", marginBottom: "15px" }}
+          helperText="Feature name"
+          defaultValue="Nptxr"
+          onChange={selectGene}
+        />
         {LeafletWrapper(getPixels)}
       </>
     );

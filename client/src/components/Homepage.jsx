@@ -55,7 +55,7 @@ const colSums = (matrix, threshold) => {
   return { sums: obj, badCells: badCells };
 };
 
-const getFilteredData = (matrix, features, barcodes, badCells, badGenes) => {
+const getFilteredData = (matrix, features, barcodes, badGenes, badCells) => {
   const filteredFeatures = [];
   const filteredBarcodes = [];
 
@@ -95,8 +95,8 @@ class Homepage extends Component {
       barcodes: [],
       filteredBarcodes: [],
       thresholds: { minRowSum: 2, minColSum: 2 },
-      colSums: [],
-      rowSums: [],
+      rowsums: [],
+      colsums: [],
       loading: true,
     };
 
@@ -175,14 +175,11 @@ class Homepage extends Component {
                 for (let cell of gene) {
                   if (cell > 0) {
                     expressed = true;
+                    adjustedFeatures.push(
+                      this.state.features[index].toLowerCase()
+                    );
                     break;
                   }
-                }
-
-                if (expressed) {
-                  adjustedFeatures.push(
-                    this.state.features[index].toLowerCase()
-                  );
                 }
                 return expressed;
               })
@@ -190,54 +187,39 @@ class Homepage extends Component {
             this.setState({ matrix, adjustedFeatures });
           }
         })
-        .catch(() => {
-          this.setState({
-            matrix: [],
-            loading: false,
-          });
-          throw Error("A batch failed, exiting early.");
+        .catch((error) => {
+          this.setState({ matrix: [], loading: false });
+          throw Error(error);
         });
       count++;
     }
 
-    const { matrix, thresholds, adjustedFeatures, barcodes } = this.state;
-    const colsums = colSums(matrix, thresholds.minColSum);
-    const rowsums = rowSums(matrix, thresholds.minRowSum);
-
-    const filteredData = getFilteredData(
-      matrix,
-      adjustedFeatures,
-      barcodes,
-      colsums.badCells,
-      rowsums.badGenes
-    );
-
-    this.setState({
-      filteredMatrix: filteredData.matrix,
-      filteredFeatures: filteredData.features,
-      filteredBarcodes: filteredData.barcodes,
-      colSums: colsums,
-      rowSums: rowsums,
-      loading: false,
-    });
+    const { thresholds } = this.state;
+    this.handleFilter(thresholds.minRowSum, thresholds.minColSum);
+    this.setState({ loading: false });
   }
 
-  handleFilter(filterType, threshold) {
-    const { matrix, thresholds, adjustedFeatures, barcodes } = this.state;
+  handleFilter(minRowSum, minColSum) {
+    const { matrix } = this.state;
     if (!matrix[0]) return 0;
+    const { thresholds, adjustedFeatures, barcodes } = this.state;
+    let { rowsums, colsums } = this.state;
 
-    if (filterType === "rowsum") thresholds.minRowSum = threshold;
-    if (filterType === "colsum") thresholds.minColSum = threshold;
-
-    const colsums = colSums(matrix, thresholds.minColSum);
-    const rowsums = rowSums(matrix, thresholds.minRowSum);
+    if (minRowSum !== null) {
+      thresholds.minRowSum = minRowSum;
+      rowsums = rowSums(matrix, thresholds.minRowSum);
+    }
+    if (minColSum !== null) {
+      thresholds.minColSum = minColSum;
+      colsums = colSums(matrix, thresholds.minColSum);
+    }
 
     const filteredData = getFilteredData(
       matrix,
       adjustedFeatures,
       barcodes,
-      colsums.badCells,
-      rowsums.badGenes
+      rowsums.badGenes,
+      colsums.badCells
     );
 
     this.setState({
@@ -245,8 +227,8 @@ class Homepage extends Component {
       filteredFeatures: filteredData.features,
       filteredBarcodes: filteredData.barcodes,
       thresholds,
-      colSums: colsums,
-      rowSums: rowsums,
+      rowsums,
+      colsums,
     });
   }
 
@@ -257,8 +239,8 @@ class Homepage extends Component {
           <QualityControl
             matrix={this.state.matrix}
             thresholds={this.state.thresholds}
-            colSums={this.state.colSums.sums}
-            rowSums={this.state.rowSums.sums}
+            rowsums={this.state.rowsums.sums}
+            colsums={this.state.colsums.sums}
             handleFilter={this.handleFilter}
             loading={this.state.loading}
           />
