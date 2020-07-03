@@ -3,6 +3,7 @@ import axios from "axios";
 import { SparseMatrix } from "ml-sparse-matrix";
 import QualityControl from "./QualityControl.jsx";
 import FeatureVis from "./FeatureVis.jsx";
+import PCA from "./PCA.jsx";
 
 const rowSums = (matrix, threshold) => {
   if (!matrix[0]) return {};
@@ -238,12 +239,14 @@ class Homepage extends Component {
             colsums={this.state.colsums.sums}
             handleFilter={this.handleFilter}
           />
-          <br />
+          <div style={{ paddingTop: "10px" }}></div>
           <FeatureVis
             matrix={this.state.filteredMatrix}
             features={this.state.filteredFeatures}
             barcodes={this.state.filteredBarcodes}
           />
+          <div style={{ paddingTop: "35px" }}></div>
+          <PCA />
           <div style={{ paddingTop: "70px" }}></div>
         </div>
       </>

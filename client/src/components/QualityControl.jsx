@@ -9,7 +9,7 @@ const sliderColor = "#90b4ce";
 const marks = (min, max) => {
   const list = [];
   for (let i = min; i < max; i += 0.5)
-    list.push({ value: i, label: Number(i).toFixed(1) });
+    list.push({ value: i, label: i.toFixed(1) });
   return list;
 };
 

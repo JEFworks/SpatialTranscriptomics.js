@@ -10,11 +10,10 @@ import GitHubIcon from "@material-ui/icons/GitHub";
 
 const background = "#fffffe";
 const primary = "#094067";
-const weight = 500;
 
 const Title = (
   <>
-    <Typography variant="h6" style={{ flexGrow: 1, fontWeight: weight }}>
+    <Typography variant="h6" style={{ flexGrow: 1, fontWeight: 500 }}>
       <Link style={{ color: primary }} underline="none" href="/">
         SpatialTranscriptomics.js
       </Link>
@@ -24,7 +23,7 @@ const Title = (
 
 const About = (
   <>
-    <Typography style={{ fontSize: "1.1em", fontWeight: weight }}>
+    <Typography style={{ fontSize: "1.1em", fontWeight: 500 }}>
       <Link style={{ color: primary }} underline="none" href="/about">
         about
       </Link>

@@ -1,11 +1,18 @@
 import React, { Component } from "react";
-import { Typography, TextField } from "@material-ui/core";
+import {
+  Typography,
+  TextField,
+  FormGroup,
+  FormControlLabel,
+  Checkbox,
+} from "@material-ui/core";
 import { Map, ImageOverlay, Circle } from "react-leaflet";
 import L from "leaflet";
 import * as d3 from "d3";
 
 const primary = "#094067";
 const paragraph = "#5f6c7b";
+const buttonColor = "#90b4ce";
 
 const normalize = (value, min, max) => {
   return (value - min) / (max - min);
@@ -43,16 +50,146 @@ const LeafletWrapper = (getPixels) => {
   );
 };
 
+const TypedInput = (selectGene, changeDeltaX, changeDeltaY, changeScale) => {
+  return (
+    <>
+      <FormGroup row style={{ marginTop: "7px" }}>
+        <TextField
+          style={{ width: "150px", marginRight: "15px" }}
+          helperText="Feature name"
+          defaultValue="Nptxr"
+          onChange={selectGene}
+        />
+        <TextField
+          style={{ width: "50px", marginRight: "15px" }}
+          helperText="ΔX"
+          defaultValue="0"
+          onChange={changeDeltaX}
+        />
+        <TextField
+          style={{ width: "50px", marginRight: "15px" }}
+          helperText="ΔY"
+          defaultValue="1965"
+          onChange={changeDeltaY}
+        />
+        <TextField
+          style={{ width: "250px" }}
+          helperText="Scale (< 1 to downscale or > 1 to upscale)"
+          defaultValue="0.176"
+          onChange={changeScale}
+        />
+      </FormGroup>
+    </>
+  );
+};
+
+const CheckboxInput = (
+  horizontalFlipped,
+  flipHorizontal,
+  verticalFlipped,
+  flipVertical,
+  xyFlipped,
+  flipXY
+) => {
+  return (
+    <>
+      <FormGroup row style={{ marginTop: "5px" }}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              disableRipple
+              style={{ backgroundColor: "transparent", color: buttonColor }}
+              checked={horizontalFlipped === -1}
+              onChange={flipHorizontal}
+              name="checkedB"
+              color="primary"
+            />
+          }
+          label="Flip Horizontally"
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              disableRipple
+              style={{ backgroundColor: "transparent", color: buttonColor }}
+              checked={verticalFlipped === -1}
+              onChange={flipVertical}
+              name="checkedB"
+              color="primary"
+            />
+          }
+          label="Flip Vertically"
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              disableRipple
+              style={{ backgroundColor: "transparent", color: buttonColor }}
+              checked={xyFlipped}
+              onChange={flipXY}
+              name="checkedB"
+              color="primary"
+            />
+          }
+          label="Swap X and Y Coordinates"
+        />
+      </FormGroup>
+    </>
+  );
+};
+
 class FeatureVis extends Component {
   constructor(props) {
     super(props);
-    this.state = { feature: "nptxr" };
-    this.selectGene = this.selectGene.bind(this);
+    this.state = {
+      feature: "nptxr",
+      deltaX: 0,
+      deltaY: 1965,
+      scale: 0.176,
+      horizontalFlipped: 1,
+      verticalFlipped: -1,
+      xyFlipped: false,
+    };
+
     this.getPixels = this.getPixels.bind(this);
+    this.selectGene = this.selectGene.bind(this);
+    this.changeDeltaX = this.changeDeltaX.bind(this);
+    this.changeDeltaY = this.changeDeltaY.bind(this);
+    this.changeScale = this.changeScale.bind(this);
+    this.flipHorizontal = this.flipHorizontal.bind(this);
+    this.flipVertical = this.flipVertical.bind(this);
+    this.flipXY = this.flipXY.bind(this);
   }
 
   selectGene(event) {
     this.setState({ feature: event.target.value.trim().toLowerCase() });
+  }
+
+  changeScale(event) {
+    const scale = Number.parseFloat(event.target.value);
+    this.setState({ scale: isNaN(scale) ? 1 : scale });
+  }
+
+  changeDeltaX(event) {
+    const deltaX = Number.parseInt(event.target.value);
+    this.setState({ deltaX: isNaN(deltaX) ? 0 : deltaX });
+  }
+
+  changeDeltaY(event) {
+    const deltaY = Number.parseInt(event.target.value);
+    this.setState({ deltaY: isNaN(deltaY) ? 0 : deltaY });
+  }
+
+  flipHorizontal() {
+    this.setState({ horizontalFlipped: this.state.horizontalFlipped * -1 });
+  }
+
+  flipVertical() {
+    this.setState({ verticalFlipped: this.state.verticalFlipped * -1 });
+  }
+
+  flipXY() {
+    this.setState({ xyFlipped: !this.state.xyFlipped });
   }
 
   getPixels() {
@@ -104,11 +241,19 @@ class FeatureVis extends Component {
           const b =
             (colors[index2][2] - colors[index1][2]) * fract + colors[index1][2];
 
-          const centerX = (-x + 11200) / 5.7;
-          const centerY = y / 5.7;
+          const {
+            xyFlipped,
+            verticalFlipped,
+            deltaY,
+            horizontalFlipped,
+            deltaX,
+            scale,
+          } = this.state;
+          const centerX = verticalFlipped * x * scale + deltaY;
+          const centerY = horizontalFlipped * y * scale + deltaX;
 
           pixels.push({
-            center: [centerX, centerY],
+            center: !xyFlipped ? [centerX, centerY] : [centerY, centerX],
             color: "rgb(" + r + "," + g + "," + b + ")",
           });
         } catch (error) {}
@@ -118,7 +263,18 @@ class FeatureVis extends Component {
   }
 
   render() {
-    const { selectGene, getPixels } = this;
+    const {
+      getPixels,
+      selectGene,
+      changeDeltaX,
+      changeDeltaY,
+      changeScale,
+      flipHorizontal,
+      flipVertical,
+      flipXY,
+    } = this;
+    const { horizontalFlipped, verticalFlipped, xyFlipped } = this.state;
+
     return (
       <>
         <Typography
@@ -134,12 +290,17 @@ class FeatureVis extends Component {
           Enter description here.
         </Typography>
 
-        <TextField
-          style={{ width: "150px", marginTop: "7px", marginBottom: "15px" }}
-          helperText="Feature name"
-          defaultValue="Nptxr"
-          onChange={selectGene}
-        />
+        {TypedInput(selectGene, changeDeltaX, changeDeltaY, changeScale)}
+        {CheckboxInput(
+          horizontalFlipped,
+          flipHorizontal,
+          verticalFlipped,
+          flipVertical,
+          xyFlipped,
+          flipXY
+        )}
+        <div style={{ paddingTop: "10px" }}></div>
+
         {LeafletWrapper(getPixels)}
       </>
     );
