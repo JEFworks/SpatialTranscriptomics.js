@@ -14,8 +14,39 @@ const primary = "#094067";
 const paragraph = "#5f6c7b";
 const buttonColor = "#90b4ce";
 
-const normalize = (value, min, max) => {
-  return (value - min) / (max - min);
+const normalize = (val, min, max) => {
+  return (val - min) / (max - min);
+};
+
+const getRGB = (val, min, max) => {
+  const colors = [
+    [0, 0, 255],
+    [255, 255, 255],
+    [255, 0, 0],
+  ];
+
+  let value = normalize(val, min, max);
+  let index1;
+  let index2;
+  let fract = 0;
+  if (value <= 0) {
+    index1 = 0;
+    index2 = 0;
+  } else if (value >= 1) {
+    index1 = colors.length - 1;
+    index2 = colors.length - 1;
+  } else {
+    value = value * (colors.length - 1);
+    index1 = Math.floor(value);
+    index2 = index1 + 1;
+    fract = value - index1;
+  }
+
+  const r = (colors[index2][0] - colors[index1][0]) * fract + colors[index1][0];
+  const g = (colors[index2][1] - colors[index1][1]) * fract + colors[index1][1];
+  const b = (colors[index2][2] - colors[index1][2]) * fract + colors[index1][2];
+
+  return `rgb(${r},${g},${b})`;
 };
 
 const LeafletWrapper = (getPixels) => {
@@ -101,8 +132,6 @@ const CheckboxInput = (
               style={{ backgroundColor: "transparent", color: buttonColor }}
               checked={horizontalFlipped === -1}
               onChange={flipHorizontal}
-              name="checkedB"
-              color="primary"
             />
           }
           label="Flip Horizontally"
@@ -114,8 +143,6 @@ const CheckboxInput = (
               style={{ backgroundColor: "transparent", color: buttonColor }}
               checked={verticalFlipped === -1}
               onChange={flipVertical}
-              name="checkedB"
-              color="primary"
             />
           }
           label="Flip Vertically"
@@ -127,8 +154,6 @@ const CheckboxInput = (
               style={{ backgroundColor: "transparent", color: buttonColor }}
               checked={xyFlipped}
               onChange={flipXY}
-              name="checkedB"
-              color="primary"
             />
           }
           label="Swap X and Y Coordinates"
@@ -210,37 +235,7 @@ class FeatureVis extends Component {
 
       gene.forEach((cell, index) => {
         try {
-          const colors = [
-            [0, 0, 255],
-            [255, 255, 255],
-            [255, 0, 0],
-          ];
           const { x, y } = barcodes[index];
-
-          let value = normalize(cell, min, max);
-          let index1;
-          let index2;
-          let fract = 0;
-          if (value <= 0) {
-            index1 = 0;
-            index2 = 0;
-          } else if (value >= 1) {
-            index1 = colors.length - 1;
-            index2 = colors.length - 1;
-          } else {
-            value = value * (colors.length - 1);
-            index1 = Math.floor(value);
-            index2 = index1 + 1;
-            fract = value - index1;
-          }
-
-          const r =
-            (colors[index2][0] - colors[index1][0]) * fract + colors[index1][0];
-          const g =
-            (colors[index2][1] - colors[index1][1]) * fract + colors[index1][1];
-          const b =
-            (colors[index2][2] - colors[index1][2]) * fract + colors[index1][2];
-
           const {
             xyFlipped,
             verticalFlipped,
@@ -249,12 +244,12 @@ class FeatureVis extends Component {
             deltaX,
             scale,
           } = this.state;
+
           const centerX = verticalFlipped * x * scale + deltaY;
           const centerY = horizontalFlipped * y * scale + deltaX;
-
           pixels.push({
             center: !xyFlipped ? [centerX, centerY] : [centerY, centerX],
-            color: "rgb(" + r + "," + g + "," + b + ")",
+            color: getRGB(cell, min, max),
           });
         } catch (error) {}
       });
