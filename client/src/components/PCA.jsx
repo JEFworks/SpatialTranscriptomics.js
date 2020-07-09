@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { PCA } from "ml-pca";
+// import { PCA } from "pca-js";
 import { Typography } from "@material-ui/core";
 
 const primary = "#094067";
@@ -10,18 +11,20 @@ class PCAWrapper extends Component {
     const { props } = this;
     const { matrix } = props;
 
-    // compute eigenvectors
-    if (matrix.length > 0) {
+    // size of each PC is # of cells
+    if (matrix[0]) {
       const pca = new PCA(matrix, {
         method: "SVD",
         center: true,
         scale: true,
         ignoreZeroVariance: true,
       });
-      console.log(pca.getEigenvectors());
+      const vectors =
+        matrix[0].length >= matrix.length
+          ? pca.getEigenvectors().data
+          : pca.getLoadings().data;
+      console.log(vectors.slice(0, 10));
     }
-
-    // how to get top 10?
 
     return (
       <>

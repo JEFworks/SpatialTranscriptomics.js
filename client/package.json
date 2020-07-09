@@ -19,6 +19,7 @@
     "leaflet": "^1.6.0",
     "ml-pca": "^4.0.1",
     "ml-sparse-matrix": "^2.0.0",
+    "pca-js": "^1.0.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-leaflet": "^2.7.0",
