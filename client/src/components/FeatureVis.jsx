@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import { Map, ImageOverlay, Circle } from "react-leaflet";
+import L from "leaflet";
 import {
   Typography,
   TextField,
@@ -6,26 +8,19 @@ import {
   FormControlLabel,
   Checkbox,
 } from "@material-ui/core";
-import { Map, ImageOverlay, Circle } from "react-leaflet";
-import L from "leaflet";
-import * as d3 from "d3";
 
 const primary = "#094067";
 const paragraph = "#5f6c7b";
 const buttonColor = "#90b4ce";
 
-const normalize = (val, min, max) => {
-  return (val - min) / (max - min);
-};
-
-const getRGB = (val, min, max) => {
+const getRGB = (val) => {
   const colors = [
     [0, 0, 255],
     [255, 255, 255],
     [255, 0, 0],
   ];
 
-  let value = normalize(val, min, max);
+  let value = val;
   let index1;
   let index2;
   let fract = 0;
@@ -226,13 +221,6 @@ class FeatureVis extends Component {
     if (gene && barcodes[0]) {
       if (!barcodes[0].x || !barcodes[0].y) return [];
 
-      const mean = d3.mean(gene);
-      const sd = d3.deviation(gene);
-      const upperLimit = mean + 2 * sd;
-      const lowerLimit = mean - 2 * sd;
-      const max = Math.min(d3.max(gene), upperLimit);
-      const min = Math.max(lowerLimit, d3.min(gene));
-
       gene.forEach((cell, index) => {
         try {
           const { x, y } = barcodes[index];
@@ -249,7 +237,7 @@ class FeatureVis extends Component {
           const centerY = horizontalFlipped * y * scale + deltaX;
           pixels.push({
             center: !xyFlipped ? [centerX, centerY] : [centerY, centerX],
-            color: getRGB(cell, min, max),
+            color: getRGB(cell),
           });
         } catch (error) {}
       });

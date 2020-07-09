@@ -1,11 +1,28 @@
 import React, { Component } from "react";
+import { PCA } from "ml-pca";
 import { Typography } from "@material-ui/core";
 
 const primary = "#094067";
 const paragraph = "#5f6c7b";
 
-class PCA extends Component {
+class PCAWrapper extends Component {
   render() {
+    const { props } = this;
+    const { matrix } = props;
+
+    // compute eigenvectors
+    if (matrix.length > 0) {
+      const pca = new PCA(matrix, {
+        method: "SVD",
+        center: true,
+        scale: true,
+        ignoreZeroVariance: true,
+      });
+      console.log(pca.getEigenvectors());
+    }
+
+    // how to get top 10?
+
     return (
       <>
         <Typography
@@ -25,4 +42,4 @@ class PCA extends Component {
   }
 }
 
-export default PCA;
+export default PCAWrapper;

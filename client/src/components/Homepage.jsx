@@ -1,9 +1,14 @@
 import React, { Component } from "react";
 import axios from "axios";
 import { SparseMatrix } from "ml-sparse-matrix";
+import * as d3 from "d3";
 import QualityControl from "./QualityControl.jsx";
 import FeatureVis from "./FeatureVis.jsx";
 import PCA from "./PCA.jsx";
+
+const normalize = (val, min, max) => {
+  return (val - min) / (max - min);
+};
 
 const rowSums = (matrix, threshold) => {
   if (!matrix[0]) return {};
@@ -69,11 +74,22 @@ const getFilteredData = (matrix, features, barcodes, badGenes, badCells) => {
 
   // colsum filtering
   filteredMatrix.forEach((gene, index) => {
-    filteredMatrix[index] = gene.filter((_cell, i) => {
+    const filteredGene = gene.filter((_cell, i) => {
       const badCell = badCells.includes(i);
       if (barcodes.length > 0 && index === 0 && !badCell)
         filteredBarcodes.push(barcodes[i]);
       return !badCell;
+    });
+
+    const mean = d3.mean(filteredGene);
+    const sd = d3.deviation(filteredGene);
+    const upperLimit = mean + 2 * sd;
+    const lowerLimit = mean - 2 * sd;
+    const max = Math.min(d3.max(filteredGene), upperLimit);
+    const min = Math.max(lowerLimit, d3.min(filteredGene));
+
+    filteredMatrix[index] = filteredGene.map((cell) => {
+      return normalize(cell, min, max);
     });
   });
 
@@ -229,11 +245,12 @@ class Homepage extends Component {
   }
 
   render() {
+    const { matrix, filteredMatrix } = this.state;
     return (
       <>
         <div className="site-container">
           <QualityControl
-            matrix={this.state.matrix}
+            matrix={matrix}
             thresholds={this.state.thresholds}
             rowsums={this.state.rowsums.sums}
             colsums={this.state.colsums.sums}
@@ -241,12 +258,12 @@ class Homepage extends Component {
           />
           <div style={{ paddingTop: "10px" }}></div>
           <FeatureVis
-            matrix={this.state.filteredMatrix}
+            matrix={filteredMatrix}
             features={this.state.filteredFeatures}
             barcodes={this.state.filteredBarcodes}
           />
           <div style={{ paddingTop: "35px" }}></div>
-          <PCA />
+          <PCA matrix={filteredMatrix} />
           <div style={{ paddingTop: "70px" }}></div>
         </div>
       </>

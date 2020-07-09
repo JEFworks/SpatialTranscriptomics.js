@@ -7,7 +7,7 @@
 library(Matrix)
 
 ######## read in data
-dir <- '~/Documents/GitHub/SpatialTranscriptomics.js/data/coronal_brain/'
+dir <- '~/Documents/GitHub/SpatialTranscriptomics.js/data/olfactory_bulb/'
 cd <- readMM(paste0(dir, 'filtered_feature_bc_matrix/matrix.mtx.gz'))
 genes <- read.csv(paste0(dir, 'filtered_feature_bc_matrix/features.tsv.gz'), sep='\t', header=FALSE)
 cells <- read.csv(paste0(dir, 'filtered_feature_bc_matrix/barcodes.tsv.gz'), sep='\t', header=FALSE)
@@ -17,48 +17,48 @@ rownames(cd) <- genes[,2]
 colnames(cd) <- cells[,1]
 head(cd)
 
-# ######### QC
-# hist(log10(colSums(cd)+1)) ## distribution of genes per cell ie. library size (log scale) 
-# hist(log10(colSums(cd>0)+1)) ## distribution of unique gene species per cell ie. library complexity (log scale) 
-# hist(log10(rowSums(cd)+1)) ## distribution of cells per gene (log scale)
-# vi <- rowSums(cd) > 3000 ## pick a filtering threshold
-# table(vi)
-# cd.filter <- cd[vi,]
-# vi <- colSums(cd) > 3000 ## pick a filtering threshold
-# table(vi)
-# cd.filter <- cd.filter[,vi]
-# hist(log10(colSums(cd.filter)+1)) 
-# hist(log10(colSums(cd.filter>0)+1))
-# hist(log10(rowSums(cd.filter)+1)) 
+######### QC
+hist(log10(colSums(cd)+1)) ## distribution of genes per cell ie. library size (log scale) 
+hist(log10(colSums(cd>0)+1)) ## distribution of unique gene species per cell ie. library complexity (log scale) 
+hist(log10(rowSums(cd)+1)) ## distribution of cells per gene (log scale)
+vi <- rowSums(cd) > 3000 ## pick a filtering threshold
+table(vi)
+cd.filter <- cd[vi,]
+vi <- colSums(cd) > 3000 ## pick a filtering threshold
+table(vi)
+cd.filter <- cd.filter[,vi]
+hist(log10(colSums(cd.filter)+1)) 
+hist(log10(colSums(cd.filter>0)+1))
+hist(log10(rowSums(cd.filter)+1)) 
 
-# ######## Counts per million (CPM) normalization
-# mat <- Matrix::t(Matrix::t(cd)/Matrix::colSums(cd))
-# mat <- mat * 1e6
-# mat <- log10(mat + 1)
+######## Counts per million (CPM) normalization
+mat <- Matrix::t(Matrix::t(cd)/Matrix::colSums(cd))
+mat <- mat * 1e6
+mat <- log10(mat + 1)
 
-# ## Principal components dimensionality reduction
-# ## the built in PCA is too slow but feel free to try
-# # pcs <- prcomp(mat) 
-# ## we will instead install a faster implementation
-# # install.packages(RSpectra)
-# library(RSpectra)
-# pca <- RSpectra::svds(
-#   A    = t(mat),
-#   k    = 50, 
-#   opts = list(
-#     center = TRUE, scale = TRUE, maxitr = 2000, tol = 1e-10
-#   )
-# )
+## Principal components dimensionality reduction
+## the built in PCA is too slow but feel free to try
+# pcs <- prcomp(mat) 
+## we will instead install a faster implementation
+library(RSpectra)
+pca <- RSpectra::svds(
+  A    = t(mat),
+  k    = min(nrow(mat),ncol(mat)), 
+  opts = list(
+    center = TRUE, scale = TRUE, maxitr = 2000, tol = 1e-10
+  )
+)
 
-# ## look at elbow plot to check what is reasonable number of pcs
+## look at elbow plot to check what is reasonable number of pcs
 # val <- pca$d
 # plot(val, type="l")
-# N <- 10
+N <- 10
 # abline(v=N, col='red')
-# pcs <- pca$u[, 1:N]
-# rownames(pcs) <- colnames(mat)
-# colnames(pcs) <- paste0('PC', 1:N)
-# head(pcs)
+pcs <- pca$u[, 1:N]
+print(ncol(pca$u))
+rownames(pcs) <- colnames(mat)
+colnames(pcs) <- paste0('PC', 1:N)
+tail(pcs)
 
 # ############# 2D visualization
 # ## TSNE embedding with regular PCs
@@ -103,14 +103,14 @@ head(cd)
 # ## first 2 PCs for example
 # plot(pcs[,1:2], col=col, pch=".")  
 
-## Since this is spatial data, we can also see where these 
-## transcriptional clusters are spatially
-positions <- read.csv(paste0(dir, 'spatial/tissue_positions_list.csv.gz'),
-                header=FALSE)
-head(positions)
-## we only care about the x-y pixel coordinates for now
-pos <- positions[,c(5,6)]
-rownames(pos) <- positions[,1]
-head(pos)
-## plot (note positions may be in different order to gene expression matrix)
-plot(pos[names(col),], col=col, pch=".")  
+# ## Since this is spatial data, we can also see where these 
+# ## transcriptional clusters are spatially
+# positions <- read.csv(paste0(dir, 'spatial/tissue_positions_list.csv.gz'),
+#                 header=FALSE)
+# head(positions)
+# ## we only care about the x-y pixel coordinates for now
+# pos <- positions[,1:2]
+# rownames(pos) <- positions[,1]
+# head(pos)
+# ## plot (note positions may be in different order to gene expression matrix)
+# plot(pos[names(col),], col=col, pch=".")  
