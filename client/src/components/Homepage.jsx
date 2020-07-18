@@ -1,10 +1,27 @@
 import React, { Component } from "react";
 import axios from "axios";
 import { SparseMatrix } from "ml-sparse-matrix";
+import { PCA } from "ml-pca";
 import * as d3 from "d3";
 import QualityControl from "./QualityControl.jsx";
 import FeatureVis from "./FeatureVis.jsx";
-import PCA from "./PCA.jsx";
+import PCAWrapper from "./PCA.jsx";
+
+const computePCA = (matrix) => {
+  if (!matrix[0]) return {};
+  const pca = new PCA(matrix, {
+    method: "SVD",
+    center: true,
+    scale: true,
+    ignoreZeroVariance: true,
+  });
+  const vectors =
+    matrix[0].length >= matrix.length
+      ? pca.getEigenvectors().data
+      : pca.getLoadings().data;
+  const values = pca.getEigenvalues();
+  return { eigenvectors: vectors, eigenvalues: values };
+};
 
 const normalize = (val, min, max) => {
   return (val - min) / (max - min);
@@ -114,6 +131,7 @@ class Homepage extends Component {
       thresholds: { minRowSum: 2, minColSum: 2 },
       rowsums: [],
       colsums: [],
+      pcaData: {},
     };
 
     this.handleFilter = this.handleFilter.bind(this);
@@ -233,6 +251,7 @@ class Homepage extends Component {
       rowsums.badGenes,
       colsums.badCells
     );
+    const pcaData = computePCA(filteredData.matrix);
 
     this.setState({
       filteredMatrix: filteredData.matrix,
@@ -241,11 +260,12 @@ class Homepage extends Component {
       thresholds,
       rowsums,
       colsums,
+      pcaData,
     });
   }
 
   render() {
-    const { matrix, filteredMatrix } = this.state;
+    const { matrix, filteredMatrix, pcaData } = this.state;
     return (
       <>
         <div className="site-container">
@@ -263,7 +283,7 @@ class Homepage extends Component {
             barcodes={this.state.filteredBarcodes}
           />
           <div style={{ paddingTop: "35px" }}></div>
-          <PCA matrix={filteredMatrix} />
+          <PCAWrapper data={pcaData} />
           <div style={{ paddingTop: "70px" }}></div>
         </div>
       </>

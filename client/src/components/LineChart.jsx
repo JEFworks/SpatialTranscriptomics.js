@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import { ResponsiveLine } from "@nivo/line";
 
 const red = "#ff80ab";
+const blue = "#80d8ff";
+const getColor = (bar) => bar.data.color;
 
 const markers = (max, loading) => [
   {
@@ -55,6 +57,7 @@ class LineChart extends Component {
           pointSize={10}
           pointBorderWidth={0.5}
           markers={markers(max, data[0].data.length < 1)}
+          colors={blue}
         />
       </>
     );

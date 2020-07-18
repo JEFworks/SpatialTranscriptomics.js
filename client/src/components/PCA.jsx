@@ -61,31 +61,10 @@ const ScreePlot = (eigenvalues) => {
   );
 };
 
-const computePCA = (matrix) => {
-  // size of each PC is # of cells
-  if (matrix[0]) {
-    const pca = new PCA(matrix, {
-      method: "SVD",
-      center: true,
-      scale: true,
-      ignoreZeroVariance: true,
-    });
-    const vectors =
-      matrix[0].length >= matrix.length
-        ? pca.getEigenvectors().data
-        : pca.getLoadings().data;
-    const values = pca.getEigenvalues();
-    return { eigenvectors: vectors, eigenvalues: values };
-  }
-  return [];
-};
-
 class PCAWrapper extends Component {
   render() {
     const { props } = this;
-    const { matrix } = props;
-    const data = computePCA(matrix);
-    // console.log(data);
+    const { data } = props;
 
     return (
       <>
