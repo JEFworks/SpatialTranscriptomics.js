@@ -1,30 +1,91 @@
 import React, { Component } from "react";
 import { PCA } from "ml-pca";
-// import { PCA } from "pca-js";
-import { Typography } from "@material-ui/core";
+import { Typography, Paper } from "@material-ui/core";
+import LineChart from "./LineChart.jsx";
 
 const primary = "#094067";
 const paragraph = "#5f6c7b";
+
+const ScreePlot = (eigenvalues) => {
+  const obj = [{ data: [] }];
+  if (eigenvalues) {
+    eigenvalues.forEach((eigenvalue, index) => {
+      obj[0].data.push({ x: index + 1, y: eigenvalue });
+    });
+  }
+
+  const Title = (
+    <>
+      <Typography
+        variant="body1"
+        align="center"
+        style={{ paddingBottom: "5px", fontWeight: 500, color: primary }}
+      >
+        {"Scree Plot"}
+      </Typography>
+    </>
+  );
+
+  const Line = (
+    <div style={{ width: "100%", height: "100%" }}>
+      <LineChart data={obj} max={10} />
+    </div>
+  );
+
+  return (
+    <>
+      <div
+        style={{
+          height: "300px",
+          width: "100%",
+          paddingLeft: "15px",
+          paddingRight: "15px",
+          paddingBottom: "50px",
+        }}
+      >
+        <Paper
+          style={{
+            padding: "15px 20px 40px 15px",
+            width: "500px",
+            height: "100%",
+            backgroundColor: "transparent",
+          }}
+          variant="outlined"
+          elevation={3}
+        >
+          {Title}
+          {Line}
+        </Paper>
+      </div>
+    </>
+  );
+};
+
+const computePCA = (matrix) => {
+  // size of each PC is # of cells
+  if (matrix[0]) {
+    const pca = new PCA(matrix, {
+      method: "SVD",
+      center: true,
+      scale: true,
+      ignoreZeroVariance: true,
+    });
+    const vectors =
+      matrix[0].length >= matrix.length
+        ? pca.getEigenvectors().data
+        : pca.getLoadings().data;
+    const values = pca.getEigenvalues();
+    return { eigenvectors: vectors, eigenvalues: values };
+  }
+  return [];
+};
 
 class PCAWrapper extends Component {
   render() {
     const { props } = this;
     const { matrix } = props;
-
-    // size of each PC is # of cells
-    if (matrix[0]) {
-      const pca = new PCA(matrix, {
-        method: "SVD",
-        center: true,
-        scale: true,
-        ignoreZeroVariance: true,
-      });
-      const vectors =
-        matrix[0].length >= matrix.length
-          ? pca.getEigenvectors().data
-          : pca.getLoadings().data;
-      console.log(vectors.slice(0, 10));
-    }
+    const data = computePCA(matrix);
+    // console.log(data);
 
     return (
       <>
@@ -35,11 +96,17 @@ class PCAWrapper extends Component {
           PCA
         </Typography>
         <Typography
-          style={{ marginBottom: "0px", fontWeight: 400, color: paragraph }}
+          style={{ marginBottom: "20px", fontWeight: 400, color: paragraph }}
           variant="body1"
         >
           Enter description here.
         </Typography>
+
+        <div style={{ width: "100%", display: "flex" }}>
+          <div style={{ width: "50%" }}></div>
+          <div className="GC-flex">{ScreePlot(data.eigenvalues)}</div>
+          <div style={{ width: "50%" }}></div>
+        </div>
       </>
     );
   }

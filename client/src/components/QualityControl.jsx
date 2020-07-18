@@ -96,7 +96,7 @@ const Figure = (props, type) => {
       >
         <Paper
           style={{
-            padding: "12px 15px 90px 10px",
+            padding: "15px 20px 90px 15px",
             width: "330px",
             height: "100%",
             backgroundColor: "transparent",

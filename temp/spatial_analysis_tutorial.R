@@ -7,10 +7,14 @@
 library(Matrix)
 
 ######## read in data
-dir <- '~/Documents/GitHub/SpatialTranscriptomics.js/data/olfactory_bulb/'
-cd <- readMM(paste0(dir, 'filtered_feature_bc_matrix/matrix.mtx.gz'))
-genes <- read.csv(paste0(dir, 'filtered_feature_bc_matrix/features.tsv.gz'), sep='\t', header=FALSE)
-cells <- read.csv(paste0(dir, 'filtered_feature_bc_matrix/barcodes.tsv.gz'), sep='\t', header=FALSE)
+# dir <- '~/Documents/GitHub/SpatialTranscriptomics.js/data/olfactory_bulb/'
+# cd <- readMM(paste0(dir, 'filtered_feature_bc_matrix/matrix.mtx.gz'))
+# genes <- read.csv(paste0(dir, 'filtered_feature_bc_matrix/features.tsv.gz'), sep='\t', header=FALSE)
+# cells <- read.csv(paste0(dir, 'filtered_feature_bc_matrix/barcodes.tsv.gz'), sep='\t', header=FALSE)
+dir <- '~/Documents/GitHub/SpatialTranscriptomics.js/data/coronal_brain/'
+cd <- readMM(paste0(dir, 'filtered_feature_bc_matrix/filtered/filtered_matrix.mtx.gz'))
+genes <- read.csv(paste0(dir, 'filtered_feature_bc_matrix/filtered/filtered_features.tsv.gz'), sep='\t', header=FALSE)
+cells <- read.csv(paste0(dir, 'filtered_feature_bc_matrix/filtered/barcodes.tsv.gz'), sep='\t', header=FALSE)
 head(genes)
 head(cells)
 rownames(cd) <- genes[,2]
@@ -50,58 +54,58 @@ pca <- RSpectra::svds(
 )
 
 ## look at elbow plot to check what is reasonable number of pcs
-# val <- pca$d
-# plot(val, type="l")
+val <- pca$d
+plot(val, type="l")
 N <- 10
-# abline(v=N, col='red')
+abline(v=N, col='red')
 pcs <- pca$u[, 1:N]
 print(ncol(pca$u))
 rownames(pcs) <- colnames(mat)
 colnames(pcs) <- paste0('PC', 1:N)
 tail(pcs)
 
-# ############# 2D visualization
-# ## TSNE embedding with regular PCs
-# ## Can also use UMAP (try it out for yourself) using the uwot package
-# library(Rtsne)
-# emb <- Rtsne::Rtsne(pcs, 
-#                     is_distance=FALSE, 
-#                     perplexity=30, 
-#                     num_threads=1,
-#                     verbose=FALSE)$Y 
-# rownames(emb) <- rownames(pcs)
+############# 2D visualization
+## TSNE embedding with regular PCs
+## Can also use UMAP (try it out for yourself) using the uwot package
+library(Rtsne)
+emb <- Rtsne::Rtsne(pcs, 
+                    is_distance=FALSE, 
+                    perplexity=30, 
+                    num_threads=1,
+                    verbose=FALSE)$Y 
+rownames(emb) <- rownames(pcs)
 
-# ## Plot
-# plot(emb, pch=".")
-# ## I'm sure you can visually see transcriptionally distinct clusters
-# ## but let's try to computationally identify them 
-# ## with graph based clustering
+## Plot
+plot(emb, pch=".")
+## I'm sure you can visually see transcriptionally distinct clusters
+## but let's try to computationally identify them 
+## with graph based clustering
 
-# ## we will first make a k-nearest neighbor graph (with k=30 here)
-# knn <- RANN::nn2(pcs, k = 30)[[1]]
-# ## we will represent this as an adjacency matrix
-# adj <- matrix(0, nrow(pcs), nrow(pcs))
-# rownames(adj) <- colnames(adj) <- rownames(pcs)
-# invisible(lapply(seq_len(nrow(pcs)), function(i) {
-#   adj[i, rownames(pcs)[knn[i, ]]] <<- 1
-# }))
-# ## now we can use this adjacency matrix to build a graph
-# g <- igraph::graph.adjacency(adj, mode = "undirected")
-# g <- igraph::simplify(g)
-# ## and now we can run a graph-based community detection method
-# com <- igraph::cluster_walktrap(g)$membership
-# names(com) <- rownames(pcs)
-# table(com)  
-# ## turn into colors
-# col = rainbow(length(unique(com)))[com]
-# names(col) <- names(com)
+## we will first make a k-nearest neighbor graph (with k=30 here)
+knn <- RANN::nn2(pcs, k = 30)[[1]]
+## we will represent this as an adjacency matrix
+adj <- matrix(0, nrow(pcs), nrow(pcs))
+rownames(adj) <- colnames(adj) <- rownames(pcs)
+invisible(lapply(seq_len(nrow(pcs)), function(i) {
+  adj[i, rownames(pcs)[knn[i, ]]] <<- 1
+}))
+## now we can use this adjacency matrix to build a graph
+g <- igraph::graph.adjacency(adj, mode = "undirected")
+g <- igraph::simplify(g)
+## and now we can run a graph-based community detection method
+com <- igraph::cluster_walktrap(g)$membership
+names(com) <- rownames(pcs)
+table(com)  
+## turn into colors
+col = rainbow(length(unique(com)))[com]
+names(col) <- names(com)
 
-# ## Now let's plot again
-# plot(emb, col=col, pch=".")  
+## Now let's plot again
+plot(emb, col=col, pch=".")  
   
-# ## You can also visualize these clusters in different embeddings like in PC space
-# ## first 2 PCs for example
-# plot(pcs[,1:2], col=col, pch=".")  
+# You can also visualize these clusters in different embeddings like in PC space
+# first 2 PCs for example
+plot(pcs[,1:2], col=col, pch=".")  
 
 # ## Since this is spatial data, we can also see where these 
 # ## transcriptional clusters are spatially
