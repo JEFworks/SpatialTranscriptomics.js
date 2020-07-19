@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { PCA } from "ml-pca";
 import { Typography, Paper } from "@material-ui/core";
 import LineChart from "./LineChart.jsx";
 import ScatterPlot from "./ScatterPlot.jsx";
@@ -8,12 +7,11 @@ const primary = "#094067";
 const paragraph = "#5f6c7b";
 
 const Biplot = (eigenvectors) => {
-  // console.log(eigenvectors);
   const obj = [{ data: [] }];
   if (eigenvectors) {
-    eigenvectors.slice(0, 500).forEach((eigenvector, index) => {
-      const x = -1 * eigenvector[0];
-      const y = -1 * eigenvector[1];
+    eigenvectors.slice(0, 500).forEach((eigenvector) => {
+      const x = eigenvector[0];
+      const y = eigenvector[1];
       obj[0].data.push({ x: x, y: y });
     });
   }
@@ -50,7 +48,7 @@ const Biplot = (eigenvectors) => {
         <Paper
           style={{
             padding: "15px 20px 40px 15px",
-            width: "500px",
+            width: "420px",
             height: "100%",
             backgroundColor: "transparent",
           }}
@@ -99,13 +97,13 @@ const ScreePlot = (eigenvalues) => {
           width: "100%",
           paddingLeft: "15px",
           paddingRight: "15px",
-          paddingBottom: "50px",
+          paddingBottom: "80px",
         }}
       >
         <Paper
+          className="scree-plot"
           style={{
             padding: "15px 20px 40px 15px",
-            width: "500px",
             height: "100%",
             backgroundColor: "transparent",
           }}
@@ -130,7 +128,7 @@ class PCAWrapper extends Component {
           style={{ marginBottom: "10px", fontWeight: 500, color: primary }}
           variant="h5"
         >
-          PCA
+          Principal Component Analysis
         </Typography>
         <Typography
           style={{ marginBottom: "20px", fontWeight: 400, color: paragraph }}

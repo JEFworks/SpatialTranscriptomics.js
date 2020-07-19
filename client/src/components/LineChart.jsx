@@ -3,7 +3,6 @@ import { ResponsiveLine } from "@nivo/line";
 
 const red = "#ff80ab";
 const blue = "#80d8ff";
-const getColor = (bar) => bar.data.color;
 
 const markers = (max, loading) => [
   {

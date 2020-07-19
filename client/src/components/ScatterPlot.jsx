@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { ResponsiveScatterPlot } from "@nivo/scatterplot";
 
-const red = "#ff80ab";
+// const red = "#ff80ab";
 const blue = "#80d8ff";
 
 class Scatter extends Component {
@@ -22,8 +22,8 @@ class Scatter extends Component {
           yFormat={function (e) {
             return e + " cm";
           }}
-          blendMode="multiply"
-          nodeSize={3}
+          blendMode="normal"
+          nodeSize={5}
           isInteractive={false}
           enableGridX={false}
           enableGridY={false}
@@ -47,6 +47,7 @@ class Scatter extends Component {
             legendPosition: "middle",
             legendOffset: -50,
           }}
+          colors={blue}
         />
       </>
     );

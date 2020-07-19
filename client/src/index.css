@@ -28,13 +28,23 @@ code {
   display: inline-flex;
 }
 
+.scree-plot {
+  width: 370px;
+}
+
 @media only screen and (max-width: 970px) {
   .QC-flex {
     display: grid;
   }
+}
 
+@media only screen and (max-width: 1050px) {
   .PC-flex {
-    display: inline-flex;
+    display: grid;
+  }
+
+  .scree-plot {
+    width: 420px;
   }
 
   .site-container {
