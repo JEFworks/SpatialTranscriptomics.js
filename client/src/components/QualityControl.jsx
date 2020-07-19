@@ -97,7 +97,7 @@ const Figure = (props, type) => {
         <Paper
           style={{
             padding: "15px 20px 90px 15px",
-            width: "330px",
+            width: "370px",
             height: "100%",
             backgroundColor: "transparent",
           }}
@@ -136,7 +136,7 @@ class QualityControl extends Component {
 
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>
-          <div className="GC-flex">
+          <div className="QC-flex">
             {Figure(props, "rowsum")}
             {Figure(props, "colsum")}
           </div>

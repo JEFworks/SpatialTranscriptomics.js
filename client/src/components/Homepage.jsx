@@ -8,17 +8,14 @@ import FeatureVis from "./FeatureVis.jsx";
 import PCAWrapper from "./PCA.jsx";
 
 const computePCA = (matrix) => {
-  if (!matrix[0]) return {};
+  if (!matrix[0] || matrix[0].length < 1) return {};
   const pca = new PCA(matrix, {
     method: "SVD",
     center: true,
     scale: true,
     ignoreZeroVariance: true,
   });
-  const vectors =
-    matrix[0].length >= matrix.length
-      ? pca.getEigenvectors().data
-      : pca.getLoadings().data;
+  const vectors = pca.getEigenvectors().data;
   const values = pca.getEigenvalues();
   return { eigenvectors: vectors, eigenvalues: values };
 };
