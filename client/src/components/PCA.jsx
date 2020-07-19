@@ -12,8 +12,8 @@ const Biplot = (eigenvectors) => {
   const obj = [{ data: [] }];
   if (eigenvectors) {
     eigenvectors.slice(0, 500).forEach((eigenvector, index) => {
-      const x = eigenvector[0];
-      const y = eigenvector[1];
+      const x = -1 * eigenvector[0];
+      const y = -1 * eigenvector[1];
       obj[0].data.push({ x: x, y: y });
     });
   }

@@ -66,6 +66,9 @@ class BarGraph extends Component {
           axisBottom={xAxis(props.xLabel)}
           axisLeft={yAxis}
           enableLabel={false}
+          enableGridX={false}
+          enableGridY={false}
+          isInteractive={false}
         />
       </>
     );

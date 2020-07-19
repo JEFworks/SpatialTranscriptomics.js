@@ -13,16 +13,20 @@ class Scatter extends Component {
       <>
         <ResponsiveScatterPlot
           data={data}
-          margin={{ top: 10, right: 10, bottom: 50, left: 50 }}
-          xScale={{ type: "linear", min: -0.05, max: "auto" }}
+          margin={{ top: 10, right: 10, bottom: 50, left: 55 }}
+          xScale={{ type: "linear", min: "auto", max: "auto" }}
           xFormat={function (e) {
             return e + " kg";
           }}
-          yScale={{ type: "linear", min: -0.05, max: "auto" }}
+          yScale={{ type: "linear", min: "auto", max: "auto" }}
           yFormat={function (e) {
             return e + " cm";
           }}
           blendMode="multiply"
+          nodeSize={3}
+          isInteractive={false}
+          enableGridX={false}
+          enableGridY={false}
           axisTop={null}
           axisRight={null}
           axisBottom={{
@@ -32,7 +36,7 @@ class Scatter extends Component {
             tickRotation: 0,
             legend: "pc1",
             legendPosition: "middle",
-            legendOffset: 36,
+            legendOffset: 40,
           }}
           axisLeft={{
             orient: "left",
@@ -41,7 +45,7 @@ class Scatter extends Component {
             tickRotation: 0,
             legend: "pc2",
             legendPosition: "middle",
-            legendOffset: -45,
+            legendOffset: -50,
           }}
         />
       </>

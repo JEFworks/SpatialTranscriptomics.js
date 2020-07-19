@@ -34,6 +34,8 @@ class LineChart extends Component {
             stacked: true,
             reverse: false,
           }}
+          enableGridX={false}
+          enableGridY={false}
           axisTop={null}
           axisRight={null}
           axisBottom={{
@@ -42,7 +44,7 @@ class LineChart extends Component {
             tickPadding: 5,
             tickRotation: 0,
             legend: "principal components",
-            legendOffset: 36,
+            legendOffset: 40,
             legendPosition: "middle",
           }}
           axisLeft={{
@@ -51,7 +53,7 @@ class LineChart extends Component {
             tickPadding: 5,
             tickRotation: 0,
             legend: "eigenvalues",
-            legendOffset: -45,
+            legendOffset: -40,
             legendPosition: "middle",
           }}
           pointSize={10}
