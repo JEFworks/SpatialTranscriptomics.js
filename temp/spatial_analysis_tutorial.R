@@ -7,21 +7,21 @@
 library(Matrix)
 
 ######## read in data
-#dir <- '~/Dropbox (HMS)/Github/SpatialTranscriptomics.js/data/coronal_brain/'
-#cd <- readMM(paste0(dir, 'filtered_feature_bc_matrix/matrix.mtx.gz'))
-#genes <- read.csv(paste0(dir, 'filtered_feature_bc_matrix/features.tsv.gz'), sep='\t', header=FALSE)
-#cells <- read.csv(paste0(dir, 'filtered_feature_bc_matrix/barcodes.tsv.gz'), sep='\t', header=FALSE)
-#head(genes)
-#head(cells)
-#rownames(cd) <- genes[,2]
-#colnames(cd) <- cells[,1]
-#head(cd)
+dir <- '~/Dropbox (HMS)/Github/SpatialTranscriptomics.js/data/coronal_brain/'
+cd <- readMM(paste0(dir, 'filtered_feature_bc_matrix/matrix.mtx.gz'))
+genes <- read.csv(paste0(dir, 'filtered_feature_bc_matrix/features.tsv.gz'), sep='\t', header=FALSE)
+cells <- read.csv(paste0(dir, 'filtered_feature_bc_matrix/barcodes.tsv.gz'), sep='\t', header=FALSE)
+head(genes)
+head(cells)
+rownames(cd) <- genes[,2]
+colnames(cd) <- cells[,1]
+head(cd)
 
 ######## smaller dataset
-library(MERingue)
-data(mOB)
-names(mOB)
-cd <- mOB$counts
+#library(MERingue)
+#data(mOB)
+#names(mOB)
+#cd <- mOB$counts
 
 ######### QC
 hist(log10(colSums(cd)+1)) ## distribution of genes per cell ie. library size (log scale) 
@@ -30,7 +30,7 @@ hist(log10(rowSums(cd)+1)) ## distribution of cells per gene (log scale)
 vi <- rowSums(cd) > 1000 ## pick a filtering threshold
 table(vi)
 cd.filter <- cd[vi,]
-vi <- colSums(cd) > 3000 ## pick a filtering threshold
+vi <- colSums(cd) > 1000 ## pick a filtering threshold
 table(vi)
 cd.filter <- cd.filter[,vi]
 hist(log10(colSums(cd.filter)+1)) 
@@ -38,9 +38,10 @@ hist(log10(colSums(cd.filter>0)+1))
 hist(log10(rowSums(cd.filter)+1)) 
 
 ######## Counts per million (CPM) normalization
-mat <- Matrix::t(Matrix::t(cd)/Matrix::colSums(cd))
+mat <- Matrix::t(Matrix::t(cd.filter)/Matrix::colSums(cd.filter))
 mat <- mat * 1e6
 mat <- log10(mat + 1)
+dim(mat)
 
 ## Principal components dimensionality reduction
 ## the built in PCA is too slow but feel free to try
@@ -65,6 +66,38 @@ pcs <- pca$u[, 1:N]
 rownames(pcs) <- colnames(mat)
 colnames(pcs) <- paste0('PC', 1:N)
 head(pcs)
+
+############# PCA plots
+par(mfrow=c(2,2), mar=rep(4,4))
+#MUDAN::plotEmbedding(pcs[,1:2], main='PC1 and PC2')
+
+g <- 'Nptxr'
+gexp <- scale(mat[g,])[,1]
+gexp[gexp > 1.5] <- 1.5
+gexp[gexp < -1.5] <- -1.5
+MUDAN::plotEmbedding(pcs[,1:2], main=g, col=gexp,
+                     xlab='PC1', ylab='PC2')
+
+g <- 'Agt'
+gexp <- scale(mat[g,])[,1]
+gexp[gexp > 1.5] <- 1.5
+gexp[gexp < -1.5] <- -1.5
+MUDAN::plotEmbedding(pcs[,1:2], main=g, col=gexp,
+                     xlab='PC1', ylab='PC2')
+
+g <- 'Camk2n1'
+gexp <- scale(mat[g,])[,1]
+gexp[gexp > 1.5] <- 1.5
+gexp[gexp < -1.5] <- -1.5
+MUDAN::plotEmbedding(pcs[,1:2], main=g, col=gexp,
+                     xlab='PC1', ylab='PC2')
+
+g <- 'Pmch'
+gexp <- scale(mat[g,])[,1]
+gexp[gexp > 1.5] <- 1.5
+gexp[gexp < -1.5] <- -1.5
+MUDAN::plotEmbedding(pcs[,1:2], main=g, col=gexp,
+                     xlab='PC1', ylab='PC2')
 
 ############# 2D visualization
 ## TSNE embedding with regular PCs
@@ -113,20 +146,20 @@ plot(pcs[,1:2], col=col, pch=".")
 ## transcriptional clusters are spatially
 positions <- read.csv(paste0(dir, 'spatial/tissue_positions_list.csv.gz'),
                 header=FALSE)
-#head(positions)
+head(positions)
 ## we only care about the x-y pixel coordinates for now
-#pos <- positions[,c(5,6)]
-#rownames(pos) <- positions[,1]
+pos <- positions[,c(5,6)]
+rownames(pos) <- positions[,1]
 #head(pos)
-pos <- mOB$pos
+#pos <- mOB$pos
 ## plot (note positions may be in different order to gene expression matrix)
 plot(pos[names(col),], col=col, pch=16)  
 
 ######## Output data
-library(Matrix)
-dir <- '~/Dropbox (HMS)/Github/SpatialTranscriptomics.js/data/olfactory_bulb/'
-writeMM(obj = Matrix(cd, sparse=TRUE), file = paste0(dir, 'filtered_feature_bc_matrix/matrix.mtx'))
-write.table(rownames(cd), paste0(dir, 'filtered_feature_bc_matrix/features.tsv'), sep='\t', quote=FALSE, col.names=FALSE)
-write.table(colnames(cd), paste0(dir, 'filtered_feature_bc_matrix/barcodes.tsv'), sep='\t', quote=FALSE, col.names=FALSE)
-write.table(pos, paste0(dir, 'spatial/tissue_positions_list.csv'), sep='\t', quote=FALSE, col.names=FALSE)
+#library(Matrix)
+#dir <- '~/Dropbox (HMS)/Github/SpatialTranscriptomics.js/data/olfactory_bulb/'
+#writeMM(obj = Matrix(cd, sparse=TRUE), file = paste0(dir, 'filtered_feature_bc_matrix/matrix.mtx'))
+#write.table(rownames(cd), paste0(dir, 'filtered_feature_bc_matrix/features.tsv'), sep='\t', quote=FALSE, col.names=FALSE)
+#write.table(colnames(cd), paste0(dir, 'filtered_feature_bc_matrix/barcodes.tsv'), sep='\t', quote=FALSE, col.names=FALSE)
+#write.table(pos, paste0(dir, 'spatial/tissue_positions_list.csv'), sep='\t', quote=FALSE, col.names=FALSE)
 
