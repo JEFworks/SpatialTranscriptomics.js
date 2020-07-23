@@ -7,19 +7,6 @@ import QualityControl from "./QualityControl.jsx";
 import FeatureVis from "./FeatureVis.jsx";
 import PCAWrapper from "./PCA.jsx";
 
-const computePCA = (matrix) => {
-  if (!matrix[0] || matrix[0].length < 1) return {};
-  const pca = new PCA(matrix, {
-    method: "SVD",
-    center: true,
-    scale: true,
-    ignoreZeroVariance: true,
-  });
-  const vectors = pca.getEigenvectors().data;
-  const values = pca.getEigenvalues();
-  return { eigenvectors: vectors, eigenvalues: values };
-};
-
 const normalize = (val, min, max) => {
   return (val - min) / (max - min);
 };
@@ -128,10 +115,10 @@ class Homepage extends Component {
       thresholds: { minRowSum: 2, minColSum: 2 },
       rowsums: [],
       colsums: [],
-      pcaData: {},
     };
 
     this.handleFilter = this.handleFilter.bind(this);
+    this.computePCA = this.computePCA.bind(this);
   }
 
   async componentDidMount() {
@@ -248,7 +235,6 @@ class Homepage extends Component {
       rowsums.badGenes,
       colsums.badCells
     );
-    const pcaData = computePCA(filteredData.matrix);
 
     this.setState({
       filteredMatrix: filteredData.matrix,
@@ -257,17 +243,29 @@ class Homepage extends Component {
       thresholds,
       rowsums,
       colsums,
-      pcaData,
     });
   }
 
+  computePCA() {
+    const matrix = this.state.filteredMatrix;
+    if (!matrix[0] || matrix[0].length < 1) return {};
+    const pca = new PCA(matrix, {
+      method: "SVD",
+      center: true,
+      scale: true,
+      ignoreZeroVariance: true,
+    });
+    const vectors = pca.getEigenvectors().data;
+    const values = pca.getEigenvalues();
+    return { eigenvectors: vectors, eigenvalues: values };
+  }
+
   render() {
-    const { matrix, filteredMatrix, pcaData } = this.state;
+    const { filteredMatrix } = this.state;
     return (
       <>
         <div className="site-container">
           <QualityControl
-            matrix={matrix}
             thresholds={this.state.thresholds}
             rowsums={this.state.rowsums.sums}
             colsums={this.state.colsums.sums}
@@ -280,7 +278,7 @@ class Homepage extends Component {
             barcodes={this.state.filteredBarcodes}
           />
           <div style={{ paddingTop: "35px" }}></div>
-          <PCAWrapper data={pcaData} />
+          <PCAWrapper computePCA={this.computePCA} />
           <div style={{ paddingTop: "70px" }}></div>
         </div>
       </>

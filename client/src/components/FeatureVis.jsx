@@ -7,6 +7,7 @@ import {
   FormGroup,
   FormControlLabel,
   Checkbox,
+  Button,
 } from "@material-ui/core";
 
 const primary = "#094067";
@@ -44,7 +45,7 @@ const getRGB = (val) => {
   return `rgb(${r},${g},${b})`;
 };
 
-const LeafletWrapper = (getPixels) => {
+const LeafletWrapper = (pixels) => {
   const bounds = [
     [0, 0],
     [1921, 2000],
@@ -59,7 +60,7 @@ const LeafletWrapper = (getPixels) => {
         style={{ height: "500px", width: "100%" }}
       >
         <ImageOverlay bounds={bounds} url="/images/tissue_image.png" />
-        {getPixels().map((pixel) => {
+        {pixels.map((pixel) => {
           return (
             <Circle
               key={pixel.center}
@@ -162,7 +163,9 @@ class FeatureVis extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      status: 0,
       feature: "nptxr",
+      pixels: [],
       deltaX: 0,
       deltaY: 1965,
       scale: 0.176,
@@ -212,6 +215,11 @@ class FeatureVis extends Component {
     this.setState({ xyFlipped: !this.state.xyFlipped });
   }
 
+  run() {
+    const pixels = this.getPixels();
+    this.setState({ pixels, status: 1 });
+  }
+
   getPixels() {
     const { props } = this;
     const { barcodes } = props;
@@ -247,7 +255,6 @@ class FeatureVis extends Component {
 
   render() {
     const {
-      getPixels,
       selectGene,
       changeDeltaX,
       changeDeltaY,
@@ -256,16 +263,31 @@ class FeatureVis extends Component {
       flipVertical,
       flipXY,
     } = this;
-    const { horizontalFlipped, verticalFlipped, xyFlipped } = this.state;
+    const {
+      pixels,
+      horizontalFlipped,
+      verticalFlipped,
+      xyFlipped,
+    } = this.state;
 
     return (
       <>
-        <Typography
-          style={{ marginBottom: "10px", fontWeight: 500, color: primary }}
-          variant="h5"
-        >
-          Feature Visualization
-        </Typography>
+        <div style={{ display: "flex" }}>
+          <Typography
+            style={{ marginBottom: "10px", fontWeight: 500, color: primary }}
+            variant="h5"
+          >
+            Feature Visualization
+          </Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => this.run()}
+          >
+            Run
+          </Button>
+        </div>
+
         <Typography
           style={{ marginBottom: "0px", fontWeight: 400, color: paragraph }}
           variant="body1"
@@ -284,7 +306,7 @@ class FeatureVis extends Component {
         )}
         <div style={{ paddingTop: "10px" }}></div>
 
-        {LeafletWrapper(getPixels)}
+        {LeafletWrapper(pixels)}
       </>
     );
   }

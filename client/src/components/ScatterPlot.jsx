@@ -23,7 +23,7 @@ class Scatter extends Component {
             return e + " cm";
           }}
           blendMode="normal"
-          nodeSize={5}
+          nodeSize={2}
           isInteractive={false}
           enableGridX={false}
           enableGridY={false}

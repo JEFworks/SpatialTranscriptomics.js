@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Typography, Paper } from "@material-ui/core";
+import { Typography, Paper, Button } from "@material-ui/core";
 import LineChart from "./LineChart.jsx";
 import ScatterPlot from "./ScatterPlot.jsx";
 
@@ -9,7 +9,7 @@ const paragraph = "#5f6c7b";
 const Biplot = (eigenvectors) => {
   const obj = [{ data: [] }];
   if (eigenvectors) {
-    eigenvectors.slice(0, 500).forEach((eigenvector) => {
+    eigenvectors.forEach((eigenvector) => {
       const x = eigenvector[0];
       const y = eigenvector[1];
       obj[0].data.push({ x: x, y: y });
@@ -119,17 +119,37 @@ const ScreePlot = (eigenvalues) => {
 };
 
 class PCAWrapper extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { data: [] };
+  }
+
+  run() {
+    const { computePCA } = this.props;
+    const data = computePCA();
+    this.setState({ data });
+  }
+
   render() {
-    const { props } = this;
-    const { data } = props;
+    const { data } = this.state;
+
     return (
       <>
-        <Typography
-          style={{ marginBottom: "10px", fontWeight: 500, color: primary }}
-          variant="h5"
-        >
-          Principal Component Analysis
-        </Typography>
+        <div style={{ display: "flex" }}>
+          <Typography
+            style={{ marginBottom: "10px", fontWeight: 500, color: primary }}
+            variant="h5"
+          >
+            Principal Component Analysis
+          </Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => this.run()}
+          >
+            Run
+          </Button>
+        </div>
         <Typography
           style={{ marginBottom: "20px", fontWeight: 400, color: paragraph }}
           variant="body1"

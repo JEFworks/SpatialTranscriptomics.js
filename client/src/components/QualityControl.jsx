@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Typography, Paper, Slider } from "@material-ui/core";
+import { Typography, Paper, Slider, Button } from "@material-ui/core";
 import BarGraph from "./BarGraph.jsx";
 
 const primary = "#094067";
@@ -13,12 +13,8 @@ const marks = (min, max) => {
   return list;
 };
 
-const Figure = (props, type) => {
-  const sums = !props.matrix[0]
-    ? []
-    : type === "rowsum"
-    ? props.rowsums
-    : props.colsums;
+const Figure = (rowsums, colsums, thresholds, changeThreshold, type) => {
+  const sums = !rowsums ? [] : type === "rowsum" ? rowsums : colsums;
 
   let minIndex = 0;
   let maxIndex = 10;
@@ -51,11 +47,7 @@ const Figure = (props, type) => {
         <BarGraph
           xLabel={type === "rowsum" ? "log10(rowSum + 1)" : "log10(colSum + 1)"}
           data={sums}
-          min={
-            type === "rowsum"
-              ? props.thresholds.minRowSum
-              : props.thresholds.minColSum
-          }
+          min={type === "rowsum" ? thresholds.minRowSum : thresholds.minColSum}
           lowerLimit={minIndex}
           upperLimit={maxIndex}
         />
@@ -68,7 +60,7 @@ const Figure = (props, type) => {
       <Slider
         style={{ marginLeft: "20px", width: "90%", color: sliderColor }}
         onChangeCommitted={(_event, value) =>
-          props.handleFilter(
+          changeThreshold(
             type === "rowsum" ? value : null,
             type === "colsum" ? value : null
           )
@@ -114,8 +106,35 @@ const Figure = (props, type) => {
 };
 
 class QualityControl extends Component {
-  render() {
+  constructor(props) {
+    super(props);
+    const { thresholds } = props;
+    this.state = {
+      minRowSum: thresholds.minRowSum,
+      minColSum: thresholds.minColSum,
+    };
+
+    this.changeThreshold = this.changeThreshold.bind(this);
+    this.run = this.run.bind(this);
+  }
+
+  changeThreshold(minRowSum, minColSum) {
+    if (minRowSum) this.setState({ minRowSum });
+    if (minColSum) this.setState({ minColSum });
+  }
+
+  run() {
     const { props } = this;
+    const { minRowSum, minColSum } = this.state;
+    props.handleFilter(minRowSum, minColSum);
+  }
+
+  render() {
+    const { props, state } = this;
+    const { rowsums, colsums } = props;
+    const { minRowSum, minColSum } = state;
+    const thresholds = { minRowSum: minRowSum, minColSum: minColSum };
+
     return (
       <>
         <Typography
@@ -124,6 +143,10 @@ class QualityControl extends Component {
         >
           Quality Control
         </Typography>
+        <Button variant="contained" color="primary" onClick={() => this.run()}>
+          Run
+        </Button>
+
         <Typography
           style={{ marginBottom: "20px", fontWeight: 400, color: paragraph }}
           variant="body1"
@@ -137,8 +160,20 @@ class QualityControl extends Component {
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>
           <div className="QC-flex">
-            {Figure(props, "rowsum")}
-            {Figure(props, "colsum")}
+            {Figure(
+              rowsums,
+              colsums,
+              thresholds,
+              this.changeThreshold,
+              "rowsum"
+            )}
+            {Figure(
+              rowsums,
+              colsums,
+              thresholds,
+              this.changeThreshold,
+              "colsum"
+            )}
           </div>
           <div style={{ width: "50%" }}></div>
         </div>
