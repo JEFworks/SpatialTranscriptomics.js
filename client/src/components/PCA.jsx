@@ -2,17 +2,18 @@ import React, { Component } from "react";
 import { Typography, Paper, Button } from "@material-ui/core";
 import LineChart from "./LineChart.jsx";
 import ScatterPlot from "./ScatterPlot.jsx";
+import GetRGB from "../functions/GetRGB.jsx";
 
 const primary = "#094067";
 const paragraph = "#5f6c7b";
 
-const Biplot = (eigenvectors) => {
+const Biplot = (eigenvectors, getColor) => {
   const obj = [{ data: [] }];
   if (eigenvectors) {
-    eigenvectors.forEach((eigenvector) => {
+    eigenvectors.forEach((eigenvector, index) => {
       const x = eigenvector[0];
       const y = eigenvector[1];
-      obj[0].data.push({ x: x, y: y });
+      obj[0].data.push({ x: x, y: y, index: index });
     });
   }
 
@@ -30,7 +31,7 @@ const Biplot = (eigenvectors) => {
 
   const Scatterplot = (
     <div style={{ width: "100%", height: "100%" }}>
-      <ScatterPlot data={obj} />
+      <ScatterPlot data={obj} getColor={getColor} />
     </div>
   );
 
@@ -121,7 +122,15 @@ const ScreePlot = (eigenvalues) => {
 class PCAWrapper extends Component {
   constructor(props) {
     super(props);
-    this.state = { data: [] };
+    this.state = { data: [], feature: "nptxr" };
+    this.getColor = this.getColor.bind(this);
+  }
+
+  getColor(node) {
+    const { props } = this;
+    const gene = props.matrix[props.features.indexOf(this.state.feature)];
+    if (gene && node.index) return GetRGB(gene[node.index]);
+    return "black";
   }
 
   run() {
@@ -135,33 +144,35 @@ class PCAWrapper extends Component {
 
     return (
       <>
-        <div style={{ display: "flex" }}>
-          <Typography
-            style={{ marginBottom: "10px", fontWeight: 500, color: primary }}
-            variant="h5"
-          >
-            Principal Component Analysis
-          </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => this.run()}
-          >
-            Run
-          </Button>
-        </div>
         <Typography
-          style={{ marginBottom: "20px", fontWeight: 400, color: paragraph }}
+          style={{ marginBottom: "10px", fontWeight: 500, color: primary }}
+          variant="h5"
+        >
+          Principal Component Analysis
+        </Typography>
+        <Typography
+          style={{ marginBottom: "15px", fontWeight: 400, color: paragraph }}
           variant="body1"
         >
           Enter description here.
         </Typography>
 
+        <Button
+          variant="contained"
+          size="small"
+          color="primary"
+          style={{ backgroundColor: primary }}
+          onClick={() => this.run()}
+        >
+          Run PCA
+        </Button>
+        <div style={{ paddingTop: "20px" }}></div>
+
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>
           <div className="PC-flex">
             {ScreePlot(data.eigenvalues)}
-            {Biplot(data.eigenvectors)}
+            {Biplot(data.eigenvectors, this.getColor)}
           </div>
           <div style={{ width: "50%" }}></div>
         </div>

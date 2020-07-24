@@ -271,14 +271,18 @@ class Homepage extends Component {
             colsums={this.state.colsums.sums}
             handleFilter={this.handleFilter}
           />
-          <div style={{ paddingTop: "10px" }}></div>
+          <div style={{ paddingTop: "30px" }}></div>
           <FeatureVis
             matrix={filteredMatrix}
             features={this.state.filteredFeatures}
             barcodes={this.state.filteredBarcodes}
           />
           <div style={{ paddingTop: "35px" }}></div>
-          <PCAWrapper computePCA={this.computePCA} />
+          <PCAWrapper
+            matrix={filteredMatrix}
+            features={this.state.filteredFeatures}
+            computePCA={this.computePCA}
+          />
           <div style={{ paddingTop: "70px" }}></div>
         </div>
       </>

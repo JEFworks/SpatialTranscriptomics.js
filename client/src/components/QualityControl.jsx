@@ -4,7 +4,7 @@ import BarGraph from "./BarGraph.jsx";
 
 const primary = "#094067";
 const paragraph = "#5f6c7b";
-const sliderColor = "#90b4ce";
+const tertiary = "#90b4ce";
 
 const marks = (min, max) => {
   const list = [];
@@ -58,8 +58,8 @@ const Figure = (rowsums, colsums, thresholds, changeThreshold, type) => {
   const Toggle = (
     <>
       <Slider
-        style={{ marginLeft: "20px", width: "90%", color: sliderColor }}
-        onChangeCommitted={(_event, value) =>
+        style={{ marginLeft: "20px", width: "90%", color: tertiary }}
+        onChange={(_event, value) =>
           changeThreshold(
             type === "rowsum" ? value : null,
             type === "colsum" ? value : null
@@ -143,10 +143,6 @@ class QualityControl extends Component {
         >
           Quality Control
         </Typography>
-        <Button variant="contained" color="primary" onClick={() => this.run()}>
-          Run
-        </Button>
-
         <Typography
           style={{ marginBottom: "20px", fontWeight: 400, color: paragraph }}
           variant="body1"
@@ -177,6 +173,17 @@ class QualityControl extends Component {
           </div>
           <div style={{ width: "50%" }}></div>
         </div>
+
+        <div style={{ paddingTop: "0px" }}></div>
+        <Button
+          variant="contained"
+          size="small"
+          color="primary"
+          style={{ backgroundColor: primary }}
+          onClick={() => this.run()}
+        >
+          Apply Filters
+        </Button>
       </>
     );
   }

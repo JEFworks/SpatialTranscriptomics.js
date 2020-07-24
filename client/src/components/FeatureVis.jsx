@@ -9,41 +9,11 @@ import {
   Checkbox,
   Button,
 } from "@material-ui/core";
+import GetRGB from "../functions/GetRGB.jsx";
 
 const primary = "#094067";
 const paragraph = "#5f6c7b";
-const buttonColor = "#90b4ce";
-
-const getRGB = (val) => {
-  const colors = [
-    [0, 0, 255],
-    [255, 255, 255],
-    [255, 0, 0],
-  ];
-
-  let value = val;
-  let index1;
-  let index2;
-  let fract = 0;
-  if (value <= 0) {
-    index1 = 0;
-    index2 = 0;
-  } else if (value >= 1) {
-    index1 = colors.length - 1;
-    index2 = colors.length - 1;
-  } else {
-    value = value * (colors.length - 1);
-    index1 = Math.floor(value);
-    index2 = index1 + 1;
-    fract = value - index1;
-  }
-
-  const r = (colors[index2][0] - colors[index1][0]) * fract + colors[index1][0];
-  const g = (colors[index2][1] - colors[index1][1]) * fract + colors[index1][1];
-  const b = (colors[index2][2] - colors[index1][2]) * fract + colors[index1][2];
-
-  return `rgb(${r},${g},${b})`;
-};
+const tertiary = "#90b4ce";
 
 const LeafletWrapper = (pixels) => {
   const bounds = [
@@ -125,7 +95,7 @@ const CheckboxInput = (
           control={
             <Checkbox
               disableRipple
-              style={{ backgroundColor: "transparent", color: buttonColor }}
+              style={{ backgroundColor: "transparent", color: tertiary }}
               checked={horizontalFlipped === -1}
               onChange={flipHorizontal}
             />
@@ -136,7 +106,7 @@ const CheckboxInput = (
           control={
             <Checkbox
               disableRipple
-              style={{ backgroundColor: "transparent", color: buttonColor }}
+              style={{ backgroundColor: "transparent", color: tertiary }}
               checked={verticalFlipped === -1}
               onChange={flipVertical}
             />
@@ -147,7 +117,7 @@ const CheckboxInput = (
           control={
             <Checkbox
               disableRipple
-              style={{ backgroundColor: "transparent", color: buttonColor }}
+              style={{ backgroundColor: "transparent", color: tertiary }}
               checked={xyFlipped}
               onChange={flipXY}
             />
@@ -245,7 +215,7 @@ class FeatureVis extends Component {
           const centerY = horizontalFlipped * y * scale + deltaX;
           pixels.push({
             center: !xyFlipped ? [centerX, centerY] : [centerY, centerX],
-            color: getRGB(cell),
+            color: GetRGB(cell),
           });
         } catch (error) {}
       });
@@ -272,22 +242,12 @@ class FeatureVis extends Component {
 
     return (
       <>
-        <div style={{ display: "flex" }}>
-          <Typography
-            style={{ marginBottom: "10px", fontWeight: 500, color: primary }}
-            variant="h5"
-          >
-            Feature Visualization
-          </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => this.run()}
-          >
-            Run
-          </Button>
-        </div>
-
+        <Typography
+          style={{ marginBottom: "10px", fontWeight: 500, color: primary }}
+          variant="h5"
+        >
+          Feature Visualization
+        </Typography>
         <Typography
           style={{ marginBottom: "0px", fontWeight: 400, color: paragraph }}
           variant="body1"
@@ -304,7 +264,18 @@ class FeatureVis extends Component {
           xyFlipped,
           flipXY
         )}
+
         <div style={{ paddingTop: "10px" }}></div>
+        <Button
+          variant="contained"
+          size="small"
+          color="primary"
+          style={{ backgroundColor: primary }}
+          onClick={() => this.run()}
+        >
+          Run Visualization
+        </Button>
+        <div style={{ paddingTop: "20px" }}></div>
 
         {LeafletWrapper(pixels)}
       </>
