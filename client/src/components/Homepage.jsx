@@ -2,14 +2,9 @@ import React, { Component } from "react";
 import axios from "axios";
 import { SparseMatrix } from "ml-sparse-matrix";
 import { PCA } from "ml-pca";
-import * as d3 from "d3";
 import QualityControl from "./QualityControl.jsx";
 import FeatureVis from "./FeatureVis.jsx";
 import PCAWrapper from "./PCA.jsx";
-
-const normalize = (val, min, max) => {
-  return (val - min) / (max - min);
-};
 
 const rowSums = (matrix, threshold) => {
   if (!matrix[0]) return {};
@@ -82,16 +77,7 @@ const getFilteredData = (matrix, features, barcodes, badGenes, badCells) => {
       return !badCell;
     });
 
-    const mean = d3.mean(filteredGene);
-    const sd = d3.deviation(filteredGene);
-    const upperLimit = mean + 2 * sd;
-    const lowerLimit = mean - 2 * sd;
-    const max = Math.min(d3.max(filteredGene), upperLimit);
-    const min = Math.max(lowerLimit, d3.min(filteredGene));
-
-    filteredMatrix[index] = filteredGene.map((cell) => {
-      return normalize(cell, min, max);
-    });
+    filteredMatrix[index] = filteredGene;
   });
 
   return {
@@ -247,8 +233,19 @@ class Homepage extends Component {
   }
 
   computePCA() {
-    const matrix = this.state.filteredMatrix;
+    const matrix = this.state.filteredMatrix.slice();
     if (!matrix[0] || matrix[0].length < 1) return {};
+
+    matrix.forEach((gene, index) => {
+      const totalReads = gene.reduce((a, b) => {
+        return a + b;
+      }, 0);
+      matrix[index] = gene.map((cell) => {
+        const cpm = (cell * Math.pow(10, 6)) / totalReads;
+        return Math.log10(cpm + 1);
+      });
+    });
+
     const pca = new PCA(matrix, {
       method: "SVD",
       center: true,

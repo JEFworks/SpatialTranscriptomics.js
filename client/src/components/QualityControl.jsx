@@ -119,8 +119,8 @@ class QualityControl extends Component {
   }
 
   changeThreshold(minRowSum, minColSum) {
-    if (minRowSum) this.setState({ minRowSum });
-    if (minColSum) this.setState({ minColSum });
+    if (minRowSum !== null) this.setState({ minRowSum });
+    if (minColSum !== null) this.setState({ minColSum });
   }
 
   run() {

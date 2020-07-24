@@ -1,8 +1,16 @@
 import React, { Component } from "react";
-import { Typography, Paper, Button } from "@material-ui/core";
+import {
+  Typography,
+  Paper,
+  Button,
+  FormGroup,
+  TextField,
+} from "@material-ui/core";
 import LineChart from "./LineChart.jsx";
 import ScatterPlot from "./ScatterPlot.jsx";
 import GetRGB from "../functions/GetRGB.jsx";
+import MinMaxNormalize from "../functions/MinMaxNormalize.jsx";
+import MinMaxStats from "../functions/MinMaxStats.jsx";
 
 const primary = "#094067";
 const paragraph = "#5f6c7b";
@@ -66,7 +74,7 @@ const Biplot = (eigenvectors, getColor) => {
   );
 };
 
-const ScreePlot = (eigenvalues) => {
+const ScreePlot = (eigenvalues, numPCs) => {
   const obj = [{ data: [] }];
   if (eigenvalues) {
     eigenvalues.slice(0, 20).forEach((eigenvalue, index) => {
@@ -88,7 +96,7 @@ const ScreePlot = (eigenvalues) => {
 
   const Linechart = (
     <div style={{ width: "100%", height: "100%" }}>
-      <LineChart data={obj} max={10} />
+      <LineChart data={obj} max={numPCs} />
     </div>
   );
 
@@ -121,11 +129,35 @@ const ScreePlot = (eigenvalues) => {
   );
 };
 
+const TypedInput = (selectGene, selectNumPCs) => {
+  return (
+    <>
+      <FormGroup row style={{ marginTop: "0px" }}>
+        <TextField
+          style={{ width: "150px", marginRight: "15px" }}
+          helperText="Feature name"
+          defaultValue="Agt"
+          onChange={selectGene}
+        />
+        <TextField
+          style={{ width: "150px", marginRight: "15px" }}
+          helperText="Number of PCs"
+          defaultValue="10"
+          onChange={selectNumPCs}
+        />
+      </FormGroup>
+    </>
+  );
+};
+
 class PCAWrapper extends Component {
   constructor(props) {
     super(props);
-    this.state = { data: [], colors: [], feature: "nptxr" };
+    this.state = { data: [], colors: [], feature: "agt", numPCs: 10 };
+
     this.getColor = this.getColor.bind(this);
+    this.selectGene = this.selectGene.bind(this);
+    this.selectNumPCs = this.selectNumPCs.bind(this);
   }
 
   getColor(node) {
@@ -139,15 +171,28 @@ class PCAWrapper extends Component {
 
     const colors = [];
     const gene = matrix[features.indexOf(this.state.feature)];
-    if (gene)
+    if (gene) {
+      const { max, min } = MinMaxStats(gene);
       gene.forEach((cell) => {
-        colors.push(GetRGB(cell));
+        colors.push(GetRGB(MinMaxNormalize(cell, min, max)));
       });
+    }
     this.setState({ data, colors });
   }
 
+  selectNumPCs(event) {
+    const num = Number.parseInt(event.target.value);
+    if (!isNaN(num))
+      this.setState({ numPCs: num === 0 ? 1 : Math.min(num, 20) });
+  }
+
+  selectGene(event) {
+    this.setState({ feature: event.target.value.trim().toLowerCase() });
+  }
+
   render() {
-    const { data } = this.state;
+    const { selectGene, selectNumPCs } = this;
+    const { data, numPCs } = this.state;
 
     return (
       <>
@@ -158,12 +203,15 @@ class PCAWrapper extends Component {
           Principal Component Analysis
         </Typography>
         <Typography
-          style={{ marginBottom: "15px", fontWeight: 400, color: paragraph }}
+          style={{ marginBottom: "10px", fontWeight: 400, color: paragraph }}
           variant="body1"
         >
           Enter description here.
         </Typography>
 
+        {TypedInput(selectGene, selectNumPCs)}
+
+        <div style={{ paddingTop: "10px" }}></div>
         <Button
           variant="contained"
           size="small"
@@ -178,7 +226,7 @@ class PCAWrapper extends Component {
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>
           <div className="PC-flex">
-            {ScreePlot(data.eigenvalues)}
+            {ScreePlot(data.eigenvalues, numPCs)}
             {Biplot(data.eigenvectors, this.getColor)}
           </div>
           <div style={{ width: "50%" }}></div>

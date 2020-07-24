@@ -2,10 +2,6 @@ import React, { Component } from "react";
 import { ResponsiveScatterPlot } from "@nivo/scatterplot";
 
 class Scatter extends Component {
-  constructor(props) {
-    super(props);
-  }
-
   render() {
     const { props } = this;
     const { data } = props;
@@ -24,7 +20,7 @@ class Scatter extends Component {
             return e + " cm";
           }}
           blendMode="normal"
-          nodeSize={2}
+          nodeSize={3}
           isInteractive={false}
           enableGridX={false}
           enableGridY={false}

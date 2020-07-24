@@ -10,6 +10,8 @@ import {
   Button,
 } from "@material-ui/core";
 import GetRGB from "../functions/GetRGB.jsx";
+import MinMaxNormalize from "../functions/MinMaxNormalize.jsx";
+import MinMaxStats from "../functions/MinMaxStats.jsx";
 
 const primary = "#094067";
 const paragraph = "#5f6c7b";
@@ -133,7 +135,6 @@ class FeatureVis extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      status: 0,
       feature: "nptxr",
       pixels: [],
       deltaX: 0,
@@ -198,6 +199,7 @@ class FeatureVis extends Component {
     if (gene && barcodes[0]) {
       if (!barcodes[0].x || !barcodes[0].y) return [];
 
+      const { max, min } = MinMaxStats(gene);
       gene.forEach((cell, index) => {
         try {
           const { x, y } = barcodes[index];
@@ -214,7 +216,7 @@ class FeatureVis extends Component {
           const centerY = horizontalFlipped * y * scale + deltaX;
           pixels.push({
             center: !xyFlipped ? [centerX, centerY] : [centerY, centerX],
-            color: GetRGB(cell),
+            color: GetRGB(MinMaxNormalize(cell, min, max)),
           });
         } catch (error) {}
       });
