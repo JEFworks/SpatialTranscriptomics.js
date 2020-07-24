@@ -255,7 +255,7 @@ class Homepage extends Component {
       scale: true,
       ignoreZeroVariance: true,
     });
-    const vectors = pca.getEigenvectors().data;
+    const vectors = pca.getLoadings().data;
     const values = pca.getEigenvalues();
     return { eigenvectors: vectors, eigenvalues: values };
   }

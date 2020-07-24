@@ -1,9 +1,6 @@
 import React, { Component } from "react";
 import { ResponsiveScatterPlot } from "@nivo/scatterplot";
 
-// const red = "#ff80ab";
-// const blue = "#80d8ff";
-
 class Scatter extends Component {
   constructor(props) {
     super(props);
@@ -52,6 +49,7 @@ class Scatter extends Component {
             legendOffset: -50,
           }}
           colors={props.getColor}
+          animate={false}
         />
       </>
     );

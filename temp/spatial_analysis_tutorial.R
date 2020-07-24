@@ -7,10 +7,10 @@
 library(Matrix)
 
 ######## read in data
-dir <- '~/Dropbox (HMS)/Github/SpatialTranscriptomics.js/data/coronal_brain/'
-cd <- readMM(paste0(dir, 'filtered_feature_bc_matrix/matrix.mtx.gz'))
-genes <- read.csv(paste0(dir, 'filtered_feature_bc_matrix/features.tsv.gz'), sep='\t', header=FALSE)
-cells <- read.csv(paste0(dir, 'filtered_feature_bc_matrix/barcodes.tsv.gz'), sep='\t', header=FALSE)
+dir <- '~/Documents/GitHub/SpatialTranscriptomics.js/data/coronal_brain/'
+cd <- readMM(paste0(dir, 'filtered_feature_bc_matrix/filtered/filtered_matrix.mtx.gz'))
+genes <- read.csv(paste0(dir, 'filtered_feature_bc_matrix/filtered/filtered_features.tsv.gz'), sep='\t', header=FALSE)
+cells <- read.csv(paste0(dir, 'filtered_feature_bc_matrix/filtered/barcodes.tsv.gz'), sep='\t', header=FALSE)
 head(genes)
 head(cells)
 rownames(cd) <- genes[,2]

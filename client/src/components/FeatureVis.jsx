@@ -191,10 +191,9 @@ class FeatureVis extends Component {
   }
 
   getPixels() {
-    const { props } = this;
-    const { barcodes } = props;
+    const { matrix, barcodes, features } = this.props;
     const pixels = [];
-    const gene = props.matrix[props.features.indexOf(this.state.feature)];
+    const gene = matrix[features.indexOf(this.state.feature)];
 
     if (gene && barcodes[0]) {
       if (!barcodes[0].x || !barcodes[0].y) return [];

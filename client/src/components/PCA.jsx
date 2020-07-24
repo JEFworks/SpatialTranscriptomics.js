@@ -10,9 +10,11 @@ const paragraph = "#5f6c7b";
 const Biplot = (eigenvectors, getColor) => {
   const obj = [{ data: [] }];
   if (eigenvectors) {
-    eigenvectors.forEach((eigenvector, index) => {
-      const x = eigenvector[0];
-      const y = eigenvector[1];
+    const pc1 = eigenvectors[0];
+    const pc2 = eigenvectors[1];
+    pc1.forEach((cell, index) => {
+      const x = cell;
+      const y = pc2[index];
       obj[0].data.push({ x: x, y: y, index: index });
     });
   }
@@ -122,21 +124,26 @@ const ScreePlot = (eigenvalues) => {
 class PCAWrapper extends Component {
   constructor(props) {
     super(props);
-    this.state = { data: [], feature: "nptxr" };
+    this.state = { data: [], colors: [], feature: "nptxr" };
     this.getColor = this.getColor.bind(this);
   }
 
   getColor(node) {
-    const { props } = this;
-    const gene = props.matrix[props.features.indexOf(this.state.feature)];
-    if (gene && node.index) return GetRGB(gene[node.index]);
-    return "black";
+    if (node.index) return this.state.colors[node.index];
+    return "blue";
   }
 
   run() {
-    const { computePCA } = this.props;
+    const { computePCA, matrix, features } = this.props;
     const data = computePCA();
-    this.setState({ data });
+
+    const colors = [];
+    const gene = matrix[features.indexOf(this.state.feature)];
+    if (gene)
+      gene.forEach((cell) => {
+        colors.push(GetRGB(cell));
+      });
+    this.setState({ data, colors });
   }
 
   render() {

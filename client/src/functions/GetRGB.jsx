@@ -1,4 +1,5 @@
 const GetRGB = (val) => {
+  if (!val) return "blue";
   const colors = [
     [0, 0, 255],
     [255, 255, 255],
