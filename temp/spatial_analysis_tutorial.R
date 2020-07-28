@@ -1,16 +1,16 @@
 ######## Sample spatial transcriptomics analysis
-## When working through this analysis, 
-## you may think about what parameters 
-## you'd be interested in toggling 
+## When working through this analysis,
+## you may think about what parameters
+## you'd be interested in toggling
 ## and exploring interactively
 
 library(Matrix)
 
 ######## read in data
-dir <- '~/Dropbox (HMS)/Github/SpatialTranscriptomics.js/data/coronal_brain/'
-cd <- readMM(paste0(dir, 'filtered_feature_bc_matrix/matrix.mtx.gz'))
-genes <- read.csv(paste0(dir, 'filtered_feature_bc_matrix/features.tsv.gz'), sep='\t', header=FALSE)
-cells <- read.csv(paste0(dir, 'filtered_feature_bc_matrix/barcodes.tsv.gz'), sep='\t', header=FALSE)
+dir <- '~/Desktop/SpatialTranscriptomics.js/data/coronal_brain/filtered_feature_bc_matrix/filtered/'
+cd <- readMM(paste0(dir, 'filtered_matrix.mtx.gz'))
+genes <- read.csv(paste0(dir, 'filtered_features.tsv.gz'), sep='\t', header=FALSE)
+cells <- read.csv(paste0(dir, 'barcodes.tsv.gz'), sep='\t', header=FALSE)
 head(genes)
 head(cells)
 rownames(cd) <- genes[,2]
@@ -24,18 +24,18 @@ head(cd)
 #cd <- mOB$counts
 
 ######### QC
-hist(log10(colSums(cd)+1)) ## distribution of genes per cell ie. library size (log scale) 
-hist(log10(colSums(cd>0)+1)) ## distribution of unique gene species per cell ie. library complexity (log scale) 
+hist(log10(colSums(cd)+1)) ## distribution of genes per cell ie. library size (log scale)
+hist(log10(colSums(cd>0)+1)) ## distribution of unique gene species per cell ie. library complexity (log scale)
 hist(log10(rowSums(cd)+1)) ## distribution of cells per gene (log scale)
 vi <- rowSums(cd) > 1000 ## pick a filtering threshold
 table(vi)
 cd.filter <- cd[vi,]
-vi <- colSums(cd) > 1000 ## pick a filtering threshold
+vi <- colSums(cd) > 100 ## pick a filtering threshold
 table(vi)
 cd.filter <- cd.filter[,vi]
-hist(log10(colSums(cd.filter)+1)) 
+hist(log10(colSums(cd.filter)+1))
 hist(log10(colSums(cd.filter>0)+1))
-hist(log10(rowSums(cd.filter)+1)) 
+hist(log10(rowSums(cd.filter)+1))
 
 ######## Counts per million (CPM) normalization
 mat <- Matrix::t(Matrix::t(cd.filter)/Matrix::colSums(cd.filter))
@@ -45,21 +45,37 @@ dim(mat)
 
 ## Principal components dimensionality reduction
 ## the built in PCA is too slow but feel free to try
-# pcs <- prcomp(mat) 
+# pcs <- prcomp(mat)
 ## we will instead install a faster implementation
-# install.packages(RSpectra)
+#install.packages("RSpectra")
 library(RSpectra)
+#pca <- RSpectra::svds(
+#  A    = t(mat),
+#  k    = 20,
+#  opts = list(
+#    center = TRUE, scale = TRUE, maxitr = 2000, tol = 1e-10
+#  )
+#)
+
+## Scale and center data myself
+m <- t(mat)
+m <- t(t(m) - colMeans(m))
+colMeans(m) ## double check mean is ~0
+m <- scale(m)
+apply(m, 2, var) ## double check var is 1
+
 pca <- RSpectra::svds(
-  A    = t(mat),
-  k    = 50, 
+  A    = m,
+  k    = 20,
   opts = list(
-    center = TRUE, scale = TRUE, maxitr = 2000, tol = 1e-10
+    center = FALSE, scale = FALSE, maxitr = 2000, tol = 1e-10
   )
 )
 
 ## look at elbow plot to check what is reasonable number of pcs
 val <- pca$d
 plot(val, type="l")
+points(val)
 N <- 10
 abline(v=N, col='red')
 pcs <- pca$u[, 1:N]
@@ -103,17 +119,17 @@ MUDAN::plotEmbedding(pcs[,1:2], main=g, col=gexp,
 ## TSNE embedding with regular PCs
 ## Can also use UMAP (try it out for yourself) using the uwot package
 library(Rtsne)
-emb <- Rtsne::Rtsne(pcs, 
-                    is_distance=FALSE, 
-                    perplexity=30, 
+emb <- Rtsne::Rtsne(pcs,
+                    is_distance=FALSE,
+                    perplexity=30,
                     num_threads=1,
-                    verbose=FALSE)$Y 
+                    verbose=FALSE)$Y
 rownames(emb) <- rownames(pcs)
 
 ## Plot
 plot(emb, pch=".")
 ## I'm sure you can visually see transcriptionally distinct clusters
-## but let's try to computationally identify them 
+## but let's try to computationally identify them
 ## with graph based clustering
 
 ## we will first make a k-nearest neighbor graph (with k=30 here)
@@ -130,19 +146,19 @@ g <- igraph::simplify(g)
 ## and now we can run a graph-based community detection method
 com <- igraph::cluster_walktrap(g)$membership
 names(com) <- rownames(pcs)
-table(com)  
+table(com)
 ## turn into colors
 col = rainbow(length(unique(com)))[com]
 names(col) <- names(com)
 
 ## Now let's plot again
-plot(emb, col=col, pch=".")  
-  
+plot(emb, col=col, pch=".")
+
 ## You can also visualize these clusters in different embeddings like in PC space
 ## first 2 PCs for example
-plot(pcs[,1:2], col=col, pch=".")  
+plot(pcs[,1:2], col=col, pch=".")
 
-## Since this is spatial data, we can also see where these 
+## Since this is spatial data, we can also see where these
 ## transcriptional clusters are spatially
 positions <- read.csv(paste0(dir, 'spatial/tissue_positions_list.csv.gz'),
                 header=FALSE)
@@ -153,7 +169,7 @@ rownames(pos) <- positions[,1]
 #head(pos)
 #pos <- mOB$pos
 ## plot (note positions may be in different order to gene expression matrix)
-plot(pos[names(col),], col=col, pch=16)  
+plot(pos[names(col),], col=col, pch=16)
 
 ######## Output data
 #library(Matrix)
