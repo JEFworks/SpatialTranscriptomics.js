@@ -20,11 +20,13 @@ const Biplot = (eigenvectors, getColor) => {
   if (eigenvectors) {
     const pc1 = eigenvectors[0];
     const pc2 = eigenvectors[1];
-    pc1.forEach((cell, index) => {
-      const x = cell;
-      const y = pc2[index];
-      obj[0].data.push({ x: x, y: y, index: index });
-    });
+    if (pc1 && pc2) {
+      pc1.forEach((cell, index) => {
+        const x = cell;
+        const y = pc2[index];
+        obj[0].data.push({ x: x, y: y, index: index });
+      });
+    }
   }
 
   const Title = (
@@ -132,18 +134,18 @@ const ScreePlot = (eigenvalues, numPCs) => {
 const TypedInput = (selectGene, selectNumPCs) => {
   return (
     <>
-      <FormGroup row style={{ marginTop: "0px" }}>
-        <TextField
-          style={{ width: "150px", marginRight: "15px" }}
-          helperText="Feature name"
-          defaultValue="Agt"
-          onChange={selectGene}
-        />
+      <FormGroup row style={{ marginTop: "7px" }}>
         <TextField
           style={{ width: "150px", marginRight: "15px" }}
           helperText="Number of PCs"
           defaultValue="10"
           onChange={selectNumPCs}
+        />
+        <TextField
+          style={{ width: "150px", marginRight: "15px" }}
+          helperText="Feature name"
+          defaultValue="Agt"
+          onChange={selectGene}
         />
       </FormGroup>
     </>
@@ -153,7 +155,13 @@ const TypedInput = (selectGene, selectNumPCs) => {
 class PCAWrapper extends Component {
   constructor(props) {
     super(props);
-    this.state = { data: [], colors: [], feature: "agt", numPCs: 10 };
+    this.state = {
+      data: [],
+      colors: [],
+      feature: "agt",
+      numPCs: 10,
+      updatedNumPCs: 10,
+    };
 
     this.getColor = this.getColor.bind(this);
     this.selectGene = this.selectGene.bind(this);
@@ -165,10 +173,8 @@ class PCAWrapper extends Component {
     return "blue";
   }
 
-  run() {
-    const { computePCA, matrix, features } = this.props;
-    const data = computePCA();
-
+  getColors() {
+    const { matrix, features } = this.props;
     const colors = [];
     const gene = matrix[features.indexOf(this.state.feature)];
     if (gene) {
@@ -177,13 +183,26 @@ class PCAWrapper extends Component {
         colors.push(GetRGB(MinMaxNormalize(cell, min, max)));
       });
     }
+    return colors;
+  }
+
+  run() {
+    const { computePCA } = this.props;
+    const data = computePCA();
+
+    const colors = this.getColors();
     this.setState({ data, colors });
+  }
+
+  applySettings() {
+    const colors = this.getColors();
+    this.setState({ colors, numPCs: this.state.updatedNumPCs });
   }
 
   selectNumPCs(event) {
     const num = Number.parseInt(event.target.value);
     if (!isNaN(num))
-      this.setState({ numPCs: num === 0 ? 1 : Math.min(num, 20) });
+      this.setState({ updatedNumPCs: num === 0 ? 1 : Math.min(num, 20) });
   }
 
   selectGene(event) {
@@ -203,7 +222,7 @@ class PCAWrapper extends Component {
           Principal Component Analysis
         </Typography>
         <Typography
-          style={{ marginBottom: "10px", fontWeight: 400, color: paragraph }}
+          style={{ marginBottom: "0px", fontWeight: 400, color: paragraph }}
           variant="body1"
         >
           Enter description here.
@@ -211,7 +230,7 @@ class PCAWrapper extends Component {
 
         {TypedInput(selectGene, selectNumPCs)}
 
-        <div style={{ paddingTop: "10px" }}></div>
+        <div style={{ paddingTop: "15px" }}></div>
         <Button
           variant="contained"
           size="small"
@@ -220,6 +239,15 @@ class PCAWrapper extends Component {
           onClick={() => this.run()}
         >
           Run PCA
+        </Button>
+        <Button
+          variant="contained"
+          size="small"
+          color="primary"
+          style={{ backgroundColor: primary, marginLeft: "10px" }}
+          onClick={() => this.applySettings()}
+        >
+          Apply Settings
         </Button>
         <div style={{ paddingTop: "20px" }}></div>
 
