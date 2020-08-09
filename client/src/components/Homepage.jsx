@@ -153,6 +153,7 @@ class Homepage extends Component {
 
   handleFilter = this.handleFilter.bind(this);
   computePCA = this.computePCA.bind(this);
+  getGene = this.getGene.bind(this);
   computeTSNE = this.computeTSNE.bind(this);
 
   async componentDidMount() {
@@ -297,6 +298,11 @@ class Homepage extends Component {
     return { eigenvectors: vectors, eigenvalues: values };
   }
 
+  getGene(name) {
+    const { filteredMatrix, filteredFeatures } = this.state;
+    return filteredMatrix[filteredFeatures.indexOf(name)];
+  }
+
   computeTSNE() {
     const m = this.state.filteredMatrix.slice();
     if (!m[0] || m[0].length < 1) return [];
@@ -319,7 +325,6 @@ class Homepage extends Component {
   }
 
   render() {
-    const { filteredMatrix } = this.state;
     return (
       <>
         <div className="site-container">
@@ -329,20 +334,19 @@ class Homepage extends Component {
             colsums={this.state.colsums.sums}
             handleFilter={this.handleFilter}
           />
+
           <div style={{ paddingTop: "30px" }}></div>
           <FeatureVis
-            matrix={filteredMatrix}
-            features={this.state.filteredFeatures}
+            getGene={this.getGene}
             barcodes={this.state.filteredBarcodes}
           />
+
           <div style={{ paddingTop: "35px" }}></div>
-          <PCAWrapper
-            matrix={filteredMatrix}
-            features={this.state.filteredFeatures}
-            computePCA={this.computePCA}
-          />
+          <PCAWrapper getGene={this.getGene} computePCA={this.computePCA} />
+
           <div style={{ paddingTop: "10px" }}></div>
           <TSNE computeTSNE={this.computeTSNE} />
+
           <div style={{ paddingTop: "70px" }}></div>
         </div>
       </>

@@ -4,13 +4,13 @@ import { ResponsiveScatterPlot } from "@nivo/scatterplot";
 class Scatter extends Component {
   render() {
     const { props } = this;
-    const { data } = props;
+    const { data, tSNE } = props;
 
     return (
       <>
         <ResponsiveScatterPlot
           data={data}
-          margin={{ top: 10, right: 10, bottom: 50, left: 55 }}
+          margin={{ top: 10, right: 10, bottom: 50, left: tSNE ? 10 : 55 }}
           xScale={{ type: "linear", min: "auto", max: "auto" }}
           xFormat={function (e) {
             return e + " kg";
@@ -26,25 +26,33 @@ class Scatter extends Component {
           enableGridY={false}
           axisTop={null}
           axisRight={null}
-          axisBottom={{
-            orient: "bottom",
-            tickSize: 5,
-            tickPadding: 5,
-            tickRotation: 0,
-            legend: "pc1",
-            legendPosition: "middle",
-            legendOffset: 40,
-          }}
-          axisLeft={{
-            orient: "left",
-            tickSize: 5,
-            tickPadding: 5,
-            tickRotation: 0,
-            legend: "pc2",
-            legendPosition: "middle",
-            legendOffset: -50,
-          }}
-          colors={props.getColor}
+          axisBottom={
+            tSNE
+              ? null
+              : {
+                  orient: "bottom",
+                  tickSize: 5,
+                  tickPadding: 5,
+                  tickRotation: 0,
+                  legend: "pc1",
+                  legendPosition: "middle",
+                  legendOffset: 40,
+                }
+          }
+          axisLeft={
+            tSNE
+              ? null
+              : {
+                  orient: "left",
+                  tickSize: 5,
+                  tickPadding: 5,
+                  tickRotation: 0,
+                  legend: "pc2",
+                  legendPosition: "middle",
+                  legendOffset: -50,
+                }
+          }
+          colors={props.getColor != null ? props.getColor : "blue"}
           animate={false}
         />
       </>

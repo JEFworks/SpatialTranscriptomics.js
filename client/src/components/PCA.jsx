@@ -171,9 +171,8 @@ class PCAWrapper extends Component {
   }
 
   getColors() {
-    const { matrix, features } = this.props;
     const colors = [];
-    const gene = matrix[features.indexOf(this.state.feature)];
+    const gene = this.props.getGene(this.state.feature);
     if (gene) {
       const { max, min } = MinMaxStats(gene);
       gene.forEach((cell) => {
