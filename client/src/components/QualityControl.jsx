@@ -106,19 +106,15 @@ const Figure = (rowsums, colsums, thresholds, changeThreshold, type) => {
 };
 
 class QualityControl extends Component {
-  constructor(props) {
-    super(props);
-    const { thresholds } = props;
-    this.state = {
-      minRowSum: thresholds.minRowSum,
-      minColSum: thresholds.minColSum,
-      status0: false,
-      status1: false,
-    };
+  state = {
+    minRowSum: this.props.thresholds.minRowSum,
+    minColSum: this.props.thresholds.minColSum,
+    status0: false,
+    status1: false,
+  };
 
-    this.changeThreshold = this.changeThreshold.bind(this);
-    this.run = this.run.bind(this);
-  }
+  changeThreshold = this.changeThreshold.bind(this);
+  run = this.run.bind(this);
 
   changeThreshold(minRowSum, minColSum) {
     if (minRowSum !== null) this.setState({ minRowSum, status0: true });

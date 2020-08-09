@@ -132,28 +132,25 @@ const CheckboxInput = (
 };
 
 class FeatureVis extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      feature: "nptxr",
-      pixels: [],
-      deltaX: 0,
-      deltaY: 1965,
-      scale: 0.176,
-      horizontalFlipped: 1,
-      verticalFlipped: -1,
-      xyFlipped: false,
-    };
+  state = {
+    feature: "nptxr",
+    pixels: [],
+    deltaX: 0,
+    deltaY: 1965,
+    scale: 0.176,
+    horizontalFlipped: 1,
+    verticalFlipped: -1,
+    xyFlipped: false,
+  };
 
-    this.getPixels = this.getPixels.bind(this);
-    this.selectGene = this.selectGene.bind(this);
-    this.changeDeltaX = this.changeDeltaX.bind(this);
-    this.changeDeltaY = this.changeDeltaY.bind(this);
-    this.changeScale = this.changeScale.bind(this);
-    this.flipHorizontal = this.flipHorizontal.bind(this);
-    this.flipVertical = this.flipVertical.bind(this);
-    this.flipXY = this.flipXY.bind(this);
-  }
+  getPixels = this.getPixels.bind(this);
+  selectGene = this.selectGene.bind(this);
+  changeDeltaX = this.changeDeltaX.bind(this);
+  changeDeltaY = this.changeDeltaY.bind(this);
+  changeScale = this.changeScale.bind(this);
+  flipHorizontal = this.flipHorizontal.bind(this);
+  flipVertical = this.flipVertical.bind(this);
+  flipXY = this.flipXY.bind(this);
 
   selectGene(event) {
     this.setState({ feature: event.target.value.trim().toLowerCase() });

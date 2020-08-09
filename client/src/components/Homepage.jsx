@@ -2,9 +2,11 @@ import React, { Component } from "react";
 import axios from "axios";
 import { SparseMatrix } from "ml-sparse-matrix";
 import { PCA } from "ml-pca";
+import tsnejs from "../functions/tsne.js";
 import QualityControl from "./QualityControl.jsx";
 import FeatureVis from "./FeatureVis.jsx";
 import PCAWrapper from "./PCA.jsx";
+import TSNE from "./tSNE.jsx";
 
 const rowSums = (matrix, threshold) => {
   if (!matrix[0]) return {};
@@ -87,25 +89,71 @@ const getFilteredData = (matrix, features, barcodes, badGenes, badCells) => {
   };
 };
 
-class Homepage extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      matrix: [],
-      filteredMatrix: [],
-      features: [],
-      adjustedFeatures: [],
-      filteredFeatures: [],
-      barcodes: [],
-      filteredBarcodes: [],
-      thresholds: { minRowSum: 2, minColSum: 2 },
-      rowsums: [],
-      colsums: [],
-    };
+const cpmNormalize = (m) => {
+  const matrix = m.slice();
+  matrix.forEach((gene, index) => {
+    const totalReads = gene.reduce((a, b) => {
+      return a + b;
+    }, 0);
+    matrix[index] = gene.map((cell) => {
+      const cpm = (cell * Math.pow(10, 6)) / totalReads;
+      return Math.log10(cpm + 1);
+    });
+  });
+  return matrix;
+};
 
-    this.handleFilter = this.handleFilter.bind(this);
-    this.computePCA = this.computePCA.bind(this);
+const euclideanDists = (matrix) => {
+  let dists = new Array(Math.min(1000, matrix[0].length));
+  for (let i = 0; i < dists.length; i++)
+    dists[i] = new Array(dists.length).fill(0);
+
+  for (let i = 0; i < dists.length; i++) {
+    for (let j = i + 1; j < dists.length; j++) {
+      for (let d = 0; d < matrix.length; d++) {
+        dists[i][j] += Math.pow(matrix[d][i] - matrix[d][j], 2);
+      }
+      dists[i][j] = Math.sqrt(dists[i][j]);
+      dists[j][i] = dists[i][j];
+    }
   }
+
+  return dists;
+};
+
+const normalizeDists = (d) => {
+  const dists = d.slice();
+  let max_dist = 0;
+  for (let i = 0; i < dists.length; i++) {
+    for (let j = i + 1; j < dists.length; j++) {
+      if (dists[i][j] > max_dist) max_dist = dists[i][j];
+    }
+  }
+  for (let i = 0; i < dists.length; i++) {
+    for (let j = 0; j < dists.length; j++) {
+      dists[i][j] /= max_dist;
+    }
+  }
+  return dists;
+};
+
+class Homepage extends Component {
+  state = {
+    matrix: [],
+    filteredMatrix: [],
+    features: [],
+    adjustedFeatures: [],
+    filteredFeatures: [],
+    barcodes: [],
+    filteredBarcodes: [],
+    thresholds: { minRowSum: 2, minColSum: 2 },
+    rowsums: [],
+    colsums: [],
+  };
+
+  handleFilter = this.handleFilter.bind(this);
+  computePCA = this.computePCA.bind(this);
+  computeTSNE = this.computeTSNE.bind(this);
 
   async componentDidMount() {
     await this.loadFeatures();
@@ -233,18 +281,10 @@ class Homepage extends Component {
   }
 
   computePCA() {
-    const matrix = this.state.filteredMatrix.slice();
-    if (!matrix[0] || matrix[0].length < 1) return {};
+    const m = this.state.filteredMatrix.slice();
+    if (!m[0] || m[0].length < 1) return {};
 
-    matrix.forEach((gene, index) => {
-      const totalReads = gene.reduce((a, b) => {
-        return a + b;
-      }, 0);
-      matrix[index] = gene.map((cell) => {
-        const cpm = (cell * Math.pow(10, 6)) / totalReads;
-        return Math.log10(cpm + 1);
-      });
-    });
+    const matrix = cpmNormalize(m);
 
     const pca = new PCA(matrix, {
       method: "SVD",
@@ -255,6 +295,27 @@ class Homepage extends Component {
     const vectors = pca.getLoadings().data;
     const values = pca.getEigenvalues();
     return { eigenvectors: vectors, eigenvalues: values };
+  }
+
+  computeTSNE() {
+    const m = this.state.filteredMatrix.slice();
+    if (!m[0] || m[0].length < 1) return [];
+
+    const matrix = cpmNormalize(m);
+    let dists = euclideanDists(matrix);
+    dists = normalizeDists(dists);
+
+    const opt = {};
+    opt.epsilon = 10; // epsilon is learning rate (10 = default)
+    opt.perplexity = 30; // roughly how many neighbors each point influences (30 = default)
+    opt.dim = 2; // dimensionality of the embedding (2 = default)
+
+    const tsne = new tsnejs.tSNE(opt); // create a tSNE instance
+    tsne.initDataDist(dists);
+
+    for (let k = 0; k < 500; k++) tsne.step(); // every time you call this, solution gets better
+    const Y = tsne.getSolution(); // Y is an array of 2-D points that you can plot
+    return Y;
   }
 
   render() {
@@ -280,6 +341,8 @@ class Homepage extends Component {
             features={this.state.filteredFeatures}
             computePCA={this.computePCA}
           />
+          <div style={{ paddingTop: "10px" }}></div>
+          <TSNE computeTSNE={this.computeTSNE} />
           <div style={{ paddingTop: "70px" }}></div>
         </div>
       </>

@@ -153,20 +153,17 @@ const TypedInput = (selectGene, selectNumPCs) => {
 };
 
 class PCAWrapper extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      data: [],
-      colors: [],
-      feature: "agt",
-      numPCs: 10,
-      updatedNumPCs: 10,
-    };
+  state = {
+    data: [],
+    colors: [],
+    feature: "agt",
+    numPCs: 10,
+    updatedNumPCs: 10,
+  };
 
-    this.getColor = this.getColor.bind(this);
-    this.selectGene = this.selectGene.bind(this);
-    this.selectNumPCs = this.selectNumPCs.bind(this);
-  }
+  getColor = this.getColor.bind(this);
+  selectGene = this.selectGene.bind(this);
+  selectNumPCs = this.selectNumPCs.bind(this);
 
   getColor(node) {
     if (node.index) return this.state.colors[node.index];
