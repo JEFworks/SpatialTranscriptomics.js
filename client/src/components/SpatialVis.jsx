@@ -56,7 +56,7 @@ const TypedInput = (selectGene, changeDeltaX, changeDeltaY, changeScale) => {
         <TextField
           style={{ width: "150px", marginRight: "15px" }}
           helperText="Feature name"
-          defaultValue="Nptxr"
+          defaultValue="Camk2n1"
           onChange={selectGene}
         />
         <TextField
@@ -133,7 +133,7 @@ const CheckboxInput = (
 
 class SpatialVis extends Component {
   state = {
-    feature: "nptxr",
+    feature: "camk2n1",
     pixels: [],
     deltaX: 0,
     deltaY: 1965,

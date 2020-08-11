@@ -52,7 +52,7 @@ class Scatter extends Component {
                   legendOffset: -50,
                 }
           }
-          colors={props.getColor != null ? props.getColor : "blue"}
+          colors={props.getColor}
           animate={false}
         />
       </>

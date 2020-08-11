@@ -2,11 +2,16 @@ import React, { Component } from "react";
 import axios from "axios";
 import { SparseMatrix } from "ml-sparse-matrix";
 import { PCA } from "ml-pca";
+
+import GetRGB from "../functions/GetRGB.jsx";
+import MinMaxNormalize from "../functions/MinMaxNormalize.jsx";
+import MinMaxStats from "../functions/MinMaxStats.jsx";
 import tsnejs from "../functions/tsne.js";
+
 import QualityControl from "./QualityControl.jsx";
-import SpatialVis from "./SpatialVis.jsx";
 import PCAWrapper from "./PCA.jsx";
 import TSNE from "./tSNE.jsx";
+import SpatialVis from "./SpatialVis.jsx";
 
 const rowSums = (matrix, threshold) => {
   if (!matrix[0]) return {};
@@ -150,11 +155,14 @@ class Homepage extends Component {
     rowsums: [],
     colsums: [],
     pcs: [],
+    numPCs: 10,
   };
 
   handleFilter = this.handleFilter.bind(this);
-  computePCA = this.computePCA.bind(this);
   getGene = this.getGene.bind(this);
+  getColors = this.getColors.bind(this);
+  setNumPCs = this.setNumPCs.bind(this);
+  computePCA = this.computePCA.bind(this);
   computeTSNE = this.computeTSNE.bind(this);
 
   async componentDidMount() {
@@ -287,6 +295,22 @@ class Homepage extends Component {
     return filteredMatrix[filteredFeatures.indexOf(name)];
   }
 
+  getColors(feature) {
+    const colors = [];
+    const gene = this.getGene(feature);
+    if (gene) {
+      const { max, min } = MinMaxStats(gene);
+      gene.forEach((cell) => {
+        colors.push(GetRGB(MinMaxNormalize(cell, min, max)));
+      });
+    }
+    return colors;
+  }
+
+  setNumPCs(num) {
+    this.setState({ numPCs: num });
+  }
+
   computePCA() {
     const m = this.state.filteredMatrix.slice();
     if (!m[0] || m[0].length < 1) return {};
@@ -307,7 +331,7 @@ class Homepage extends Component {
   }
 
   computeTSNE() {
-    const { pcs } = this.state;
+    const { pcs, numPCs } = this.state;
     if (!pcs[0] || pcs[0].length < 1) {
       alert("Please run PCA first.");
       return [];
@@ -315,7 +339,7 @@ class Homepage extends Component {
 
     const filteredPCs = [];
     pcs.forEach((pc) => {
-      filteredPCs.push(pc.slice(0, 10));
+      filteredPCs.push(pc.slice(0, numPCs));
     });
     let dists = euclideanDists(filteredPCs);
     dists = normalizeDists(dists);
@@ -345,10 +369,14 @@ class Homepage extends Component {
           />
 
           <div style={{ paddingTop: "40px" }}></div>
-          <PCAWrapper getGene={this.getGene} computePCA={this.computePCA} />
+          <PCAWrapper
+            getColors={this.getColors}
+            computePCA={this.computePCA}
+            setNumPCs={this.setNumPCs}
+          />
 
           <div style={{ paddingTop: "20px" }}></div>
-          <TSNE getGene={this.getGene} computeTSNE={this.computeTSNE} />
+          <TSNE getColors={this.getColors} computeTSNE={this.computeTSNE} />
 
           <div style={{ paddingTop: "20px" }}></div>
           <SpatialVis

@@ -5,13 +5,13 @@ import ScatterPlot from "./Plots/ScatterPlot.jsx";
 const primary = "#094067";
 const paragraph = "#5f6c7b";
 
-const Plot = (data) => {
+const Plot = (data, getColor) => {
   const obj = [{ data: [] }];
   if (data) {
-    data.forEach((point) => {
+    data.forEach((point, index) => {
       const x = point[0];
       const y = point[1];
-      obj[0].data.push({ x: x, y: y });
+      obj[0].data.push({ x: x, y: y, index: index });
     });
   }
 
@@ -29,7 +29,7 @@ const Plot = (data) => {
 
   const Scatterplot = (
     <div style={{ width: "100%", height: "100%" }}>
-      <ScatterPlot data={obj} tSNE={true} />
+      <ScatterPlot data={obj} getColor={getColor} tSNE={true} />
     </div>
   );
 
@@ -65,11 +65,24 @@ const Plot = (data) => {
 class TSNEWrapper extends Component {
   state = {
     data: [],
+    colors: [],
+    feature: "camk2n1",
   };
 
+  getColor = this.getColor.bind(this);
+
+  getColor(node) {
+    if (node.index) return this.state.colors[node.index];
+    return "blue";
+  }
+
   run() {
-    const data = this.props.computeTSNE();
-    this.setState({ data });
+    const { computeTSNE, getColors } = this.props;
+    const { feature } = this.state;
+
+    const data = computeTSNE();
+    const colors = getColors(feature);
+    this.setState({ data, colors });
   }
 
   render() {
@@ -102,7 +115,7 @@ class TSNEWrapper extends Component {
         <div style={{ paddingTop: "20px" }}></div>
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>
-          <div className="PC-flex">{Plot(this.state.data)}</div>
+          <div className="PC-flex">{Plot(this.state.data, this.getColor)}</div>
           <div style={{ width: "50%" }}></div>
         </div>
       </>

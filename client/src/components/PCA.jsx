@@ -8,9 +8,6 @@ import {
 } from "@material-ui/core";
 import LineChart from "./Plots/LineChart.jsx";
 import ScatterPlot from "./Plots/ScatterPlot.jsx";
-import GetRGB from "../functions/GetRGB.jsx";
-import MinMaxNormalize from "../functions/MinMaxNormalize.jsx";
-import MinMaxStats from "../functions/MinMaxStats.jsx";
 
 const primary = "#094067";
 const paragraph = "#5f6c7b";
@@ -140,7 +137,7 @@ const TypedInput = (selectGene, selectNumPCs) => {
         <TextField
           style={{ width: "150px", marginRight: "15px" }}
           helperText="Feature name"
-          defaultValue="Agt"
+          defaultValue="Camk2n1"
           onChange={selectGene}
         />
       </FormGroup>
@@ -152,7 +149,7 @@ class PCAWrapper extends Component {
   state = {
     data: [],
     colors: [],
-    feature: "agt",
+    feature: "camk2n1",
     numPCs: 10,
     updatedNumPCs: 10,
   };
@@ -166,29 +163,22 @@ class PCAWrapper extends Component {
     return "blue";
   }
 
-  getColors() {
-    const colors = [];
-    const gene = this.props.getGene(this.state.feature);
-    if (gene) {
-      const { max, min } = MinMaxStats(gene);
-      gene.forEach((cell) => {
-        colors.push(GetRGB(MinMaxNormalize(cell, min, max)));
-      });
-    }
-    return colors;
-  }
-
   run() {
-    const { computePCA } = this.props;
-    const data = computePCA();
+    const { computePCA, getColors } = this.props;
+    const { feature, updatedNumPCs } = this.state;
 
-    const colors = this.getColors();
-    this.setState({ data, colors });
+    const data = computePCA();
+    const colors = getColors(feature);
+    this.setState({ data, colors, numPCs: updatedNumPCs });
   }
 
   applySettings() {
-    const colors = this.getColors();
-    this.setState({ colors, numPCs: this.state.updatedNumPCs });
+    const { setNumPCs, getColors } = this.props;
+    const { feature, updatedNumPCs } = this.state;
+
+    setNumPCs(updatedNumPCs);
+    const colors = getColors(feature);
+    this.setState({ colors, numPCs: updatedNumPCs });
   }
 
   selectNumPCs(event) {
