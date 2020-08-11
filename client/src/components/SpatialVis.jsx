@@ -131,7 +131,7 @@ const CheckboxInput = (
   );
 };
 
-class FeatureVis extends Component {
+class SpatialVis extends Component {
   state = {
     feature: "nptxr",
     pixels: [],
@@ -244,7 +244,7 @@ class FeatureVis extends Component {
           style={{ marginBottom: "10px", fontWeight: 500, color: primary }}
           variant="h5"
         >
-          Feature Visualization
+          Spatial Visualization
         </Typography>
         <Typography
           style={{ marginBottom: "0px", fontWeight: 400, color: paragraph }}
@@ -281,4 +281,4 @@ class FeatureVis extends Component {
   }
 }
 
-export default FeatureVis;
+export default SpatialVis;

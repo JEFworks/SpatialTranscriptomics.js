@@ -4,7 +4,7 @@ import { SparseMatrix } from "ml-sparse-matrix";
 import { PCA } from "ml-pca";
 import tsnejs from "../functions/tsne.js";
 import QualityControl from "./QualityControl.jsx";
-import FeatureVis from "./FeatureVis.jsx";
+import SpatialVis from "./SpatialVis.jsx";
 import PCAWrapper from "./PCA.jsx";
 import TSNE from "./tSNE.jsx";
 
@@ -282,6 +282,11 @@ class Homepage extends Component {
     });
   }
 
+  getGene(name) {
+    const { filteredMatrix, filteredFeatures } = this.state;
+    return filteredMatrix[filteredFeatures.indexOf(name)];
+  }
+
   computePCA() {
     const m = this.state.filteredMatrix.slice();
     if (!m[0] || m[0].length < 1) return {};
@@ -301,22 +306,17 @@ class Homepage extends Component {
     return { eigenvectors: pcs, eigenvalues: eigenvalues };
   }
 
-  getGene(name) {
-    const { filteredMatrix, filteredFeatures } = this.state;
-    return filteredMatrix[filteredFeatures.indexOf(name)];
-  }
-
   computeTSNE() {
-    // const m = this.state.filteredMatrix.slice();
     const { pcs } = this.state;
-    if (!pcs[0] || pcs[0].length < 1) return [];
+    if (!pcs[0] || pcs[0].length < 1) {
+      alert("Please run PCA first.");
+      return [];
+    }
 
-    // const matrix = cpmNormalize(m);
     const filteredPCs = [];
     pcs.forEach((pc) => {
       filteredPCs.push(pc.slice(0, 10));
     });
-    // console.log(data);
     let dists = euclideanDists(filteredPCs);
     dists = normalizeDists(dists);
 
@@ -344,17 +344,17 @@ class Homepage extends Component {
             handleFilter={this.handleFilter}
           />
 
-          <div style={{ paddingTop: "30px" }}></div>
-          <FeatureVis
+          <div style={{ paddingTop: "40px" }}></div>
+          <PCAWrapper getGene={this.getGene} computePCA={this.computePCA} />
+
+          <div style={{ paddingTop: "20px" }}></div>
+          <TSNE getGene={this.getGene} computeTSNE={this.computeTSNE} />
+
+          <div style={{ paddingTop: "20px" }}></div>
+          <SpatialVis
             getGene={this.getGene}
             barcodes={this.state.filteredBarcodes}
           />
-
-          <div style={{ paddingTop: "35px" }}></div>
-          <PCAWrapper getGene={this.getGene} computePCA={this.computePCA} />
-
-          <div style={{ paddingTop: "10px" }}></div>
-          <TSNE computeTSNE={this.computeTSNE} />
 
           <div style={{ paddingTop: "70px" }}></div>
         </div>

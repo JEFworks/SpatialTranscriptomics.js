@@ -6,8 +6,8 @@ import {
   FormGroup,
   TextField,
 } from "@material-ui/core";
-import LineChart from "./LineChart.jsx";
-import ScatterPlot from "./ScatterPlot.jsx";
+import LineChart from "./Plots/LineChart.jsx";
+import ScatterPlot from "./Plots/ScatterPlot.jsx";
 import GetRGB from "../functions/GetRGB.jsx";
 import MinMaxNormalize from "../functions/MinMaxNormalize.jsx";
 import MinMaxStats from "../functions/MinMaxStats.jsx";
@@ -211,7 +211,7 @@ class PCAWrapper extends Component {
           style={{ marginBottom: "10px", fontWeight: 500, color: primary }}
           variant="h5"
         >
-          Principal Component Analysis
+          Principal Component Analysis (PCA)
         </Typography>
         <Typography
           style={{ marginBottom: "0px", fontWeight: 400, color: paragraph }}

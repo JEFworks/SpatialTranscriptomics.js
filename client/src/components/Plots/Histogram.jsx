@@ -38,7 +38,7 @@ const yAxis = {
   legendOffset: -40,
 };
 
-class BarGraph extends Component {
+class Histogram extends Component {
   render() {
     const { props } = this;
     const { min, lowerLimit, upperLimit } = props;
@@ -75,4 +75,4 @@ class BarGraph extends Component {
   }
 }
 
-export default BarGraph;
+export default Histogram;

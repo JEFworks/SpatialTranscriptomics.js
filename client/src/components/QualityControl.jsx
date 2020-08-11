@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Typography, Paper, Slider, Button } from "@material-ui/core";
-import BarGraph from "./BarGraph.jsx";
+import Histogram from "./Plots/Histogram.jsx";
 
 const primary = "#094067";
 const paragraph = "#5f6c7b";
@@ -41,10 +41,10 @@ const Figure = (rowsums, colsums, thresholds, changeThreshold, type) => {
     </>
   );
 
-  const Histogram = (
+  const HistogramPlot = (
     <>
       <div style={{ width: "100%", height: "100%" }}>
-        <BarGraph
+        <Histogram
           xLabel={type === "rowsum" ? "log10(rowSum + 1)" : "log10(colSum + 1)"}
           data={sums}
           min={type === "rowsum" ? thresholds.minRowSum : thresholds.minColSum}
@@ -97,7 +97,7 @@ const Figure = (rowsums, colsums, thresholds, changeThreshold, type) => {
           elevation={3}
         >
           {Title}
-          {Histogram}
+          {HistogramPlot}
           {Toggle}
         </Paper>
       </div>
