@@ -104,14 +104,14 @@ const cpmNormalize = (m) => {
 };
 
 const euclideanDists = (matrix) => {
-  let dists = new Array(Math.min(1000, matrix[0].length));
+  const dists = new Array(Math.min(1000, matrix.length));
   for (let i = 0; i < dists.length; i++)
     dists[i] = new Array(dists.length).fill(0);
 
   for (let i = 0; i < dists.length; i++) {
     for (let j = i + 1; j < dists.length; j++) {
-      for (let d = 0; d < matrix.length; d++) {
-        dists[i][j] += Math.pow(matrix[d][i] - matrix[d][j], 2);
+      for (let d = 0; d < matrix[0].length; d++) {
+        dists[i][j] += Math.pow(matrix[i][d] - matrix[j][d], 2);
       }
       dists[i][j] = Math.sqrt(dists[i][j]);
       dists[j][i] = dists[i][j];
@@ -149,6 +149,7 @@ class Homepage extends Component {
     thresholds: { minRowSum: 2, minColSum: 2 },
     rowsums: [],
     colsums: [],
+    pcs: [],
   };
 
   handleFilter = this.handleFilter.bind(this);
@@ -293,9 +294,11 @@ class Homepage extends Component {
       scale: true,
       ignoreZeroVariance: true,
     });
-    const vectors = pca.getLoadings().data;
-    const values = pca.getEigenvalues();
-    return { eigenvectors: vectors, eigenvalues: values };
+    const pcs = pca.getEigenvectors().data;
+    const eigenvalues = pca.getEigenvalues();
+
+    this.setState({ pcs });
+    return { eigenvectors: pcs, eigenvalues: eigenvalues };
   }
 
   getGene(name) {
@@ -304,11 +307,17 @@ class Homepage extends Component {
   }
 
   computeTSNE() {
-    const m = this.state.filteredMatrix.slice();
-    if (!m[0] || m[0].length < 1) return [];
+    // const m = this.state.filteredMatrix.slice();
+    const { pcs } = this.state;
+    if (!pcs[0] || pcs[0].length < 1) return [];
 
-    const matrix = cpmNormalize(m);
-    let dists = euclideanDists(matrix);
+    // const matrix = cpmNormalize(m);
+    const filteredPCs = [];
+    pcs.forEach((pc) => {
+      filteredPCs.push(pc.slice(0, 10));
+    });
+    // console.log(data);
+    let dists = euclideanDists(filteredPCs);
     dists = normalizeDists(dists);
 
     const opt = {};

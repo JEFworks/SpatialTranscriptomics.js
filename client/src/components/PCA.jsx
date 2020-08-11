@@ -18,15 +18,11 @@ const paragraph = "#5f6c7b";
 const Biplot = (eigenvectors, getColor) => {
   const obj = [{ data: [] }];
   if (eigenvectors) {
-    const pc1 = eigenvectors[0];
-    const pc2 = eigenvectors[1];
-    if (pc1 && pc2) {
-      pc1.forEach((cell, index) => {
-        const x = cell;
-        const y = pc2[index];
-        obj[0].data.push({ x: x, y: y, index: index });
-      });
-    }
+    eigenvectors.forEach((vector, index) => {
+      const x = vector[0];
+      const y = vector[1];
+      obj[0].data.push({ x: x, y: y, index: index });
+    });
   }
 
   const Title = (
