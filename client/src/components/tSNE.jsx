@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Typography, Button, Paper } from "@material-ui/core";
-import ScatterPlot from "./Plots/ScatterPlot.jsx";
+import ScatterPlot from "./plots/ScatterPlot.jsx";
 
 const primary = "#094067";
 const paragraph = "#5f6c7b";
@@ -62,27 +62,22 @@ const Plot = (data, getColor) => {
   );
 };
 
-class TSNEWrapper extends Component {
+class tSNEWrapper extends Component {
   state = {
     data: [],
-    colors: [],
-    feature: "camk2n1",
   };
 
   getColor = this.getColor.bind(this);
 
   getColor(node) {
-    if (node.index) return this.state.colors[node.index];
+    if (node.index) return this.props.colors[node.index];
     return "blue";
   }
 
   run() {
-    const { computeTSNE, getColors } = this.props;
-    const { feature } = this.state;
-
+    const { computeTSNE } = this.props;
     const data = computeTSNE();
-    const colors = getColors(feature);
-    this.setState({ data, colors });
+    this.setState({ data });
   }
 
   render() {
@@ -123,4 +118,4 @@ class TSNEWrapper extends Component {
   }
 }
 
-export default TSNEWrapper;
+export default tSNEWrapper;

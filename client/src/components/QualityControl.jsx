@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Typography, Paper, Slider, Button } from "@material-ui/core";
-import Histogram from "./Plots/Histogram.jsx";
+import Histogram from "./plots/Histogram.jsx";
 
 const primary = "#094067";
 const paragraph = "#5f6c7b";
@@ -36,7 +36,9 @@ const Figure = (rowsums, colsums, thresholds, changeThreshold, type) => {
         align="center"
         style={{ paddingBottom: "5px", fontWeight: 500, color: primary }}
       >
-        {type === "rowsum" ? "log10(rowSum + 1)" : "log10(colSum + 1)"}
+        {type === "rowsum"
+          ? "# of Reads per Gene"
+          : "# of Genes Detected per Cell"}
       </Typography>
     </>
   );
@@ -45,7 +47,11 @@ const Figure = (rowsums, colsums, thresholds, changeThreshold, type) => {
     <>
       <div style={{ width: "100%", height: "100%" }}>
         <Histogram
-          xLabel={type === "rowsum" ? "log10(rowSum + 1)" : "log10(colSum + 1)"}
+          xLabel={
+            type === "rowsum"
+              ? "log10(reads per gene + 1)"
+              : "log10(genes per cell + 1)"
+          }
           data={sums}
           min={type === "rowsum" ? thresholds.minRowSum : thresholds.minColSum}
           lowerLimit={minIndex}

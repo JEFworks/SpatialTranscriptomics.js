@@ -1,5 +1,6 @@
 import React from "react";
 import { Typography, Link } from "@material-ui/core";
+import Header from "./Header.jsx";
 
 const primary = "#094067";
 const secondary = "#90b4ce";
@@ -46,6 +47,10 @@ const Text = (
 
 const Page404 = () => (
   <>
+    <div style={{ marginBottom: "60px" }}>
+      <Header />
+    </div>
+
     <div className="site-container">
       {Graphic}
       {Text}

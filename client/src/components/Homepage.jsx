@@ -3,144 +3,22 @@ import axios from "axios";
 import { SparseMatrix } from "ml-sparse-matrix";
 import { PCA } from "ml-pca";
 
+import rowSums from "../functions/rowSums.jsx";
+import colSums from "../functions/colSums.jsx";
+import getFilteredData from "../functions/getFilteredData.jsx";
+import cpmNormalize from "../functions/cpmNormalize.jsx";
+import euclideanDists from "../functions/euclideanDists.jsx";
+import normalizeDists from "../functions/normalizeDists.jsx";
 import GetRGB from "../functions/GetRGB.jsx";
 import MinMaxNormalize from "../functions/MinMaxNormalize.jsx";
 import MinMaxStats from "../functions/MinMaxStats.jsx";
 import tsnejs from "../functions/tsne.js";
 
+import Header from "./Header.jsx";
 import QualityControl from "./QualityControl.jsx";
 import PCAWrapper from "./PCA.jsx";
-import TSNE from "./tSNE.jsx";
+import TSNEWrapper from "./tSNE.jsx";
 import SpatialVis from "./SpatialVis.jsx";
-
-const rowSums = (matrix, threshold) => {
-  if (!matrix[0]) return {};
-  const sums = new Array(20).fill(0);
-  const badGenes = [];
-
-  matrix.forEach((gene, index) => {
-    const cellCount = gene.reduce((a, b) => {
-      return a + b;
-    }, 0);
-
-    const log = Math.log10(cellCount + 1);
-    sums[Math.floor(log * 2)]++;
-    if (log < threshold) badGenes.push(index);
-  });
-
-  const obj = [];
-  sums.forEach((freq, index) => {
-    obj.push({
-      range: index / 2,
-      frequency: freq,
-    });
-  });
-  return { sums: obj, badGenes: badGenes };
-};
-
-const colSums = (matrix, threshold) => {
-  if (!matrix[0]) return {};
-  const sums = new Array(20).fill(0);
-  const numCells = matrix[0].length;
-  const numGenes = matrix.length;
-  const badCells = [];
-
-  for (let i = 0; i < numCells; i++) {
-    let geneCount = 0;
-    for (let j = 0; j < numGenes; j++) geneCount += matrix[j][i];
-
-    const log = Math.log10(geneCount + 1);
-    sums[Math.floor(log * 2)]++;
-    if (log < threshold) badCells.push(i);
-  }
-
-  const obj = [];
-  sums.forEach((freq, index) => {
-    obj.push({
-      range: index / 2,
-      frequency: freq,
-    });
-  });
-  return { sums: obj, badCells: badCells };
-};
-
-const getFilteredData = (matrix, features, barcodes, badGenes, badCells) => {
-  const filteredFeatures = [];
-  const filteredBarcodes = [];
-
-  // rowsum filtering
-  const filteredMatrix = matrix.filter((_gene, index) => {
-    const badGene = badGenes.includes(index);
-    if (features.length > 0 && !badGene) filteredFeatures.push(features[index]);
-    return !badGene;
-  });
-
-  // colsum filtering
-  filteredMatrix.forEach((gene, index) => {
-    const filteredGene = gene.filter((_cell, i) => {
-      const badCell = badCells.includes(i);
-      if (barcodes.length > 0 && index === 0 && !badCell)
-        filteredBarcodes.push(barcodes[i]);
-      return !badCell;
-    });
-
-    filteredMatrix[index] = filteredGene;
-  });
-
-  return {
-    matrix: filteredMatrix,
-    features: filteredFeatures,
-    barcodes: filteredBarcodes,
-  };
-};
-
-const cpmNormalize = (m) => {
-  const matrix = m.slice();
-  matrix.forEach((gene, index) => {
-    const totalReads = gene.reduce((a, b) => {
-      return a + b;
-    }, 0);
-    matrix[index] = gene.map((cell) => {
-      const cpm = (cell * Math.pow(10, 6)) / totalReads;
-      return Math.log10(cpm + 1);
-    });
-  });
-  return matrix;
-};
-
-const euclideanDists = (matrix) => {
-  const dists = new Array(Math.min(1000, matrix.length));
-  for (let i = 0; i < dists.length; i++)
-    dists[i] = new Array(dists.length).fill(0);
-
-  for (let i = 0; i < dists.length; i++) {
-    for (let j = i + 1; j < dists.length; j++) {
-      for (let d = 0; d < matrix[0].length; d++) {
-        dists[i][j] += Math.pow(matrix[i][d] - matrix[j][d], 2);
-      }
-      dists[i][j] = Math.sqrt(dists[i][j]);
-      dists[j][i] = dists[i][j];
-    }
-  }
-
-  return dists;
-};
-
-const normalizeDists = (d) => {
-  const dists = d.slice();
-  let max_dist = 0;
-  for (let i = 0; i < dists.length; i++) {
-    for (let j = i + 1; j < dists.length; j++) {
-      if (dists[i][j] > max_dist) max_dist = dists[i][j];
-    }
-  }
-  for (let i = 0; i < dists.length; i++) {
-    for (let j = 0; j < dists.length; j++) {
-      dists[i][j] /= max_dist;
-    }
-  }
-  return dists;
-};
 
 class Homepage extends Component {
   state = {
@@ -154,13 +32,14 @@ class Homepage extends Component {
     thresholds: { minRowSum: 2, minColSum: 2 },
     rowsums: [],
     colsums: [],
+    colors: [],
     pcs: [],
     numPCs: 10,
+    feature: "camk2n1",
   };
 
   handleFilter = this.handleFilter.bind(this);
-  getGene = this.getGene.bind(this);
-  getColors = this.getColors.bind(this);
+  updateColors = this.updateColors.bind(this);
   setNumPCs = this.setNumPCs.bind(this);
   computePCA = this.computePCA.bind(this);
   computeTSNE = this.computeTSNE.bind(this);
@@ -168,7 +47,8 @@ class Homepage extends Component {
   async componentDidMount() {
     await this.loadFeatures();
     await this.loadBarcodes();
-    this.loadMatrix().catch(() => {});
+    await this.loadMatrix().catch(() => {});
+    this.updateColors(this.state.feature);
   }
 
   async loadFeatures() {
@@ -287,24 +167,25 @@ class Homepage extends Component {
       thresholds,
       rowsums,
       colsums,
+      pcs: [],
     });
   }
 
-  getGene(name) {
+  getGene(featureName) {
     const { filteredMatrix, filteredFeatures } = this.state;
-    return filteredMatrix[filteredFeatures.indexOf(name)];
+    return filteredMatrix[filteredFeatures.indexOf(featureName)];
   }
 
-  getColors(feature) {
+  updateColors(featureName) {
     const colors = [];
-    const gene = this.getGene(feature);
+    const gene = this.getGene(featureName);
     if (gene) {
       const { max, min } = MinMaxStats(gene);
       gene.forEach((cell) => {
         colors.push(GetRGB(MinMaxNormalize(cell, min, max)));
       });
     }
-    return colors;
+    this.setState({ colors });
   }
 
   setNumPCs(num) {
@@ -360,6 +241,10 @@ class Homepage extends Component {
   render() {
     return (
       <>
+        <div style={{ marginBottom: "60px" }}>
+          <Header updateColors={this.updateColors} />
+        </div>
+
         <div className="site-container">
           <QualityControl
             thresholds={this.state.thresholds}
@@ -370,17 +255,20 @@ class Homepage extends Component {
 
           <div style={{ paddingTop: "40px" }}></div>
           <PCAWrapper
-            getColors={this.getColors}
             computePCA={this.computePCA}
             setNumPCs={this.setNumPCs}
+            colors={this.state.colors}
           />
 
           <div style={{ paddingTop: "20px" }}></div>
-          <TSNE getColors={this.getColors} computeTSNE={this.computeTSNE} />
+          <TSNEWrapper
+            computeTSNE={this.computeTSNE}
+            colors={this.state.colors}
+          />
 
           <div style={{ paddingTop: "20px" }}></div>
           <SpatialVis
-            getGene={this.getGene}
+            colors={this.state.colors}
             barcodes={this.state.filteredBarcodes}
           />
 

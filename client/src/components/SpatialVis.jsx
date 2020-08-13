@@ -9,19 +9,22 @@ import {
   Checkbox,
   Button,
 } from "@material-ui/core";
-import GetRGB from "../functions/GetRGB.jsx";
-import MinMaxNormalize from "../functions/MinMaxNormalize.jsx";
-import MinMaxStats from "../functions/MinMaxStats.jsx";
 
 const primary = "#094067";
 const paragraph = "#5f6c7b";
 const tertiary = "#90b4ce";
 
-const LeafletWrapper = (pixels) => {
+const LeafletWrapper = (p, colors) => {
   const bounds = [
     [0, 0],
     [1921, 2000],
   ];
+
+  const pixels = p.slice().map((pixel, index) => {
+    const coloredPixel = pixel;
+    coloredPixel.color = colors[index];
+    return coloredPixel;
+  });
 
   return (
     <>
@@ -49,16 +52,10 @@ const LeafletWrapper = (pixels) => {
   );
 };
 
-const TypedInput = (selectGene, changeDeltaX, changeDeltaY, changeScale) => {
+const TypedInput = (changeDeltaX, changeDeltaY, changeScale) => {
   return (
     <>
       <FormGroup row style={{ marginTop: "7px" }}>
-        <TextField
-          style={{ width: "150px", marginRight: "15px" }}
-          helperText="Feature name"
-          defaultValue="Camk2n1"
-          onChange={selectGene}
-        />
         <TextField
           style={{ width: "50px", marginRight: "15px" }}
           helperText="ΔX"
@@ -133,7 +130,6 @@ const CheckboxInput = (
 
 class SpatialVis extends Component {
   state = {
-    feature: "camk2n1",
     pixels: [],
     deltaX: 0,
     deltaY: 1965,
@@ -144,17 +140,12 @@ class SpatialVis extends Component {
   };
 
   getPixels = this.getPixels.bind(this);
-  selectGene = this.selectGene.bind(this);
   changeDeltaX = this.changeDeltaX.bind(this);
   changeDeltaY = this.changeDeltaY.bind(this);
   changeScale = this.changeScale.bind(this);
   flipHorizontal = this.flipHorizontal.bind(this);
   flipVertical = this.flipVertical.bind(this);
   flipXY = this.flipXY.bind(this);
-
-  selectGene(event) {
-    this.setState({ feature: event.target.value.trim().toLowerCase() });
-  }
 
   changeScale(event) {
     const scale = Number.parseFloat(event.target.value);
@@ -185,21 +176,19 @@ class SpatialVis extends Component {
 
   run() {
     const pixels = this.getPixels();
-    this.setState({ pixels, status: 1 });
+    this.setState({ pixels });
   }
 
   getPixels() {
-    const { barcodes, getGene } = this.props;
+    const { barcodes, colors } = this.props;
     const pixels = [];
-    const gene = getGene(this.state.feature);
 
-    if (gene && barcodes[0]) {
+    if (colors && barcodes[0]) {
       if (!barcodes[0].x || !barcodes[0].y) return [];
 
-      const { max, min } = MinMaxStats(gene);
-      gene.forEach((cell, index) => {
+      for (let i = 0; i < colors.length; i++) {
         try {
-          const { x, y } = barcodes[index];
+          const { x, y } = barcodes[i];
           const {
             xyFlipped,
             verticalFlipped,
@@ -213,17 +202,16 @@ class SpatialVis extends Component {
           const centerY = horizontalFlipped * y * scale + deltaX;
           pixels.push({
             center: !xyFlipped ? [centerX, centerY] : [centerY, centerX],
-            color: GetRGB(MinMaxNormalize(cell, min, max)),
+            color: null,
           });
         } catch (error) {}
-      });
+      }
     }
     return pixels;
   }
 
   render() {
     const {
-      selectGene,
       changeDeltaX,
       changeDeltaY,
       changeScale,
@@ -237,6 +225,7 @@ class SpatialVis extends Component {
       verticalFlipped,
       xyFlipped,
     } = this.state;
+    const { colors } = this.props;
 
     return (
       <>
@@ -253,7 +242,7 @@ class SpatialVis extends Component {
           Enter description here.
         </Typography>
 
-        {TypedInput(selectGene, changeDeltaX, changeDeltaY, changeScale)}
+        {TypedInput(changeDeltaX, changeDeltaY, changeScale)}
         {CheckboxInput(
           horizontalFlipped,
           flipHorizontal,
@@ -275,7 +264,7 @@ class SpatialVis extends Component {
         </Button>
         <div style={{ paddingTop: "20px" }}></div>
 
-        {LeafletWrapper(pixels)}
+        {LeafletWrapper(pixels, colors)}
       </>
     );
   }

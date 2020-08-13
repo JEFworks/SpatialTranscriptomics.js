@@ -6,8 +6,8 @@ import {
   FormGroup,
   TextField,
 } from "@material-ui/core";
-import LineChart from "./Plots/LineChart.jsx";
-import ScatterPlot from "./Plots/ScatterPlot.jsx";
+import LineChart from "./plots/LineChart.jsx";
+import ScatterPlot from "./plots/ScatterPlot.jsx";
 
 const primary = "#094067";
 const paragraph = "#5f6c7b";
@@ -124,7 +124,7 @@ const ScreePlot = (eigenvalues, numPCs) => {
   );
 };
 
-const TypedInput = (selectGene, selectNumPCs) => {
+const TypedInput = (selectNumPCs) => {
   return (
     <>
       <FormGroup row style={{ marginTop: "7px" }}>
@@ -133,12 +133,6 @@ const TypedInput = (selectGene, selectNumPCs) => {
           helperText="Number of PCs"
           defaultValue="10"
           onChange={selectNumPCs}
-        />
-        <TextField
-          style={{ width: "150px", marginRight: "15px" }}
-          helperText="Feature name"
-          defaultValue="Camk2n1"
-          onChange={selectGene}
         />
       </FormGroup>
     </>
@@ -149,35 +143,31 @@ class PCAWrapper extends Component {
   state = {
     data: [],
     colors: [],
-    feature: "camk2n1",
     numPCs: 10,
     updatedNumPCs: 10,
   };
 
   getColor = this.getColor.bind(this);
-  selectGene = this.selectGene.bind(this);
   selectNumPCs = this.selectNumPCs.bind(this);
 
   getColor(node) {
-    if (node.index) return this.state.colors[node.index];
+    if (node.index) return this.props.colors[node.index];
     return "blue";
   }
 
   run() {
-    const { computePCA, getColors } = this.props;
-    const { feature, updatedNumPCs } = this.state;
+    const { setNumPCs, computePCA, colors } = this.props;
+    const { updatedNumPCs } = this.state;
 
     const data = computePCA();
-    const colors = getColors(feature);
+    setNumPCs(updatedNumPCs);
     this.setState({ data, colors, numPCs: updatedNumPCs });
   }
 
   applySettings() {
-    const { setNumPCs, getColors } = this.props;
-    const { feature, updatedNumPCs } = this.state;
-
+    const { setNumPCs, colors } = this.props;
+    const { updatedNumPCs } = this.state;
     setNumPCs(updatedNumPCs);
-    const colors = getColors(feature);
     this.setState({ colors, numPCs: updatedNumPCs });
   }
 
@@ -187,12 +177,8 @@ class PCAWrapper extends Component {
       this.setState({ updatedNumPCs: num === 0 ? 1 : Math.min(num, 20) });
   }
 
-  selectGene(event) {
-    this.setState({ feature: event.target.value.trim().toLowerCase() });
-  }
-
   render() {
-    const { selectGene, selectNumPCs } = this;
+    const { selectNumPCs } = this;
     const { data, numPCs } = this.state;
 
     return (
@@ -210,7 +196,7 @@ class PCAWrapper extends Component {
           Enter description here.
         </Typography>
 
-        {TypedInput(selectGene, selectNumPCs)}
+        {TypedInput(selectNumPCs)}
 
         <div style={{ paddingTop: "15px" }}></div>
         <Button
