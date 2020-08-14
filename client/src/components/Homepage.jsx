@@ -38,9 +38,10 @@ class Homepage extends Component {
     feature: "camk2n1",
   };
 
-  handleFilter = this.handleFilter.bind(this);
   setNumPCs = this.setNumPCs.bind(this);
   setFeature = this.setFeature.bind(this);
+
+  handleFilter = this.handleFilter.bind(this);
   computePCA = this.computePCA.bind(this);
   computeTSNE = this.computeTSNE.bind(this);
 
@@ -189,12 +190,12 @@ class Homepage extends Component {
     return colors;
   }
 
-  setNumPCs(num) {
-    this.setState({ numPCs: num });
-  }
-
   setFeature(name) {
     this.setState({ feature: name });
+  }
+
+  setNumPCs(num) {
+    this.setState({ numPCs: num });
   }
 
   computePCA() {
