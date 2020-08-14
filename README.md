@@ -1,5 +1,14 @@
 # SpatialTranscriptomics.js
 
+## File Information
+Currently, the application reads files stored in various subdirectories in the `data` directory. Make sure to `gunzip -k FILENAME` all .gz files. 
+
+To specify which dataset you want the application to load, edit the following line in the `backend/Filereader.js` file.
+
+```
+const fileNum = 0; // 0 is filtered coronal brain, 1 is unfiltered coronal brain, 2 is olfactory bulb
+```
+
 ## Running the App
 
 You’ll need to have <b>Node and npm</b> installed on your local development machine.
