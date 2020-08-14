@@ -14,17 +14,11 @@ const primary = "#094067";
 const paragraph = "#5f6c7b";
 const tertiary = "#90b4ce";
 
-const LeafletWrapper = (p, colors) => {
+const LeafletWrapper = (pixels, colors) => {
   const bounds = [
     [0, 0],
     [1921, 2000],
   ];
-
-  const pixels = p.slice().map((pixel, index) => {
-    const coloredPixel = pixel;
-    coloredPixel.color = colors[index];
-    return coloredPixel;
-  });
 
   return (
     <>
@@ -35,13 +29,13 @@ const LeafletWrapper = (p, colors) => {
         style={{ height: "500px", width: "100%" }}
       >
         <ImageOverlay bounds={bounds} url="/images/tissue_image.png" />
-        {pixels.map((pixel) => {
+        {pixels.map((pixel, index) => {
           return (
             <Circle
               key={pixel.center}
               center={pixel.center}
               color="transparent"
-              fillColor={pixel.color}
+              fillColor={colors[index] ? colors[index] : "blue"}
               fillOpacity={1}
               radius={8}
             />
@@ -180,13 +174,13 @@ class SpatialVis extends Component {
   }
 
   getPixels() {
-    const { barcodes, colors } = this.props;
+    const { barcodes, numCells } = this.props;
     const pixels = [];
 
-    if (colors && barcodes[0]) {
+    if (numCells > 0 && barcodes[0]) {
       if (!barcodes[0].x || !barcodes[0].y) return [];
 
-      for (let i = 0; i < colors.length; i++) {
+      for (let i = 0; i < numCells; i++) {
         try {
           const { x, y } = barcodes[i];
           const {
@@ -202,7 +196,6 @@ class SpatialVis extends Component {
           const centerY = horizontalFlipped * y * scale + deltaX;
           pixels.push({
             center: !xyFlipped ? [centerX, centerY] : [centerY, centerX],
-            color: null,
           });
         } catch (error) {}
       }
