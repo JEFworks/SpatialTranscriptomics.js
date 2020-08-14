@@ -7,7 +7,7 @@
 library(Matrix)
 
 ######## read in data
-dir <- '~/Desktop/SpatialTranscriptomics.js/data/coronal_brain/filtered_feature_bc_matrix/filtered/'
+dir <- '~/Documents/GitHub/SpatialTranscriptomics.js/data/coronal_brain/filtered_feature_bc_matrix/filtered/'
 cd <- readMM(paste0(dir, 'filtered_matrix.mtx.gz'))
 genes <- read.csv(paste0(dir, 'filtered_features.tsv.gz'), sep='\t', header=FALSE)
 cells <- read.csv(paste0(dir, 'barcodes.tsv.gz'), sep='\t', header=FALSE)
@@ -27,7 +27,7 @@ head(cd)
 hist(log10(colSums(cd)+1)) ## distribution of genes per cell ie. library size (log scale)
 hist(log10(colSums(cd>0)+1)) ## distribution of unique gene species per cell ie. library complexity (log scale)
 hist(log10(rowSums(cd)+1)) ## distribution of cells per gene (log scale)
-vi <- rowSums(cd) > 1000 ## pick a filtering threshold
+vi <- rowSums(cd) > 3000 ## pick a filtering threshold
 table(vi)
 cd.filter <- cd[vi,]
 vi <- colSums(cd) > 100 ## pick a filtering threshold
@@ -79,9 +79,10 @@ points(val)
 N <- 10
 abline(v=N, col='red')
 pcs <- pca$u[, 1:N]
+print(ncol(pca$u))
 rownames(pcs) <- colnames(mat)
 colnames(pcs) <- paste0('PC', 1:N)
-head(pcs)
+tail(pcs)
 
 ############# PCA plots
 par(mfrow=c(2,2), mar=rep(4,4))
