@@ -14,7 +14,7 @@ import GitHubIcon from "@material-ui/icons/GitHub";
 const background = "#fffffe";
 const primary = "#094067";
 
-const Title = (updateColors, selectGene, feature) => (
+const Title = (setFeature, selectFeature, feature) => (
   <>
     <Typography variant="h6" style={{ flexGrow: 1, fontWeight: 500 }}>
       <Link style={{ color: primary }} underline="none" href="/">
@@ -25,13 +25,13 @@ const Title = (updateColors, selectGene, feature) => (
           style={{ width: "150px", marginRight: "15px" }}
           helperText="Gene name"
           defaultValue="Camk2n1"
-          onChange={selectGene}
+          onChange={selectFeature}
         />
         <Button
           variant="contained"
           size="small"
           color="primary"
-          onClick={() => updateColors(feature)}
+          onClick={() => setFeature(feature)}
         >
           Update Colors
         </Button>
@@ -81,9 +81,9 @@ class Header extends Component {
     feature: "camk2n1",
   };
 
-  selectGene = this.selectGene.bind(this);
+  selectFeature = this.selectFeature.bind(this);
 
-  selectGene(event) {
+  selectFeature(event) {
     this.setState({ feature: event.target.value.trim().toLowerCase() });
   }
 
@@ -98,8 +98,8 @@ class Header extends Component {
         >
           <Toolbar>
             {Title(
-              this.props.updateColors,
-              this.selectGene,
+              this.props.setFeature,
+              this.selectFeature,
               this.state.feature
             )}
             {About}

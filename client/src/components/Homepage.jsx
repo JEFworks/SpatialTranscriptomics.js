@@ -39,8 +39,8 @@ class Homepage extends Component {
   };
 
   handleFilter = this.handleFilter.bind(this);
-  updateColors = this.updateColors.bind(this);
   setNumPCs = this.setNumPCs.bind(this);
+  setFeature = this.setFeature.bind(this);
   computePCA = this.computePCA.bind(this);
   computeTSNE = this.computeTSNE.bind(this);
 
@@ -48,7 +48,7 @@ class Homepage extends Component {
     await this.loadFeatures();
     await this.loadBarcodes();
     await this.loadMatrix().catch(() => {});
-    this.updateColors(this.state.feature);
+    this.getColors();
   }
 
   async loadFeatures() {
@@ -171,25 +171,30 @@ class Homepage extends Component {
     });
   }
 
-  getGene(featureName) {
+  getGene(name) {
     const { filteredMatrix, filteredFeatures } = this.state;
-    return filteredMatrix[filteredFeatures.indexOf(featureName)];
+    return filteredMatrix[filteredFeatures.indexOf(name)];
   }
 
-  updateColors(featureName) {
+  getColors() {
     const colors = [];
-    const gene = this.getGene(featureName);
+    const gene = this.getGene(this.state.feature);
+
     if (gene) {
       const { max, min } = MinMaxStats(gene);
       gene.forEach((cell) => {
         colors.push(GetRGB(MinMaxNormalize(cell, min, max)));
       });
     }
-    this.setState({ colors });
+    return colors;
   }
 
   setNumPCs(num) {
     this.setState({ numPCs: num });
+  }
+
+  setFeature(name) {
+    this.setState({ feature: name });
   }
 
   computePCA() {
@@ -239,10 +244,15 @@ class Homepage extends Component {
   }
 
   render() {
+    const numCells = this.state.filteredMatrix[0]
+      ? this.state.filteredMatrix[0].length
+      : 0;
+    const colors = this.getColors();
+
     return (
       <>
         <div style={{ marginBottom: "60px" }}>
-          <Header updateColors={this.updateColors} />
+          <Header setFeature={this.setFeature} />
         </div>
 
         <div className="site-container">
@@ -257,19 +267,22 @@ class Homepage extends Component {
           <PCAWrapper
             computePCA={this.computePCA}
             setNumPCs={this.setNumPCs}
-            colors={this.state.colors}
+            colors={colors}
+            displayAllowed={this.state.pcs[0]}
           />
 
           <div style={{ paddingTop: "20px" }}></div>
           <TSNEWrapper
             computeTSNE={this.computeTSNE}
-            colors={this.state.colors}
+            colors={colors}
+            displayAllowed={this.state.pcs[0]}
           />
 
           <div style={{ paddingTop: "20px" }}></div>
           <SpatialVis
-            colors={this.state.colors}
             barcodes={this.state.filteredBarcodes}
+            colors={colors}
+            numCells={numCells}
           />
 
           <div style={{ paddingTop: "70px" }}></div>

@@ -12,9 +12,9 @@ import ScatterPlot from "./plots/ScatterPlot.jsx";
 const primary = "#094067";
 const paragraph = "#5f6c7b";
 
-const Biplot = (eigenvectors, getColor) => {
+const Biplot = (eigenvectors, getColor, displayAllowed) => {
   const obj = [{ data: [] }];
-  if (eigenvectors) {
+  if (displayAllowed && eigenvectors) {
     eigenvectors.forEach((vector, index) => {
       const x = vector[0];
       const y = vector[1];
@@ -69,9 +69,9 @@ const Biplot = (eigenvectors, getColor) => {
   );
 };
 
-const ScreePlot = (eigenvalues, numPCs) => {
+const ScreePlot = (eigenvalues, numPCs, displayAllowed) => {
   const obj = [{ data: [] }];
-  if (eigenvalues) {
+  if (displayAllowed && eigenvalues) {
     eigenvalues.slice(0, 20).forEach((eigenvalue, index) => {
       obj[0].data.push({ x: index + 1, y: eigenvalue });
     });
@@ -178,8 +178,9 @@ class PCAWrapper extends Component {
   }
 
   render() {
-    const { selectNumPCs } = this;
+    const { selectNumPCs, getColor } = this;
     const { data, numPCs } = this.state;
+    const { displayAllowed } = this.props;
 
     return (
       <>
@@ -222,8 +223,8 @@ class PCAWrapper extends Component {
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>
           <div className="PC-flex">
-            {ScreePlot(data.eigenvalues, numPCs)}
-            {Biplot(data.eigenvectors, this.getColor)}
+            {ScreePlot(data.eigenvalues, numPCs, displayAllowed)}
+            {Biplot(data.eigenvectors, getColor, displayAllowed)}
           </div>
           <div style={{ width: "50%" }}></div>
         </div>

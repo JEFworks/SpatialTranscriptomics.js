@@ -29,18 +29,19 @@ const LeafletWrapper = (pixels, colors) => {
         style={{ height: "500px", width: "100%" }}
       >
         <ImageOverlay bounds={bounds} url="/images/tissue_image.png" />
-        {pixels.map((pixel, index) => {
-          return (
-            <Circle
-              key={pixel.center}
-              center={pixel.center}
-              color="transparent"
-              fillColor={colors[index] ? colors[index] : "blue"}
-              fillOpacity={1}
-              radius={8}
-            />
-          );
-        })}
+        {pixels.length === colors.length &&
+          pixels.map((pixel, index) => {
+            return (
+              <Circle
+                key={pixel.center}
+                center={pixel.center}
+                color="transparent"
+                fillColor={colors[index] ? colors[index] : "blue"}
+                fillOpacity={1}
+                radius={8}
+              />
+            );
+          })}
       </Map>
     </>
   );

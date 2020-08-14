@@ -5,9 +5,9 @@ import ScatterPlot from "./plots/ScatterPlot.jsx";
 const primary = "#094067";
 const paragraph = "#5f6c7b";
 
-const Plot = (data, getColor) => {
+const Plot = (data, getColor, displayAllowed) => {
   const obj = [{ data: [] }];
-  if (data) {
+  if (displayAllowed && data) {
     data.forEach((point, index) => {
       const x = point[0];
       const y = point[1];
@@ -110,7 +110,9 @@ class tSNEWrapper extends Component {
         <div style={{ paddingTop: "20px" }}></div>
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>
-          <div className="PC-flex">{Plot(this.state.data, this.getColor)}</div>
+          <div className="PC-flex">
+            {Plot(this.state.data, this.getColor, this.props.displayAllowed)}
+          </div>
           <div style={{ width: "50%" }}></div>
         </div>
       </>
