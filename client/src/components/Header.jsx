@@ -16,27 +16,29 @@ const primary = "#094067";
 
 const Title = (setFeature, selectFeature, feature) => (
   <>
-    <Typography variant="h6" style={{ flexGrow: 1, fontWeight: 500 }}>
+    <Typography variant="h6" style={{ flexGrow: 0.03, fontWeight: 500 }}>
       <Link style={{ color: primary }} underline="none" href="/">
         ST.js
       </Link>
-      <FormGroup row>
-        <TextField
-          style={{ width: "150px", marginRight: "15px" }}
-          helperText="Gene name"
-          defaultValue="Camk2n1"
-          onChange={selectFeature}
-        />
-        <Button
-          variant="contained"
-          size="small"
-          color="primary"
-          onClick={() => setFeature(feature)}
-        >
-          Update Colors
-        </Button>
-      </FormGroup>
     </Typography>
+    <div style={{ flexGrow: 0.02, fontWeight: 500 }}>
+      <TextField
+        style={{ width: "100px" }}
+        helperText="Gene name"
+        defaultValue="Camk2n1"
+        onChange={selectFeature}
+      />
+    </div>
+    <div style={{ flexGrow: 0.95, fontWeight: 500 }}>
+      <Button
+        variant="contained"
+        size="small"
+        color="primary"
+        onClick={() => setFeature(feature)}
+      >
+        Update Colors
+      </Button>
+    </div>
   </>
 );
 
