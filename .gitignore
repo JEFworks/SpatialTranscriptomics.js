@@ -4,4 +4,4 @@ temp/Rplots.pdf
 *.tsv
 *.mtx
 *.csv
-backend/uploads/*
+backend/data/*

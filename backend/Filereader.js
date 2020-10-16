@@ -63,10 +63,10 @@ app.get("/matrix/:uuid/:count/:numBatches", function (req, res) {
 
   let filePath =
     fileNum === 0
-      ? "../data/coronal_brain/filtered_feature_bc_matrix/filtered/filtered_matrix.mtx"
+      ? "./example_data/coronal_brain/filtered_feature_bc_matrix/filtered/filtered_matrix.mtx"
       : fileNum === 1
-      ? "../data/coronal_brain/filtered_feature_bc_matrix/matrix.mtx"
-      : "../data/olfactory_bulb/filtered_feature_bc_matrix/matrix.mtx";
+      ? "./example_data/coronal_brain/filtered_feature_bc_matrix/matrix.mtx"
+      : "./example_data/olfactory_bulb/filtered_feature_bc_matrix/matrix.mtx";
   const files = filesMap.get(req.params.uuid);
 
   if (files != null && files[0] != null) {
@@ -164,10 +164,10 @@ app.get("/matrix/:uuid/:count/:numBatches", function (req, res) {
 app.get("/features/:uuid", function (req, res) {
   let filePath =
     fileNum === 0
-      ? "../data/coronal_brain/filtered_feature_bc_matrix/filtered/filtered_features.tsv"
+      ? "./example_data/coronal_brain/filtered_feature_bc_matrix/filtered/filtered_features.tsv"
       : fileNum === 1
-      ? "../data/coronal_brain/filtered_feature_bc_matrix/features.tsv"
-      : "../data/olfactory_bulb/filtered_feature_bc_matrix/features.tsv";
+      ? "./example_data/coronal_brain/filtered_feature_bc_matrix/features.tsv"
+      : "./example_data/olfactory_bulb/filtered_feature_bc_matrix/features.tsv";
   const files = filesMap.get(req.params.uuid);
   if (files != null && files[1] != null) {
     filePath = files[1];
@@ -212,10 +212,10 @@ app.get("/features/:uuid", function (req, res) {
 app.get("/barcodes/:uuid", function (req, res) {
   let filePath =
     fileNum === 0
-      ? "../data/coronal_brain/filtered_feature_bc_matrix/filtered/barcodes.tsv"
+      ? "./example_data/coronal_brain/filtered_feature_bc_matrix/filtered/barcodes.tsv"
       : fileNum === 1
-      ? "../data/coronal_brain/filtered_feature_bc_matrix/barcodes.tsv"
-      : "../data/olfactory_bulb/filtered_feature_bc_matrix/barcodes.tsv";
+      ? "./example_data/coronal_brain/filtered_feature_bc_matrix/barcodes.tsv"
+      : "./example_data/olfactory_bulb/filtered_feature_bc_matrix/barcodes.tsv";
   const files = filesMap.get(req.params.uuid);
   if (files != null && files[2] != null) {
     filePath = files[2];
@@ -251,10 +251,10 @@ app.get("/barcodes/:uuid", function (req, res) {
 app.get("/pixels/:uuid", function (req, res) {
   let filePath =
     fileNum === 0
-      ? "../data/coronal_brain/spatial/tissue_positions_list.csv"
+      ? "./example_data/coronal_brain/spatial/tissue_positions_list.csv"
       : fileNum === 1
-      ? "../data/coronal_brain/spatial/tissue_positions_list.csv"
-      : "../data/olfactory_bulb/spatial/tissue_positions_list.csv";
+      ? "./example_data/coronal_brain/spatial/tissue_positions_list.csv"
+      : "./example_data/olfactory_bulb/spatial/tissue_positions_list.csv";
   const files = filesMap.get(req.params.uuid);
   if (files != null && files[3] != null) {
     filePath = files[3];
