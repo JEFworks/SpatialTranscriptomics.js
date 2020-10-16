@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import axios from "axios";
+import { v4 as uuidv4 } from "uuid";
 import { SparseMatrix } from "ml-sparse-matrix";
 import { PCA } from "ml-pca";
 
@@ -20,6 +21,8 @@ import PCAWrapper from "./PCA.jsx";
 import TSNEWrapper from "./tSNE.jsx";
 import SpatialVis from "./SpatialVis.jsx";
 
+import { Button } from "@material-ui/core";
+
 class Homepage extends Component {
   state = {
     matrix: [],
@@ -36,7 +39,20 @@ class Homepage extends Component {
     pcs: [],
     numPCs: 10,
     feature: "camk2n1",
-  };
+    uuid: null,
+    files: {
+      barcodes: null,
+      features: null,
+      pixels: null,
+      matrix: null,
+    },
+  }; // remember to update state in loadEverything()
+
+  matrixFileHandler = this.matrixFileHandler.bind(this);
+  barcodesFileHandler = this.barcodesFileHandler.bind(this);
+  pixelsFileHandler = this.pixelsFileHandler.bind(this);
+  featuresFileHandler = this.featuresFileHandler.bind(this);
+  uploadFiles = this.uploadFiles.bind(this);
 
   setNumPCs = this.setNumPCs.bind(this);
   setFeature = this.setFeature.bind(this);
@@ -46,15 +62,86 @@ class Homepage extends Component {
   computeTSNE = this.computeTSNE.bind(this);
 
   async componentDidMount() {
+    this.loadEverything();
+  }
+
+  async loadEverything() {
+    // reset state
+    this.setState({
+      matrix: [],
+      filteredMatrix: [],
+      features: [],
+      adjustedFeatures: [],
+      filteredFeatures: [],
+      barcodes: [],
+      filteredBarcodes: [],
+      thresholds: { minRowSum: 2, minColSum: 2 },
+      rowsums: [],
+      colsums: [],
+      colors: [],
+      pcs: [],
+      numPCs: 10,
+      feature: "camk2n1",
+      files: {
+        barcodes: null,
+        features: null,
+        pixels: null,
+        matrix: null,
+      },
+    });
+
     await this.loadFeatures();
     await this.loadBarcodes();
     await this.loadMatrix().catch(() => {});
-    this.getColors();
+  }
+
+  matrixFileHandler(event) {
+    const { files } = this.state;
+    files.matrix = event.target.files[0];
+  }
+
+  featuresFileHandler(event) {
+    const { files } = this.state;
+    files.features = event.target.files[0];
+  }
+
+  pixelsFileHandler(event) {
+    const { files } = this.state;
+    files.pixels = event.target.files[0];
+  }
+
+  barcodesFileHandler(event) {
+    const { files } = this.state;
+    files.barcodes = event.target.files[0];
+  }
+
+  async uploadFiles() {
+    const { files } = this.state;
+    // if (!files.matrix || !files.barcodes || !files.features || !files.pixels)
+    //   return;
+
+    const data = new FormData();
+    data.append("file", files.matrix);
+    data.append("file", files.features);
+    data.append("file", files.barcodes);
+    data.append("file", files.pixels);
+
+    const uuid = uuidv4();
+    await axios
+      .post(`http://localhost:4000/upload/${uuid}`, data, {})
+      .then((res) => {
+        console.log(res.statusText);
+      });
+    this.setState({
+      uuid,
+    });
+    this.loadEverything();
   }
 
   async loadFeatures() {
+    const { uuid } = this.state;
     axios
-      .get(`http://localhost:4000/features`)
+      .get(`http://localhost:4000/features/${uuid}`)
       .then((response) => {
         const features = JSON.parse(response.data);
         this.setState({ features });
@@ -63,8 +150,9 @@ class Homepage extends Component {
   }
 
   async loadBarcodes() {
+    const { uuid } = this.state;
     axios
-      .get(`http://localhost:4000/barcodes`)
+      .get(`http://localhost:4000/barcodes/${uuid}`)
       .then((response) => {
         const barcodes = JSON.parse(response.data);
         this.setState({ barcodes });
@@ -76,8 +164,9 @@ class Homepage extends Component {
   }
 
   async loadPixels(barcodes) {
+    const { uuid } = this.state;
     axios
-      .get(`http://localhost:4000/pixels`)
+      .get(`http://localhost:4000/pixels/${uuid}`)
       .then((response) => {
         const pixels = JSON.parse(response.data);
         pixels.forEach((pixel) => {
@@ -90,11 +179,12 @@ class Homepage extends Component {
   }
 
   async loadMatrix() {
+    const { uuid } = this.state;
     let count = 0;
     const numBatches = 4;
     while (count < numBatches) {
       await axios
-        .get(`http://localhost:4000/matrix/${count}/${numBatches}`)
+        .get(`http://localhost:4000/matrix/${uuid}/${count}/${numBatches}`)
         .then((response) => {
           const res = JSON.parse(response.data);
           const m = new SparseMatrix(res.rows, res.columns);
@@ -129,7 +219,7 @@ class Homepage extends Component {
         })
         .catch((error) => {
           this.setState({ matrix: [] });
-          throw Error(error);
+          console.log(error);
         });
       count++;
     }
@@ -257,6 +347,76 @@ class Homepage extends Component {
         </div>
 
         <div className="site-container">
+          <div style={{ marginTop: "50px", display: "flex" }}>
+            <div style={{ marginRight: "20px" }}>
+              <input
+                accept="*"
+                style={{ display: "none" }}
+                id="file-button1"
+                type="file"
+                onChange={this.matrixFileHandler}
+              />
+              <label htmlFor="file-button1">
+                <Button variant="contained" color="primary" component="span">
+                  Matrix Upload
+                </Button>
+              </label>
+            </div>
+            <div style={{ marginRight: "20px" }}>
+              <input
+                accept="*"
+                style={{ display: "none" }}
+                id="file-button2"
+                type="file"
+                onChange={this.featuresFileHandler}
+              />
+              <label htmlFor="file-button2">
+                <Button variant="contained" color="primary" component="span">
+                  Features Upload
+                </Button>
+              </label>
+            </div>
+            <div style={{ marginRight: "20px" }}>
+              <input
+                accept="*"
+                style={{ display: "none" }}
+                id="file-button3"
+                type="file"
+                onChange={this.barcodesFileHandler}
+              />
+              <label htmlFor="file-button3">
+                <Button variant="contained" color="primary" component="span">
+                  Barcodes Upload
+                </Button>
+              </label>
+            </div>
+            <div style={{ marginRight: "20px" }}>
+              <input
+                accept="*"
+                style={{ display: "none" }}
+                id="file-button4"
+                type="file"
+                onChange={this.pixelsFileHandler}
+              />
+              <label htmlFor="file-button4">
+                <Button variant="contained" color="primary" component="span">
+                  Pixels Upload
+                </Button>
+              </label>
+            </div>
+          </div>
+
+          <div style={{ marginTop: "30px", marginBottom: "50px" }}>
+            <Button
+              variant="contained"
+              color="primary"
+              component="span"
+              onClick={this.uploadFiles}
+            >
+              Upload All
+            </Button>
+          </div>
+
           <QualityControl
             thresholds={this.state.thresholds}
             rowsums={this.state.rowsums.sums}

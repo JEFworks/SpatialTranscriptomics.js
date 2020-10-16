@@ -5,7 +5,7 @@ const express = require("express");
 const router = express.Router();
 const app = express();
 const multer = require("multer");
-const path = require("path");
+const shell = require("shelljs");
 
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));
@@ -16,31 +16,43 @@ const es = require("event-stream");
 
 const { SparseMatrix } = require("ml-sparse-matrix");
 
+const filesMap = new Map();
 const fileNum = 0; // 0 is filtered coronal brains, 1 is original coronal brain , 2 is olfactory bulb
 
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
+  destination: function (req, _file, cb) {
+    shell.mkdir("-p", "./data/" + req.params.uuid);
+    const path = "data/" + req.params.uuid + "/";
+    cb(null, path);
   },
-  filename: function (req, file, cb) {
+  filename: function (_req, file, cb) {
     cb(null, file.originalname);
   },
 });
 
-const upload = multer({ storage: storage }).single("file");
+const upload = multer({ storage: storage }).array("file");
 
-app.post("/upload", function (req, res) {
+app.post("/upload/:uuid", function (req, res) {
   upload(req, res, function (err) {
     if (err instanceof multer.MulterError) {
       return res.status(500).json(err);
     } else if (err) {
       return res.status(500).json(err);
     }
+
+    const files = req.files;
+    const uuid = req.params.uuid;
+
+    const paths = [];
+    for (let i = 0; i < files.length; i++) {
+      paths.push(files[i].path);
+    }
+    filesMap.set(uuid, paths);
     return res.status(200).send(req.file);
   });
 });
 
-app.get("/matrix/:count/:numBatches", function (req, res) {
+app.get("/matrix/:uuid/:count/:numBatches", function (req, res) {
   const count = Number.parseInt(req.params.count);
   const numBatches = Number.parseInt(req.params.numBatches);
 
@@ -55,6 +67,11 @@ app.get("/matrix/:count/:numBatches", function (req, res) {
       : fileNum === 1
       ? "../data/coronal_brain/filtered_feature_bc_matrix/matrix.mtx"
       : "../data/olfactory_bulb/filtered_feature_bc_matrix/matrix.mtx";
+  const files = filesMap.get(req.params.uuid);
+
+  if (files != null && files[0] != null) {
+    filePath = files[0];
+  }
 
   const instream = fs.createReadStream(filePath);
   instream.on("error", function () {
@@ -144,13 +161,17 @@ app.get("/matrix/:count/:numBatches", function (req, res) {
   );
 });
 
-app.get("/features", function (_req, res) {
+app.get("/features/:uuid", function (req, res) {
   let filePath =
     fileNum === 0
       ? "../data/coronal_brain/filtered_feature_bc_matrix/filtered/filtered_features.tsv"
       : fileNum === 1
       ? "../data/coronal_brain/filtered_feature_bc_matrix/features.tsv"
       : "../data/olfactory_bulb/filtered_feature_bc_matrix/features.tsv";
+  const files = filesMap.get(req.params.uuid);
+  if (files != null && files[1] != null) {
+    filePath = files[1];
+  }
 
   const instream = fs.createReadStream(filePath);
   instream.on("error", function () {
@@ -188,13 +209,17 @@ app.get("/features", function (_req, res) {
   );
 });
 
-app.get("/barcodes", function (_req, res) {
+app.get("/barcodes/:uuid", function (req, res) {
   let filePath =
     fileNum === 0
       ? "../data/coronal_brain/filtered_feature_bc_matrix/filtered/barcodes.tsv"
       : fileNum === 1
       ? "../data/coronal_brain/filtered_feature_bc_matrix/barcodes.tsv"
       : "../data/olfactory_bulb/filtered_feature_bc_matrix/barcodes.tsv";
+  const files = filesMap.get(req.params.uuid);
+  if (files != null && files[2] != null) {
+    filePath = files[2];
+  }
 
   const instream = fs.createReadStream(filePath);
   instream.on("error", function () {
@@ -223,13 +248,17 @@ app.get("/barcodes", function (_req, res) {
   );
 });
 
-app.get("/pixels", function (_req, res) {
+app.get("/pixels/:uuid", function (req, res) {
   let filePath =
     fileNum === 0
       ? "../data/coronal_brain/spatial/tissue_positions_list.csv"
       : fileNum === 1
       ? "../data/coronal_brain/spatial/tissue_positions_list.csv"
       : "../data/olfactory_bulb/spatial/tissue_positions_list.csv";
+  const files = filesMap.get(req.params.uuid);
+  if (files != null && files[3] != null) {
+    filePath = files[3];
+  }
 
   const instream = fs.createReadStream(filePath);
   instream.on("error", function () {
@@ -244,7 +273,8 @@ app.get("/pixels", function (_req, res) {
     es
       .mapSync(function (line) {
         if (!exit) {
-          const delimited = line.split(",");
+          let delimited = line.split(",");
+          if (delimited.length == 1) delimited = delimited[0].split("\t");
           if (delimited.length >= 3) {
             const barcode = delimited[0].trim();
             const x = delimited[delimited.length - 2].trim();

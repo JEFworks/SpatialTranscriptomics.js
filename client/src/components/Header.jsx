@@ -6,7 +6,6 @@ import {
   Toolbar,
   Typography,
   Button,
-  FormGroup,
   TextField,
 } from "@material-ui/core";
 import GitHubIcon from "@material-ui/icons/GitHub";
@@ -34,6 +33,7 @@ const Title = (setFeature, selectFeature, feature) => (
         variant="contained"
         size="small"
         color="primary"
+        style={{ backgroundColor: primary }}
         onClick={() => setFeature(feature)}
       >
         Update Colors
