@@ -4,6 +4,8 @@ const cors = require("cors");
 const express = require("express");
 const router = express.Router();
 const app = express();
+const multer = require("multer");
+const path = require("path");
 
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));
@@ -15,6 +17,28 @@ const es = require("event-stream");
 const { SparseMatrix } = require("ml-sparse-matrix");
 
 const fileNum = 0; // 0 is filtered coronal brains, 1 is original coronal brain , 2 is olfactory bulb
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  },
+});
+
+const upload = multer({ storage: storage }).single("file");
+
+app.post("/upload", function (req, res) {
+  upload(req, res, function (err) {
+    if (err instanceof multer.MulterError) {
+      return res.status(500).json(err);
+    } else if (err) {
+      return res.status(500).json(err);
+    }
+    return res.status(200).send(req.file);
+  });
+});
 
 app.get("/matrix/:count/:numBatches", function (req, res) {
   const count = Number.parseInt(req.params.count);
