@@ -16,8 +16,8 @@ const es = require("event-stream");
 
 const { SparseMatrix } = require("ml-sparse-matrix");
 
-const filesMap = new Map();
-const fileNum = 0; // 0 is filtered coronal brains, 1 is original coronal brain , 2 is olfactory bulb
+const filesMap = new Map(); // map of all user sessions and their associated files
+const defaultFileNum = 0; // 0 is filtered coronal brains, 1 is original coronal brain, 2 is olfactory bulb
 
 const storage = multer.diskStorage({
   destination: function (req, _file, cb) {
@@ -41,13 +41,19 @@ app.post("/upload/:uuid", function (req, res) {
     }
 
     const files = req.files;
-    const uuid = req.params.uuid;
+    const paths = {
+      matrix: null,
+      features: null,
+      barcodes: null,
+      pixels: null,
+    };
 
-    const paths = [];
-    for (let i = 0; i < files.length; i++) {
-      paths.push(files[i].path);
-    }
-    filesMap.set(uuid, paths);
+    paths.matrix = files[0].path;
+    paths.features = files[1].path;
+    paths.barcodes = files[2].path;
+    paths.pixels = files[3].path;
+
+    filesMap.set(req.params.uuid, paths);
     return res.status(200).send(req.file);
   });
 });
@@ -62,15 +68,14 @@ app.get("/matrix/:uuid/:count/:numBatches", function (req, res) {
   }
 
   let filePath =
-    fileNum === 0
+    defaultFileNum === 0
       ? "./example_data/coronal_brain/filtered_feature_bc_matrix/filtered/filtered_matrix.mtx"
-      : fileNum === 1
+      : defaultFileNum === 1
       ? "./example_data/coronal_brain/filtered_feature_bc_matrix/matrix.mtx"
       : "./example_data/olfactory_bulb/filtered_feature_bc_matrix/matrix.mtx";
   const files = filesMap.get(req.params.uuid);
-
-  if (files != null && files[0] != null) {
-    filePath = files[0];
+  if (files != null && files.matrix != null) {
+    filePath = files.matrix;
   }
 
   const instream = fs.createReadStream(filePath);
@@ -163,14 +168,14 @@ app.get("/matrix/:uuid/:count/:numBatches", function (req, res) {
 
 app.get("/features/:uuid", function (req, res) {
   let filePath =
-    fileNum === 0
+    defaultFileNum === 0
       ? "./example_data/coronal_brain/filtered_feature_bc_matrix/filtered/filtered_features.tsv"
-      : fileNum === 1
+      : defaultFileNum === 1
       ? "./example_data/coronal_brain/filtered_feature_bc_matrix/features.tsv"
       : "./example_data/olfactory_bulb/filtered_feature_bc_matrix/features.tsv";
   const files = filesMap.get(req.params.uuid);
-  if (files != null && files[1] != null) {
-    filePath = files[1];
+  if (files != null && files.features != null) {
+    filePath = files.features;
   }
 
   const instream = fs.createReadStream(filePath);
@@ -211,14 +216,14 @@ app.get("/features/:uuid", function (req, res) {
 
 app.get("/barcodes/:uuid", function (req, res) {
   let filePath =
-    fileNum === 0
+    defaultFileNum === 0
       ? "./example_data/coronal_brain/filtered_feature_bc_matrix/filtered/barcodes.tsv"
-      : fileNum === 1
+      : defaultFileNum === 1
       ? "./example_data/coronal_brain/filtered_feature_bc_matrix/barcodes.tsv"
       : "./example_data/olfactory_bulb/filtered_feature_bc_matrix/barcodes.tsv";
   const files = filesMap.get(req.params.uuid);
-  if (files != null && files[2] != null) {
-    filePath = files[2];
+  if (files != null && files.barcodes != null) {
+    filePath = files.barcodes;
   }
 
   const instream = fs.createReadStream(filePath);
@@ -250,14 +255,14 @@ app.get("/barcodes/:uuid", function (req, res) {
 
 app.get("/pixels/:uuid", function (req, res) {
   let filePath =
-    fileNum === 0
+    defaultFileNum === 0
       ? "./example_data/coronal_brain/spatial/tissue_positions_list.csv"
-      : fileNum === 1
+      : defaultFileNum === 1
       ? "./example_data/coronal_brain/spatial/tissue_positions_list.csv"
       : "./example_data/olfactory_bulb/spatial/tissue_positions_list.csv";
   const files = filesMap.get(req.params.uuid);
-  if (files != null && files[3] != null) {
-    filePath = files[3];
+  if (files != null && files.pixels != null) {
+    filePath = files.pixels;
   }
 
   const instream = fs.createReadStream(filePath);
