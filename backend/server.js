@@ -1,4 +1,4 @@
-const PORT = 4000;
+const PORT = 3000;
 
 const cors = require("cors");
 const express = require("express");
@@ -7,9 +7,16 @@ const app = express();
 const multer = require("multer");
 const shell = require("shelljs");
 
-app.use(cors());
+const corsOptions = {
+    origin: ['https://arpansahoo.github.io', 'http://localhost:8000'],
+    optionsSuccessStatus: 200 // For legacy browser support
+}
+
+app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+
+app.options('*', cors());
 
 const fs = require("fs");
 const es = require("event-stream");
@@ -33,7 +40,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage }).array("file");
 
 app.get('/', (req, res) => {
-  res.send('Hello World!')
+  res.send('Welcome to the ST.js backend.');
 })
 
 app.post("/upload/:uuid", function (req, res) {
