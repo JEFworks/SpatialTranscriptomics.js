@@ -1,5 +1,11 @@
 import React, { Component } from "react";
-import { Typography, Button, Paper } from "@material-ui/core";
+import {
+  Typography,
+  Button,
+  Paper,
+  TextField,
+  FormGroup,
+} from "@material-ui/core";
 import ScatterPlot from "./plots/ScatterPlot.jsx";
 
 const primary = "#094067";
@@ -62,25 +68,84 @@ const Plot = (data, getColor, displayAllowed) => {
   );
 };
 
+const TypedInput = (changeSettings) => {
+  return (
+    <>
+      <FormGroup row style={{ marginTop: "7px" }}>
+        <TextField
+          style={{ width: "50px", marginRight: "15px" }}
+          helperText="Epsilon"
+          defaultValue="10"
+          onChange={(event) => changeSettings(event, "epsilon")}
+        />
+        <TextField
+          style={{ width: "60px", marginRight: "15px" }}
+          helperText="Perplexity"
+          defaultValue="30"
+          onChange={(event) => changeSettings(event, "perplexity")}
+        />
+        <TextField
+          style={{ width: "90px", marginRight: "15px" }}
+          helperText="Dimensionality"
+          defaultValue="2"
+          onChange={(event) => changeSettings(event, "dim")}
+        />
+        <TextField
+          style={{ width: "60px" }}
+          helperText="Iterations"
+          defaultValue="500"
+          onChange={(event) => changeSettings(event, "iterations")}
+        />
+      </FormGroup>
+    </>
+  );
+};
+
 class tSNEWrapper extends Component {
   state = {
     data: [],
+    tsneSettings: {
+      epsilon: 10,
+      perplexity: 30,
+      dim: 2,
+      iterations: 500,
+    },
   };
 
   getColor = this.getColor.bind(this);
+  changeSettings = this.changeSettings.bind(this);
 
   getColor(node) {
     if (node.index) return this.props.colors[node.index];
     return "blue";
   }
 
+  changeSettings(event, type) {
+    const newSetting = Number.parseInt(event.target.value);
+    const { tsneSettings } = this.state;
+
+    if (type === "epsilon") {
+      tsneSettings.epsilon = newSetting;
+    } else if (type === "perplexity") {
+      tsneSettings.perplexity = newSetting;
+    } else if (type === "dim") {
+      tsneSettings.dim = newSetting;
+    } else if (type === "iterations") {
+      tsneSettings.iterations = newSetting;
+    }
+
+    this.setState({ tsneSettings });
+  }
+
   run() {
     const { computeTSNE } = this.props;
-    const data = computeTSNE();
+    const data = computeTSNE(this.state.tsneSettings);
     this.setState({ data });
   }
 
   render() {
+    const { changeSettings } = this;
+
     return (
       <>
         <Typography
@@ -95,6 +160,8 @@ class tSNEWrapper extends Component {
         >
           Enter description here.
         </Typography>
+
+        {TypedInput(changeSettings)}
 
         <div style={{ paddingTop: "15px" }}></div>
         <Button

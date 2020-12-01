@@ -14,7 +14,7 @@ const primary = "#094067";
 const paragraph = "#5f6c7b";
 const tertiary = "#90b4ce";
 
-const LeafletWrapper = (pixels, colors) => {
+const LeafletWrapper = (pixels, colors, opacity) => {
   const bounds = [
     [0, 0],
     [1921, 2000],
@@ -37,7 +37,7 @@ const LeafletWrapper = (pixels, colors) => {
                 center={pixel.center}
                 color="transparent"
                 fillColor={colors[index] ? colors[index] : "blue"}
-                fillOpacity={1}
+                fillOpacity={opacity}
                 radius={8}
               />
             );
@@ -47,7 +47,7 @@ const LeafletWrapper = (pixels, colors) => {
   );
 };
 
-const TypedInput = (changeDeltaX, changeDeltaY, changeScale) => {
+const TypedInput = (changeDeltaX, changeDeltaY, changeScale, changeOpacity) => {
   return (
     <>
       <FormGroup row style={{ marginTop: "7px" }}>
@@ -64,10 +64,16 @@ const TypedInput = (changeDeltaX, changeDeltaY, changeScale) => {
           onChange={changeDeltaY}
         />
         <TextField
-          style={{ width: "250px" }}
+          style={{ width: "250px", marginRight: "15px" }}
           helperText="Scale (< 1 to downscale or > 1 to upscale)"
           defaultValue="0.176"
           onChange={changeScale}
+        />
+        <TextField
+          style={{ width: "100px" }}
+          helperText="Opacity (0 - 1)"
+          defaultValue="1"
+          onChange={changeOpacity}
         />
       </FormGroup>
     </>
@@ -132,12 +138,15 @@ class SpatialVis extends Component {
     horizontalFlipped: 1,
     verticalFlipped: -1,
     xyFlipped: false,
+    opacity: 1,
+    updatedOpacity: 1,
   };
 
   getPixels = this.getPixels.bind(this);
   changeDeltaX = this.changeDeltaX.bind(this);
   changeDeltaY = this.changeDeltaY.bind(this);
   changeScale = this.changeScale.bind(this);
+  changeOpacity = this.changeOpacity.bind(this);
   flipHorizontal = this.flipHorizontal.bind(this);
   flipVertical = this.flipVertical.bind(this);
   flipXY = this.flipXY.bind(this);
@@ -157,6 +166,11 @@ class SpatialVis extends Component {
     this.setState({ deltaY: isNaN(deltaY) ? 0 : deltaY });
   }
 
+  changeOpacity(event) {
+    const opacity = Number.parseFloat(event.target.value);
+    this.setState({ updatedOpacity: isNaN(opacity) ? 1 : opacity });
+  }
+
   flipHorizontal() {
     this.setState({ horizontalFlipped: this.state.horizontalFlipped * -1 });
   }
@@ -171,7 +185,7 @@ class SpatialVis extends Component {
 
   run() {
     const pixels = this.getPixels();
-    this.setState({ pixels });
+    this.setState({ pixels, opacity: this.state.updatedOpacity });
   }
 
   getPixels() {
@@ -209,6 +223,7 @@ class SpatialVis extends Component {
       changeDeltaX,
       changeDeltaY,
       changeScale,
+      changeOpacity,
       flipHorizontal,
       flipVertical,
       flipXY,
@@ -218,6 +233,7 @@ class SpatialVis extends Component {
       horizontalFlipped,
       verticalFlipped,
       xyFlipped,
+      opacity,
     } = this.state;
     const { colors } = this.props;
 
@@ -236,7 +252,7 @@ class SpatialVis extends Component {
           Enter description here.
         </Typography>
 
-        {TypedInput(changeDeltaX, changeDeltaY, changeScale)}
+        {TypedInput(changeDeltaX, changeDeltaY, changeScale, changeOpacity)}
         {CheckboxInput(
           horizontalFlipped,
           flipHorizontal,
@@ -258,7 +274,7 @@ class SpatialVis extends Component {
         </Button>
         <div style={{ paddingTop: "20px" }}></div>
 
-        {LeafletWrapper(pixels, colors)}
+        {LeafletWrapper(pixels, colors, opacity)}
       </>
     );
   }
