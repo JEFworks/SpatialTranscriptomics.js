@@ -16,7 +16,7 @@ import MinMaxStats from "../functions/MinMaxStats.jsx";
 import tsnejs from "../functions/tsne.js";
 
 import Header from "./Header.jsx";
-import UploadCenter from "./UploadCenter.jsx";
+import DataUpload from "./DataUpload.jsx";
 import QualityControl from "./QualityControl.jsx";
 import PCAWrapper from "./PCA.jsx";
 import TSNEWrapper from "./tSNE.jsx";
@@ -38,7 +38,7 @@ class Homepage extends Component {
     filteredFeatures: [],
     barcodes: [],
     filteredBarcodes: [],
-    thresholds: { minRowSum: 2, minColSum: 2 },
+    thresholds: { minRowSum: 4, minColSum: 2 },
     rowsums: [],
     colsums: [],
     colors: [],
@@ -349,12 +349,13 @@ class Homepage extends Component {
         </div>
 
         <div className="site-container">
-          <UploadCenter
+          <DataUpload
             matrixFileHandler={this.matrixFileHandler}
             barcodesFileHandler={this.barcodesFileHandler}
             featuresFileHandler={this.featuresFileHandler}
             pixelsFileHandler={this.pixelsFileHandler}
             uploadFiles={this.uploadFiles}
+            files={this.state.files}
           />
 
           <QualityControl
