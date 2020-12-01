@@ -32,6 +32,10 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage }).array("file");
 
+app.get('/', (req, res) => {
+  res.send('Hello World!')
+})
+
 app.post("/upload/:uuid", function (req, res) {
   upload(req, res, function (err) {
     if (err instanceof multer.MulterError) {
