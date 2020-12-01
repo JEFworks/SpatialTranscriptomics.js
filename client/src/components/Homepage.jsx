@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import axios from "axios";
+import { api } from "../api.js";
 import { v4 as uuidv4 } from "uuid";
 import { SparseMatrix } from "ml-sparse-matrix";
 import { PCA } from "ml-pca";
@@ -132,9 +133,7 @@ class Homepage extends Component {
     data.append("file", files.pixels);
 
     const uuid = uuidv4();
-    await axios
-      .post(`http://localhost:4000/upload/${uuid}`, data, {})
-      .then((_res) => {});
+    await axios.post(`${api}/upload/${uuid}`, data, {}).then((_res) => {});
     this.setState({ uuid });
     this.loadEverything();
   }
@@ -142,7 +141,7 @@ class Homepage extends Component {
   async loadFeatures() {
     const { uuid } = this.state;
     axios
-      .get(`http://localhost:4000/features/${uuid}`)
+      .get(`${api}/features/${uuid}`)
       .then((response) => {
         const features = JSON.parse(response.data);
         this.setState({ features });
@@ -153,7 +152,7 @@ class Homepage extends Component {
   async loadBarcodes() {
     const { uuid } = this.state;
     axios
-      .get(`http://localhost:4000/barcodes/${uuid}`)
+      .get(`${api}/barcodes/${uuid}`)
       .then((response) => {
         const barcodes = JSON.parse(response.data);
         this.setState({ barcodes });
@@ -167,7 +166,7 @@ class Homepage extends Component {
   async loadPixels(barcodes) {
     const { uuid } = this.state;
     axios
-      .get(`http://localhost:4000/pixels/${uuid}`)
+      .get(`${api}/pixels/${uuid}`)
       .then((response) => {
         const pixels = JSON.parse(response.data);
         pixels.forEach((pixel) => {
@@ -185,7 +184,7 @@ class Homepage extends Component {
     const numBatches = 4;
     while (count < numBatches) {
       await axios
-        .get(`http://localhost:4000/matrix/${uuid}/${count}/${numBatches}`)
+        .get(`${api}/matrix/${uuid}/${count}/${numBatches}`)
         .then((response) => {
           const res = JSON.parse(response.data);
           const m = new SparseMatrix(res.rows, res.columns);
