@@ -4,6 +4,7 @@ import { api } from "../api.js";
 import { v4 as uuidv4 } from "uuid";
 import { SparseMatrix } from "ml-sparse-matrix";
 import { PCA } from "ml-pca";
+import { KMeans } from "machinelearn/cluster";
 
 import rowSums from "../functions/rowSums.jsx";
 import colSums from "../functions/colSums.jsx";
@@ -60,6 +61,12 @@ class Homepage extends Component {
   handleFilter = this.handleFilter.bind(this);
   computePCA = this.computePCA.bind(this);
   computeTSNE = this.computeTSNE.bind(this);
+
+  runExperiment = this.runExperiment.bind(this);
+
+  runExperiment() {
+    console.log("hi");
+  }
 
   async componentDidMount() {
     this.loadEverything();
@@ -341,9 +348,11 @@ class Homepage extends Component {
       : 0;
     const colors = this.getColors();
 
+    // this.runExperiment();
+
     return (
       <>
-        <div style={{ marginBottom: "60px" }}>
+        <div style={{ marginBottom: "40px" }}>
           <Header setFeature={this.setFeature} />
         </div>
 
