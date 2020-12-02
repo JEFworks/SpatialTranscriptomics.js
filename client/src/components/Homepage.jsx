@@ -65,7 +65,18 @@ class Homepage extends Component {
   runExperiment = this.runExperiment.bind(this);
 
   runExperiment() {
-    console.log("hi");
+    const kmean = new KMeans({ k: 10 });
+    const { pcs, numPCs } = this.state;
+    const filteredPCs = [];
+    pcs.forEach((pc) => {
+      filteredPCs.push([].slice.call(pc.slice(0, numPCs)));
+    });
+
+    if (filteredPCs.length > 0) {
+      kmean.fit(filteredPCs);
+      const clusters = kmean.toJSON().clusters;
+      console.log(clusters);
+    }
   }
 
   async componentDidMount() {
@@ -348,7 +359,7 @@ class Homepage extends Component {
       : 0;
     const colors = this.getColors();
 
-    // this.runExperiment();
+    this.runExperiment();
 
     return (
       <>
