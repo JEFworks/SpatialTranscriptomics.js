@@ -62,23 +62,6 @@ class Homepage extends Component {
   computePCA = this.computePCA.bind(this);
   computeTSNE = this.computeTSNE.bind(this);
 
-  runExperiment = this.runExperiment.bind(this);
-
-  runExperiment() {
-    const kmean = new KMeans({ k: 10 });
-    const { pcs, numPCs } = this.state;
-    const filteredPCs = [];
-    pcs.forEach((pc) => {
-      filteredPCs.push([].slice.call(pc.slice(0, numPCs)));
-    });
-
-    if (filteredPCs.length > 0) {
-      kmean.fit(filteredPCs);
-      const clusters = kmean.toJSON().clusters;
-      console.log(clusters);
-    }
-  }
-
   async componentDidMount() {
     this.loadEverything();
   }
@@ -285,7 +268,8 @@ class Homepage extends Component {
     return filteredMatrix[filteredFeatures.indexOf(name)];
   }
 
-  getColors() {
+  // `rgb(${r},${g},${b})`
+  getColorsByGene() {
     const colors = [];
     const gene = this.getGene(this.state.feature);
 
@@ -295,7 +279,66 @@ class Homepage extends Component {
         colors.push(GetRGB(MinMaxNormalize(cell, min, max)));
       });
     }
+
     return colors;
+  }
+
+  runExperiment() {
+    const kmean = new KMeans({ k: 30 });
+    const { pcs, numPCs } = this.state;
+    const filteredData = [];
+
+    pcs.forEach((cell) => {
+      filteredData.push(cell);
+    });
+
+    if (filteredData.length > 0) {
+      kmean.fit(filteredData);
+      const clusters = kmean.toJSON().clusters;
+      return clusters;
+    }
+    return null;
+  }
+
+  getColorsByClusters() {
+    const clusters = this.runExperiment();
+
+    const palette = [
+      `rgb(${255},${0},${0})`,
+      `rgb(${64},${224},${208})`,
+      `rgb(${255},${191},${0})`,
+      `rgb(${255},${127},${80})`,
+      `rgb(${222},${49},${99})`,
+      `rgb(${159},${226},${191})`,
+      `rgb(${100},${149},${237})`,
+      `rgb(${204},${204},${255})`,
+      `rgb(${240},${128},${128})`,
+      `rgb(${255},${204},${241})`,
+    ];
+
+    const hashmap = new Map();
+    const { pcs, numPCs } = this.state;
+    pcs.forEach((cell, index) => {
+      hashmap.set(cell, index);
+    });
+
+    const colors_map = new Map();
+    let i = 0;
+    if (clusters != null) {
+      clusters.forEach((cluster) => {
+        cluster.forEach((cell) => {
+          const index = hashmap.get(cell);
+          colors_map.set(index, palette[i % 10]);
+        });
+        i++;
+      });
+    }
+
+    const sorted = new Map(
+      [...colors_map].sort((a, b) => parseInt(a) - parseInt(b))
+    );
+
+    return [...sorted.values()];
   }
 
   setFeature(name) {
@@ -321,13 +364,18 @@ class Homepage extends Component {
     const pcs = pca.getEigenvectors().data;
     const eigenvalues = pca.getEigenvalues();
 
-    this.setState({ pcs });
-    return { eigenvectors: pcs, eigenvalues: eigenvalues };
+    const pcs_cleaned = [];
+    pcs.forEach((cell) => {
+      pcs_cleaned.push([].slice.call(cell));
+    });
+
+    this.setState({ pcs: pcs_cleaned });
+    return { eigenvectors: pcs_cleaned, eigenvalues: eigenvalues };
   }
 
   computeTSNE(tsneSettings) {
     const { pcs, numPCs } = this.state;
-    const { epsilon, perplexity, dim, iterations } = tsneSettings;
+    const { epsilon, perplexity, iterations } = tsneSettings;
     if (!pcs[0] || pcs[0].length < 1) {
       alert("Please run PCA first.");
       return [];
@@ -343,7 +391,7 @@ class Homepage extends Component {
     const opt = {};
     opt.epsilon = epsilon; // epsilon is learning rate (10 = default)
     opt.perplexity = perplexity; // roughly how many neighbors each point influences (30 = default)
-    opt.dim = dim; // dimensionality of the embedding (2 = default)
+    opt.dim = 2; // dimensionality of the embedding (2 = default)
 
     const tsne = new tsnejs.tSNE(opt); // create a tSNE instance
     tsne.initDataDist(dists);
@@ -357,9 +405,8 @@ class Homepage extends Component {
     const numCells = this.state.filteredMatrix[0]
       ? this.state.filteredMatrix[0].length
       : 0;
-    const colors = this.getColors();
-
-    this.runExperiment();
+    const gene_colors = this.getColorsByGene();
+    const cluster_colors = this.getColorsByClusters();
 
     return (
       <>
@@ -388,21 +435,21 @@ class Homepage extends Component {
           <PCAWrapper
             computePCA={this.computePCA}
             setNumPCs={this.setNumPCs}
-            colors={colors}
+            colors={cluster_colors}
             displayAllowed={this.state.pcs[0]}
           />
 
           <div style={{ paddingTop: "20px" }}></div>
           <TSNEWrapper
             computeTSNE={this.computeTSNE}
-            colors={colors}
+            colors={cluster_colors}
             displayAllowed={this.state.pcs[0]}
           />
 
           <div style={{ paddingTop: "20px" }}></div>
           <SpatialVis
             barcodes={this.state.filteredBarcodes}
-            colors={colors}
+            colors={cluster_colors}
             numCells={numCells}
           />
 

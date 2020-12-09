@@ -39,7 +39,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage }).array("file");
 
-app.get("/", (req, res) => {
+app.get("/", (_req, res) => {
   res.send("Welcome to the ST.js backend.");
 });
 

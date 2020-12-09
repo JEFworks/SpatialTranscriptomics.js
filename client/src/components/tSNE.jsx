@@ -15,8 +15,8 @@ const Plot = (data, getColor, displayAllowed) => {
   const obj = [{ data: [] }];
   if (displayAllowed && data) {
     data.forEach((point, index) => {
-      const x = point[0];
-      const y = point[1];
+      const x = point[0] * 7 + 450;
+      const y = point[1] * 7 + 300;
       obj[0].data.push({ x: x, y: y, index: index });
     });
   }
@@ -85,12 +85,6 @@ const TypedInput = (changeSettings) => {
           onChange={(event) => changeSettings(event, "perplexity")}
         />
         <TextField
-          style={{ width: "90px", marginRight: "15px" }}
-          helperText="Dimensionality"
-          defaultValue="2"
-          onChange={(event) => changeSettings(event, "dim")}
-        />
-        <TextField
           style={{ width: "60px" }}
           helperText="Iterations"
           defaultValue="500"
@@ -107,7 +101,6 @@ class tSNEWrapper extends Component {
     tsneSettings: {
       epsilon: 10,
       perplexity: 30,
-      dim: 2,
       iterations: 500,
     },
   };
@@ -128,8 +121,6 @@ class tSNEWrapper extends Component {
       tsneSettings.epsilon = newSetting;
     } else if (type === "perplexity") {
       tsneSettings.perplexity = newSetting;
-    } else if (type === "dim") {
-      tsneSettings.dim = newSetting;
     } else if (type === "iterations") {
       tsneSettings.iterations = newSetting;
     }
