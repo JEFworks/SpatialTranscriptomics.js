@@ -16,6 +16,7 @@ import GetRGB from "../functions/GetRGB.jsx";
 import MinMaxNormalize from "../functions/MinMaxNormalize.jsx";
 import MinMaxStats from "../functions/MinMaxStats.jsx";
 import tsnejs from "../functions/tsne.js";
+import palette from "../functions/palette.jsx";
 
 import Header from "./Header.jsx";
 import DataUpload from "./DataUpload.jsx";
@@ -268,7 +269,6 @@ class Homepage extends Component {
     return filteredMatrix[filteredFeatures.indexOf(name)];
   }
 
-  // `rgb(${r},${g},${b})`
   getColorsByGene() {
     const colors = [];
     const gene = this.getGene(this.state.feature);
@@ -283,41 +283,23 @@ class Homepage extends Component {
     return colors;
   }
 
-  runExperiment() {
-    const kmean = new KMeans({ k: 30 });
-    const { pcs, numPCs } = this.state;
-    const filteredData = [];
+  runExperiment(num) {
+    const kmean = new KMeans({ k: num });
+    const { pcs } = this.state;
 
-    pcs.forEach((cell) => {
-      filteredData.push(cell);
-    });
-
-    if (filteredData.length > 0) {
-      kmean.fit(filteredData);
+    if (pcs.length > 0) {
+      kmean.fit(pcs);
       const clusters = kmean.toJSON().clusters;
       return clusters;
     }
     return null;
   }
 
-  getColorsByClusters() {
-    const clusters = this.runExperiment();
-
-    const palette = [
-      `rgb(${255},${0},${0})`,
-      `rgb(${64},${224},${208})`,
-      `rgb(${255},${191},${0})`,
-      `rgb(${255},${127},${80})`,
-      `rgb(${222},${49},${99})`,
-      `rgb(${159},${226},${191})`,
-      `rgb(${100},${149},${237})`,
-      `rgb(${204},${204},${255})`,
-      `rgb(${240},${128},${128})`,
-      `rgb(${255},${204},${241})`,
-    ];
+  getColorsByClusters(num) {
+    const clusters = this.runExperiment(num);
 
     const hashmap = new Map();
-    const { pcs, numPCs } = this.state;
+    const { pcs } = this.state;
     pcs.forEach((cell, index) => {
       hashmap.set(cell, index);
     });
@@ -328,7 +310,7 @@ class Homepage extends Component {
       clusters.forEach((cluster) => {
         cluster.forEach((cell) => {
           const index = hashmap.get(cell);
-          colors_map.set(index, palette[i % 10]);
+          colors_map.set(index, palette[i % palette.length]);
         });
         i++;
       });
@@ -337,7 +319,6 @@ class Homepage extends Component {
     const sorted = new Map(
       [...colors_map].sort((a, b) => parseInt(a) - parseInt(b))
     );
-
     return [...sorted.values()];
   }
 
@@ -406,7 +387,7 @@ class Homepage extends Component {
       ? this.state.filteredMatrix[0].length
       : 0;
     const gene_colors = this.getColorsByGene();
-    const cluster_colors = this.getColorsByClusters();
+    const cluster_colors = this.getColorsByClusters(10);
 
     return (
       <>
@@ -435,14 +416,14 @@ class Homepage extends Component {
           <PCAWrapper
             computePCA={this.computePCA}
             setNumPCs={this.setNumPCs}
-            colors={cluster_colors}
+            colors={gene_colors}
             displayAllowed={this.state.pcs[0]}
           />
 
           <div style={{ paddingTop: "20px" }}></div>
           <TSNEWrapper
             computeTSNE={this.computeTSNE}
-            colors={cluster_colors}
+            colors={gene_colors}
             displayAllowed={this.state.pcs[0]}
           />
 

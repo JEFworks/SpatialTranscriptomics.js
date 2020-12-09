@@ -72,7 +72,7 @@ const Figure = (rowsums, colsums, thresholds, changeThreshold, type) => {
           )
         }
         marks={marks(minIndex / 2, maxIndex / 2)}
-        defaultValue={2.0}
+        defaultValue={type === "rowsum" ? 4.0 : 2.0}
         step={0.5}
         min={minIndex / 2}
         max={maxIndex / 2 - 0.5}
