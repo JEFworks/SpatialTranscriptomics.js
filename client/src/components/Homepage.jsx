@@ -283,7 +283,7 @@ class Homepage extends Component {
     return colors;
   }
 
-  runExperiment(num) {
+  performKMeans(num) {
     const kmean = new KMeans({ k: num });
     const { pcs } = this.state;
 
@@ -296,7 +296,7 @@ class Homepage extends Component {
   }
 
   getColorsByClusters(num) {
-    const clusters = this.runExperiment(num);
+    const clusters = this.performKMeans(num);
 
     const hashmap = new Map();
     const { pcs } = this.state;
@@ -304,20 +304,20 @@ class Homepage extends Component {
       hashmap.set(cell, index);
     });
 
-    const colors_map = new Map();
+    const colorsMap = new Map();
     let i = 0;
     if (clusters != null) {
       clusters.forEach((cluster) => {
         cluster.forEach((cell) => {
           const index = hashmap.get(cell);
-          colors_map.set(index, palette[i % palette.length]);
+          colorsMap.set(index, palette[i % palette.length]);
         });
         i++;
       });
     }
 
     const sorted = new Map(
-      [...colors_map].sort((a, b) => parseInt(a) - parseInt(b))
+      [...colorsMap].sort((a, b) => parseInt(a) - parseInt(b))
     );
     return [...sorted.values()];
   }
@@ -345,13 +345,13 @@ class Homepage extends Component {
     const pcs = pca.getEigenvectors().data;
     const eigenvalues = pca.getEigenvalues();
 
-    const pcs_cleaned = [];
+    const pcsCleaned = [];
     pcs.forEach((cell) => {
-      pcs_cleaned.push([].slice.call(cell));
+      pcsCleaned.push([].slice.call(cell));
     });
 
-    this.setState({ pcs: pcs_cleaned });
-    return { eigenvectors: pcs_cleaned, eigenvalues: eigenvalues };
+    this.setState({ pcs: pcsCleaned });
+    return { eigenvectors: pcsCleaned, eigenvalues: eigenvalues };
   }
 
   computeTSNE(tsneSettings) {
@@ -386,8 +386,8 @@ class Homepage extends Component {
     const numCells = this.state.filteredMatrix[0]
       ? this.state.filteredMatrix[0].length
       : 0;
-    const gene_colors = this.getColorsByGene();
-    const cluster_colors = this.getColorsByClusters(10);
+    const geneColors = this.getColorsByGene();
+    const clusterColors = this.getColorsByClusters(10);
 
     return (
       <>
@@ -416,21 +416,21 @@ class Homepage extends Component {
           <PCAWrapper
             computePCA={this.computePCA}
             setNumPCs={this.setNumPCs}
-            colors={gene_colors}
+            colors={geneColors}
             displayAllowed={this.state.pcs[0]}
           />
 
           <div style={{ paddingTop: "20px" }}></div>
           <TSNEWrapper
             computeTSNE={this.computeTSNE}
-            colors={gene_colors}
+            colors={geneColors}
             displayAllowed={this.state.pcs[0]}
           />
 
           <div style={{ paddingTop: "20px" }}></div>
           <SpatialVis
             barcodes={this.state.filteredBarcodes}
-            colors={cluster_colors}
+            colors={clusterColors}
             numCells={numCells}
           />
 
