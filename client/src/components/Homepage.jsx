@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import axios from "axios";
-import { api } from "../api.js";
+import api from "../api.jsx";
 import { v4 as uuidv4 } from "uuid";
 import { SparseMatrix } from "ml-sparse-matrix";
 import { PCA } from "ml-pca";
@@ -25,41 +25,47 @@ import PCAWrapper from "./PCA.jsx";
 import TSNEWrapper from "./tSNE.jsx";
 import SpatialVis from "./SpatialVis.jsx";
 
-class Homepage extends Component {
-  state = {
-    uuid: null,
-    files: {
-      matrix: null,
-      barcodes: null,
-      features: null,
-      pixels: null,
-    },
-    matrix: [],
-    filteredMatrix: [],
-    features: [],
-    adjustedFeatures: [],
-    filteredFeatures: [],
-    barcodes: [],
-    filteredBarcodes: [],
-    thresholds: { minRowSum: 4, minColSum: 2 },
-    rowsums: [],
-    colsums: [],
-    colors: [],
-    pcs: [],
-    numPCs: 10,
-    feature: "camk2n1",
-  }; // remember to update state in loadEverything()
+const defaultState = {
+  uuid: null,
+  files: {
+    matrix: null,
+    barcodes: null,
+    features: null,
+    pixels: null,
+  },
+  matrix: [],
+  filteredMatrix: [],
+  features: [],
+  adjustedFeatures: [],
+  filteredFeatures: [],
+  barcodes: [],
+  filteredBarcodes: [],
+  thresholds: { minRowSum: 4, minColSum: 2 },
+  rowsums: [],
+  colsums: [],
+  colors: [],
+  pcs: [],
+  numPCs: 10,
+  feature: "camk2n1",
+};
 
+class Homepage extends Component {
+  state = defaultState;
+
+  setFeature = this.setFeature.bind(this);
+
+  // file handlers
   matrixFileHandler = this.matrixFileHandler.bind(this);
   barcodesFileHandler = this.barcodesFileHandler.bind(this);
   pixelsFileHandler = this.pixelsFileHandler.bind(this);
   featuresFileHandler = this.featuresFileHandler.bind(this);
   uploadFiles = this.uploadFiles.bind(this);
 
+  // quality control functions
   setNumPCs = this.setNumPCs.bind(this);
-  setFeature = this.setFeature.bind(this);
-
   handleFilter = this.handleFilter.bind(this);
+
+  // analysis functions
   computePCA = this.computePCA.bind(this);
   computeTSNE = this.computeTSNE.bind(this);
 
@@ -67,31 +73,7 @@ class Homepage extends Component {
     this.loadEverything();
   }
 
-  async resetState() {
-    this.setState({
-      files: {
-        matrix: null,
-        barcodes: null,
-        features: null,
-        pixels: null,
-      },
-      matrix: [],
-      filteredMatrix: [],
-      features: [],
-      adjustedFeatures: [],
-      filteredFeatures: [],
-      barcodes: [],
-      filteredBarcodes: [],
-      thresholds: { minRowSum: 2, minColSum: 2 },
-      rowsums: [],
-      colsums: [],
-      colors: [],
-      pcs: [],
-      numPCs: 10,
-      feature: "camk2n1",
-    });
-  }
-
+  // load data into the React state
   async loadEverything() {
     await this.resetState();
     await this.loadFeatures();
@@ -99,30 +81,39 @@ class Homepage extends Component {
     await this.loadMatrix().catch(() => {});
   }
 
+  async resetState() {
+    this.setState(defaultState);
+  }
+
+  // save matrix file to state
   matrixFileHandler(event) {
     const { files } = this.state;
     files.matrix = event.target.files[0];
     this.setState({ files });
   }
 
+  // save features file to state
   featuresFileHandler(event) {
     const { files } = this.state;
     files.features = event.target.files[0];
     this.setState({ files });
   }
 
-  pixelsFileHandler(event) {
-    const { files } = this.state;
-    files.pixels = event.target.files[0];
-    this.setState({ files });
-  }
-
+  // save barcodes file to state
   barcodesFileHandler(event) {
     const { files } = this.state;
     files.barcodes = event.target.files[0];
     this.setState({ files });
   }
 
+  // save tissue_positions files to state
+  pixelsFileHandler(event) {
+    const { files } = this.state;
+    files.pixels = event.target.files[0];
+    this.setState({ files });
+  }
+
+  // upload files from state to the server
   async uploadFiles() {
     const { files } = this.state;
     if (!files.matrix || !files.barcodes || !files.features || !files.pixels)
@@ -134,7 +125,7 @@ class Homepage extends Component {
     data.append("file", files.barcodes);
     data.append("file", files.pixels);
 
-    const uuid = uuidv4();
+    const uuid = uuidv4(); // generate unique user session ID
     await axios.post(`${api}/upload/${uuid}`, data, {}).then((_res) => {});
     this.setState({ uuid });
     this.loadEverything();
