@@ -25,6 +25,7 @@ const { SparseMatrix } = require("ml-sparse-matrix");
 
 const filesMap = new Map(); // map of all user sessions and their associated files
 const defaultFileNum = 0; // 0 is filtered coronal brains, 1 is original coronal brain, 2 is olfactory bulb
+const dir = "/home/ubuntu/SpatialTranscriptomics.js/backend/example_data";
 
 const storage = multer.diskStorage({
   destination: function (req, _file, cb) {
@@ -40,7 +41,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage }).array("file");
 
 app.get("/", (_req, res) => {
-  res.send("Welcome to the ST.js backend.");
+  res.send("Welcome to the ST.js backend :).\n");
 });
 
 app.post("/upload/:uuid", function (req, res) {
@@ -80,10 +81,10 @@ app.get("/matrix/:uuid/:count/:numBatches", function (req, res) {
 
   let filePath =
     defaultFileNum === 0
-      ? "./example_data/coronal_brain/filtered_feature_bc_matrix/filtered/filtered_matrix.mtx"
+      ? `${dir}/coronal_brain/filtered_feature_bc_matrix/filtered/filtered_matrix.mtx`
       : defaultFileNum === 1
-      ? "./example_data/coronal_brain/filtered_feature_bc_matrix/matrix.mtx"
-      : "./example_data/olfactory_bulb/filtered_feature_bc_matrix/matrix.mtx";
+      ? `${dir}/coronal_brain/filtered_feature_bc_matrix/matrix.mtx`
+      : `${dir}/olfactory_bulb/filtered_feature_bc_matrix/matrix.mtx`;
   const files = filesMap.get(req.params.uuid);
   if (files != null && files.matrix != null) {
     filePath = files.matrix;
@@ -180,10 +181,10 @@ app.get("/matrix/:uuid/:count/:numBatches", function (req, res) {
 app.get("/features/:uuid", function (req, res) {
   let filePath =
     defaultFileNum === 0
-      ? "./example_data/coronal_brain/filtered_feature_bc_matrix/filtered/filtered_features.tsv"
+      ? `${dir}/coronal_brain/filtered_feature_bc_matrix/filtered/filtered_features.tsv`
       : defaultFileNum === 1
-      ? "./example_data/coronal_brain/filtered_feature_bc_matrix/features.tsv"
-      : "./example_data/olfactory_bulb/filtered_feature_bc_matrix/features.tsv";
+      ? `${dir}/coronal_brain/filtered_feature_bc_matrix/features.tsv`
+      : `${dir}/olfactory_bulb/filtered_feature_bc_matrix/features.tsv`;
   const files = filesMap.get(req.params.uuid);
   if (files != null && files.features != null) {
     filePath = files.features;
@@ -228,10 +229,10 @@ app.get("/features/:uuid", function (req, res) {
 app.get("/barcodes/:uuid", function (req, res) {
   let filePath =
     defaultFileNum === 0
-      ? "./example_data/coronal_brain/filtered_feature_bc_matrix/filtered/barcodes.tsv"
+      ? `${dir}/coronal_brain/filtered_feature_bc_matrix/filtered/barcodes.tsv`
       : defaultFileNum === 1
-      ? "./example_data/coronal_brain/filtered_feature_bc_matrix/barcodes.tsv"
-      : "./example_data/olfactory_bulb/filtered_feature_bc_matrix/barcodes.tsv";
+      ? `${dir}/coronal_brain/filtered_feature_bc_matrix/barcodes.tsv`
+      : `${dir}/olfactory_bulb/filtered_feature_bc_matrix/barcodes.tsv`;
   const files = filesMap.get(req.params.uuid);
   if (files != null && files.barcodes != null) {
     filePath = files.barcodes;
@@ -267,10 +268,10 @@ app.get("/barcodes/:uuid", function (req, res) {
 app.get("/pixels/:uuid", function (req, res) {
   let filePath =
     defaultFileNum === 0
-      ? "./example_data/coronal_brain/spatial/tissue_positions_list.csv"
+      ? `${dir}/coronal_brain/spatial/tissue_positions_list.csv`
       : defaultFileNum === 1
-      ? "./example_data/coronal_brain/spatial/tissue_positions_list.csv"
-      : "./example_data/olfactory_bulb/spatial/tissue_positions_list.csv";
+      ? `${dir}/coronal_brain/spatial/tissue_positions_list.csv`
+      : `${dir}/olfactory_bulb/spatial/tissue_positions_list.csv`;
   const files = filesMap.get(req.params.uuid);
   if (files != null && files.pixels != null) {
     filePath = files.pixels;
