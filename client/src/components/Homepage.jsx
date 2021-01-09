@@ -67,7 +67,7 @@ class Homepage extends Component {
   computePCA = this.computePCA.bind(this);
   computeTSNE = this.computeTSNE.bind(this);
 
-  async componentDidMount() {
+  componentDidMount() {
     const urlParams = new URLSearchParams(window.location.search);
     this.setState({ uuid: urlParams.get("session") });
     this.loadEverything();
@@ -77,10 +77,12 @@ class Homepage extends Component {
   async loadEverything() {
     await this.loadFeatures();
     await this.loadBarcodes();
-    await this.loadMatrix().catch(() => {});
+    await this.loadMatrix().catch((error) => {
+      console.log(error);
+    });
   }
 
-  async resetState() {
+  resetState() {
     this.setState({
       uuid: null,
       files: {
@@ -169,9 +171,12 @@ class Homepage extends Component {
 
     this.resetState();
     this.setState({ uuid });
-    axios.post(`${api}/upload/${uuid}`, data, {}).then((_res) => {
-      this.loadEverything();
-    });
+    axios
+      .post(`${api}/upload/${uuid}`, data, {})
+      .then((_res) => {
+        this.loadEverything();
+      })
+      .catch(() => {});
   }
 
   async loadFeatures() {
@@ -194,9 +199,7 @@ class Homepage extends Component {
         this.setState({ barcodes });
         this.loadPixels(barcodes);
       })
-      .catch(() => {
-        return [];
-      });
+      .catch(() => {});
   }
 
   async loadPixels(barcodes) {
@@ -218,7 +221,8 @@ class Homepage extends Component {
     const { uuid } = this.state;
     let count = 0;
     const numBatches = 4;
-    while (count < numBatches) {
+    let errorOccured = false;
+    while (count < numBatches && !errorOccured) {
       await axios
         .get(`${api}/matrix/${uuid}/${count}/${numBatches}`)
         .then((response) => {
@@ -254,8 +258,8 @@ class Homepage extends Component {
           }
         })
         .catch((error) => {
-          this.setState({ matrix: [] });
-          console.log(error);
+          this.setState({ matrix: [], adjustedFeatures: [] });
+          throw error;
         });
       count++;
     }
