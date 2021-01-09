@@ -25,32 +25,30 @@ import PCAWrapper from "./PCA.jsx";
 import TSNEWrapper from "./tSNE.jsx";
 import SpatialVis from "./SpatialVis.jsx";
 
-const defaultState = {
-  uuid: null,
-  files: {
-    matrix: null,
-    barcodes: null,
-    features: null,
-    pixels: null,
-  },
-  matrix: [],
-  filteredMatrix: [],
-  features: [],
-  adjustedFeatures: [],
-  filteredFeatures: [],
-  barcodes: [],
-  filteredBarcodes: [],
-  thresholds: { minRowSum: 4, minColSum: 2 },
-  rowsums: [],
-  colsums: [],
-  colors: [],
-  pcs: [],
-  numPCs: 10,
-  feature: "camk2n1",
-};
-
 class Homepage extends Component {
-  state = defaultState;
+  state = {
+    uuid: null,
+    files: {
+      matrix: null,
+      barcodes: null,
+      features: null,
+      pixels: null,
+    },
+    matrix: [],
+    filteredMatrix: [],
+    features: [],
+    adjustedFeatures: [],
+    filteredFeatures: [],
+    barcodes: [],
+    filteredBarcodes: [],
+    thresholds: { minRowSum: 4, minColSum: 2 },
+    rowsums: [],
+    colsums: [],
+    colors: [],
+    pcs: [],
+    numPCs: 10,
+    feature: "camk2n1",
+  }; // remember to update in resetState() too
 
   setFeature = this.setFeature.bind(this);
 
@@ -70,54 +68,92 @@ class Homepage extends Component {
   computeTSNE = this.computeTSNE.bind(this);
 
   async componentDidMount() {
+    const urlParams = new URLSearchParams(window.location.search);
+    this.setState({ uuid: urlParams.get("session") });
     this.loadEverything();
   }
 
   // load data into the React state
   async loadEverything() {
-    await this.resetState();
     await this.loadFeatures();
     await this.loadBarcodes();
     await this.loadMatrix().catch(() => {});
   }
 
   async resetState() {
-    this.setState(defaultState);
+    this.setState({
+      uuid: null,
+      files: {
+        matrix: null,
+        barcodes: null,
+        features: null,
+        pixels: null,
+      },
+      matrix: [],
+      filteredMatrix: [],
+      features: [],
+      adjustedFeatures: [],
+      filteredFeatures: [],
+      barcodes: [],
+      filteredBarcodes: [],
+      thresholds: { minRowSum: 4, minColSum: 2 },
+      rowsums: [],
+      colsums: [],
+      colors: [],
+      pcs: [],
+      numPCs: 10,
+      feature: "camk2n1",
+    });
   }
 
   // save matrix file to state
   matrixFileHandler(event) {
     const { files } = this.state;
-    files.matrix = event.target.files[0];
+    const file = event.target.files[0];
+    const copy = file.slice(0, file.size, file.type);
+    const newFile = new File([copy], "matrix.mtx", { type: file.type });
+    files.matrix = newFile;
     this.setState({ files });
   }
 
   // save features file to state
   featuresFileHandler(event) {
     const { files } = this.state;
-    files.features = event.target.files[0];
+    const file = event.target.files[0];
+    const copy = file.slice(0, file.size, file.type);
+    const newFile = new File([copy], "features.tsv", { type: file.type });
+    files.features = newFile;
     this.setState({ files });
   }
 
   // save barcodes file to state
   barcodesFileHandler(event) {
     const { files } = this.state;
-    files.barcodes = event.target.files[0];
+    const file = event.target.files[0];
+    const copy = file.slice(0, file.size, file.type);
+    const newFile = new File([copy], "barcodes.tsv", { type: file.type });
+    files.barcodes = newFile;
     this.setState({ files });
   }
 
   // save tissue_positions files to state
   pixelsFileHandler(event) {
     const { files } = this.state;
-    files.pixels = event.target.files[0];
+    const file = event.target.files[0];
+    const copy = file.slice(0, file.size, file.type);
+    const newFile = new File([copy], "tissue_positions_list.csv", {
+      type: file.type,
+    });
+    files.pixels = newFile;
     this.setState({ files });
   }
 
   // upload files from state to the server
   async uploadFiles() {
     const { files } = this.state;
-    if (!files.matrix || !files.barcodes || !files.features || !files.pixels)
+    if (!files.matrix || !files.barcodes || !files.features || !files.pixels) {
       return;
+    }
 
     const data = new FormData();
     data.append("file", files.matrix);
@@ -126,9 +162,20 @@ class Homepage extends Component {
     data.append("file", files.pixels);
 
     const uuid = uuidv4(); // generate unique user session ID
-    await axios.post(`${api}/upload/${uuid}`, data, {}).then((_res) => {});
+
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set("session", uuid);
+    window.history.pushState(
+      null,
+      null,
+      `/SpatialTranscriptomics.js/?${urlParams.toString()}`
+    );
+
+    this.resetState();
     this.setState({ uuid });
-    this.loadEverything();
+    axios.post(`${api}/upload/${uuid}`, data, {}).then((_res) => {
+      this.loadEverything();
+    });
   }
 
   async loadFeatures() {
