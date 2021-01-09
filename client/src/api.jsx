@@ -1,2 +1,2 @@
-const api = "http://localhost:3000";
+const api = "https://stjs.me/api";
 export default api;

@@ -1,4 +1,4 @@
-const PORT = 3000;
+const PORT = 7000;
 
 const cors = require("cors");
 const express = require("express");
@@ -46,11 +46,11 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage }).array("file");
 
-app.get("/", (_req, res) => {
+app.get("/api/", (_req, res) => {
   res.send("Welcome to the ST.js backend :).\n");
 });
 
-app.post("/upload/:uuid", function (req, res) {
+app.post("/api/upload/:uuid", function (req, res) {
   upload(req, res, function (err) {
     if (err instanceof multer.MulterError) {
       return res.status(500).json(err);
@@ -61,7 +61,7 @@ app.post("/upload/:uuid", function (req, res) {
   });
 });
 
-app.get("/matrix/:uuid/:count/:numBatches", function (req, res) {
+app.get("/api/matrix/:uuid/:count/:numBatches", function (req, res) {
   const count = Number.parseInt(req.params.count);
   const numBatches = Number.parseInt(req.params.numBatches);
 
@@ -169,7 +169,7 @@ app.get("/matrix/:uuid/:count/:numBatches", function (req, res) {
   );
 });
 
-app.get("/features/:uuid", function (req, res) {
+app.get("/api/features/:uuid", function (req, res) {
   let filePath =
     defaultFileNum === 0
       ? `${dir}/example_data/coronal_brain/filtered_feature_bc_matrix/filtered/filtered_features.tsv`
@@ -217,7 +217,7 @@ app.get("/features/:uuid", function (req, res) {
   );
 });
 
-app.get("/barcodes/:uuid", function (req, res) {
+app.get("/api/barcodes/:uuid", function (req, res) {
   let filePath =
     defaultFileNum === 0
       ? `${dir}/example_data/coronal_brain/filtered_feature_bc_matrix/filtered/barcodes.tsv`
@@ -256,7 +256,7 @@ app.get("/barcodes/:uuid", function (req, res) {
   );
 });
 
-app.get("/pixels/:uuid", function (req, res) {
+app.get("/api/pixels/:uuid", function (req, res) {
   let filePath =
     defaultFileNum === 0
       ? `${dir}/example_data/coronal_brain/spatial/tissue_positions_list.csv`
