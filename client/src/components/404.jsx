@@ -16,7 +16,7 @@ const Graphic = (
         width: "60%",
         minWidth: "350px",
       }}
-      src="/SpatialTranscriptomics.js/images/icon404.svg"
+      src="/images/icon404.svg"
       alt="404"
     />
   </>

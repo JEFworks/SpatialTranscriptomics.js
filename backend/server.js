@@ -8,7 +8,11 @@ const multer = require("multer");
 const shell = require("shelljs");
 
 const corsOptions = {
-  origin: ["https://arpansahoo.github.io", "http://localhost:8000"],
+  origin: [
+    "https://arpansahoo.github.io",
+    "http://localhost:8000",
+    "https://stjs.me",
+  ],
   optionsSuccessStatus: 200, // For legacy browser support
 };
 

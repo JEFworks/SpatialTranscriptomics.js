@@ -16,11 +16,7 @@ const primary = "#094067";
 const Title = (setFeature, selectFeature, feature) => (
   <>
     <Typography variant="h6" style={{ flexGrow: 0.03, fontWeight: 500 }}>
-      <Link
-        style={{ color: primary }}
-        underline="none"
-        href="/SpatialTranscriptomics.js"
-      >
+      <Link style={{ color: primary }} underline="none" href="/">
         ST.js
       </Link>
     </Typography>
@@ -49,11 +45,7 @@ const Title = (setFeature, selectFeature, feature) => (
 const About = (
   <>
     <Typography style={{ fontSize: "1.1em", fontWeight: 500 }}>
-      <Link
-        style={{ color: primary }}
-        underline="none"
-        href="/SpatialTranscriptomics.js/about"
-      >
+      <Link style={{ color: primary }} underline="none" href="/about">
         about
       </Link>
     </Typography>

@@ -6,7 +6,7 @@ import {
   TextField,
   FormGroup,
 } from "@material-ui/core";
-import ScatterPlot from "./plots/ScatterPlot.jsx";
+import ScatterPlot from "./Plots/ScatterPlot.jsx";
 
 const primary = "#094067";
 const paragraph = "#5f6c7b";

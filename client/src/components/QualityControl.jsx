@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Typography, Paper, Slider, Button } from "@material-ui/core";
-import Histogram from "./plots/Histogram.jsx";
+import Histogram from "./Plots/Histogram.jsx";
 
 const primary = "#094067";
 const paragraph = "#5f6c7b";

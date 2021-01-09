@@ -6,8 +6,8 @@ import {
   FormGroup,
   TextField,
 } from "@material-ui/core";
-import LineChart from "./plots/LineChart.jsx";
-import ScatterPlot from "./plots/ScatterPlot.jsx";
+import LineChart from "./Plots/LineChart.jsx";
+import ScatterPlot from "./Plots/ScatterPlot.jsx";
 
 const primary = "#094067";
 const paragraph = "#5f6c7b";

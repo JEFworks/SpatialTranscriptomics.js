@@ -28,10 +28,7 @@ const LeafletWrapper = (pixels, colors, opacity) => {
         bounds={bounds}
         style={{ height: "500px", width: "100%" }}
       >
-        <ImageOverlay
-          bounds={bounds}
-          url="/SpatialTranscriptomics.js/images/tissue_image.png"
-        />
+        <ImageOverlay bounds={bounds} url="/images/tissue_image.png" />
         {pixels.length === colors.length &&
           pixels.map((pixel, index) => {
             return (

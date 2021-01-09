@@ -165,11 +165,7 @@ class Homepage extends Component {
 
     const urlParams = new URLSearchParams(window.location.search);
     urlParams.set("session", uuid);
-    window.history.pushState(
-      null,
-      null,
-      `/SpatialTranscriptomics.js/?${urlParams.toString()}`
-    );
+    window.history.pushState(null, null, `/?${urlParams.toString()}`);
 
     this.resetState();
     this.setState({ uuid });

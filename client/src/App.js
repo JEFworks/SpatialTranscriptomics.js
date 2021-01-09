@@ -7,7 +7,7 @@ const App = () => (
   <>
     <Router>
       <Switch>
-        <Route path="/SpatialTranscriptomics.js/" exact component={Homepage} />
+        <Route path="/" exact component={Homepage} />
         <Route component={Page404} />
       </Switch>
     </Router>
