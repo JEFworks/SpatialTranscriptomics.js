@@ -28,7 +28,7 @@ const es = require("event-stream");
 const { SparseMatrix } = require("ml-sparse-matrix");
 
 const defaultFileNum = 0; // 0 is filtered coronal brains, 1 is original coronal brain, 2 is olfactory bulb
-const dir = "/home/ubuntu/SpatialTranscriptomics.js/backend";
+const dir = process.cwd();
 
 const storage = multer.diskStorage({
   destination: function (req, _file, cb) {
