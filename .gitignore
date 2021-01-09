@@ -5,5 +5,4 @@ temp/Rplots.pdf
 *.mtx
 *.csv
 backend/data/*
-client/src/api.jsx
 st_key.pem
