@@ -23,15 +23,13 @@ const Biplot = (eigenvectors, getColor, displayAllowed) => {
   }
 
   const Title = (
-    <>
-      <Typography
-        variant="body1"
-        align="center"
-        style={{ paddingBottom: "5px", fontWeight: 500, color: primary }}
-      >
-        {"PC1 vs PC2"}
-      </Typography>
-    </>
+    <Typography
+      variant="body1"
+      align="center"
+      style={{ paddingBottom: "5px", fontWeight: 500, color: primary }}
+    >
+      {"PC1 vs PC2"}
+    </Typography>
   );
 
   const Scatterplot = (
@@ -41,31 +39,29 @@ const Biplot = (eigenvectors, getColor, displayAllowed) => {
   );
 
   return (
-    <>
-      <div
+    <div
+      style={{
+        height: "300px",
+        width: "100%",
+        paddingLeft: "15px",
+        paddingRight: "15px",
+        paddingBottom: "50px",
+      }}
+    >
+      <Paper
         style={{
-          height: "300px",
-          width: "100%",
-          paddingLeft: "15px",
-          paddingRight: "15px",
-          paddingBottom: "50px",
+          padding: "15px 20px 40px 15px",
+          width: "420px",
+          height: "100%",
+          backgroundColor: "transparent",
         }}
+        variant="outlined"
+        elevation={3}
       >
-        <Paper
-          style={{
-            padding: "15px 20px 40px 15px",
-            width: "420px",
-            height: "100%",
-            backgroundColor: "transparent",
-          }}
-          variant="outlined"
-          elevation={3}
-        >
-          {Title}
-          {Scatterplot}
-        </Paper>
-      </div>
-    </>
+        {Title}
+        {Scatterplot}
+      </Paper>
+    </div>
   );
 };
 
@@ -78,15 +74,13 @@ const ScreePlot = (eigenvalues, numPCs, displayAllowed) => {
   }
 
   const Title = (
-    <>
-      <Typography
-        variant="body1"
-        align="center"
-        style={{ paddingBottom: "5px", fontWeight: 500, color: primary }}
-      >
-        {"Scree Plot"}
-      </Typography>
-    </>
+    <Typography
+      variant="body1"
+      align="center"
+      style={{ paddingBottom: "5px", fontWeight: 500, color: primary }}
+    >
+      {"Scree Plot"}
+    </Typography>
   );
 
   const Linechart = (
@@ -96,46 +90,42 @@ const ScreePlot = (eigenvalues, numPCs, displayAllowed) => {
   );
 
   return (
-    <>
-      <div
+    <div
+      style={{
+        height: "300px",
+        width: "100%",
+        paddingLeft: "15px",
+        paddingRight: "15px",
+        paddingBottom: "80px",
+      }}
+    >
+      <Paper
+        className="scree-plot"
         style={{
-          height: "300px",
-          width: "100%",
-          paddingLeft: "15px",
-          paddingRight: "15px",
-          paddingBottom: "80px",
+          padding: "15px 20px 40px 15px",
+          height: "100%",
+          backgroundColor: "transparent",
         }}
+        variant="outlined"
+        elevation={3}
       >
-        <Paper
-          className="scree-plot"
-          style={{
-            padding: "15px 20px 40px 15px",
-            height: "100%",
-            backgroundColor: "transparent",
-          }}
-          variant="outlined"
-          elevation={3}
-        >
-          {Title}
-          {Linechart}
-        </Paper>
-      </div>
-    </>
+        {Title}
+        {Linechart}
+      </Paper>
+    </div>
   );
 };
 
 const TypedInput = (selectNumPCs) => {
   return (
-    <>
-      <FormGroup row style={{ marginTop: "7px" }}>
-        <TextField
-          style={{ width: "150px", marginRight: "15px" }}
-          helperText="Number of PCs"
-          defaultValue="10"
-          onChange={selectNumPCs}
-        />
-      </FormGroup>
-    </>
+    <FormGroup row style={{ marginTop: "7px" }}>
+      <TextField
+        style={{ width: "150px", marginRight: "15px" }}
+        helperText="Number of PCs"
+        defaultValue="10"
+        onChange={selectNumPCs}
+      />
+    </FormGroup>
   );
 };
 

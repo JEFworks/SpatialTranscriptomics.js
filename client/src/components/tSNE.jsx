@@ -22,15 +22,13 @@ const Plot = (data, getColor, displayAllowed) => {
   }
 
   const Title = (
-    <>
-      <Typography
-        variant="body1"
-        align="center"
-        style={{ paddingBottom: "5px", fontWeight: 500, color: primary }}
-      >
-        {"tSNE"}
-      </Typography>
-    </>
+    <Typography
+      variant="body1"
+      align="center"
+      style={{ paddingBottom: "5px", fontWeight: 500, color: primary }}
+    >
+      {"tSNE"}
+    </Typography>
   );
 
   const Scatterplot = (
@@ -40,58 +38,54 @@ const Plot = (data, getColor, displayAllowed) => {
   );
 
   return (
-    <>
-      <div
+    <div
+      style={{
+        height: "450px",
+        width: "800px",
+        paddingLeft: "15px",
+        paddingRight: "15px",
+        paddingBottom: "50px",
+      }}
+    >
+      <Paper
         style={{
-          height: "450px",
-          width: "800px",
-          paddingLeft: "15px",
-          paddingRight: "15px",
-          paddingBottom: "50px",
+          padding: "15px 15px 15px 15px",
+          width: "100%",
+          height: "100%",
+          backgroundColor: "transparent",
         }}
+        variant="outlined"
+        elevation={3}
       >
-        <Paper
-          style={{
-            padding: "15px 15px 15px 15px",
-            width: "100%",
-            height: "100%",
-            backgroundColor: "transparent",
-          }}
-          variant="outlined"
-          elevation={3}
-        >
-          {Title}
-          {Scatterplot}
-        </Paper>
-      </div>
-    </>
+        {Title}
+        {Scatterplot}
+      </Paper>
+    </div>
   );
 };
 
 const TypedInput = (changeSettings) => {
   return (
-    <>
-      <FormGroup row style={{ marginTop: "7px" }}>
-        <TextField
-          style={{ width: "50px", marginRight: "15px" }}
-          helperText="Epsilon"
-          defaultValue="10"
-          onChange={(event) => changeSettings(event, "epsilon")}
-        />
-        <TextField
-          style={{ width: "60px", marginRight: "15px" }}
-          helperText="Perplexity"
-          defaultValue="30"
-          onChange={(event) => changeSettings(event, "perplexity")}
-        />
-        <TextField
-          style={{ width: "60px" }}
-          helperText="Iterations"
-          defaultValue="500"
-          onChange={(event) => changeSettings(event, "iterations")}
-        />
-      </FormGroup>
-    </>
+    <FormGroup row style={{ marginTop: "7px" }}>
+      <TextField
+        style={{ width: "50px", marginRight: "15px" }}
+        helperText="Epsilon"
+        defaultValue="10"
+        onChange={(event) => changeSettings(event, "epsilon")}
+      />
+      <TextField
+        style={{ width: "60px", marginRight: "15px" }}
+        helperText="Perplexity"
+        defaultValue="30"
+        onChange={(event) => changeSettings(event, "perplexity")}
+      />
+      <TextField
+        style={{ width: "60px" }}
+        helperText="Iterations"
+        defaultValue="500"
+        onChange={(event) => changeSettings(event, "iterations")}
+      />
+    </FormGroup>
   );
 };
 

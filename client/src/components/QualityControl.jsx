@@ -30,84 +30,76 @@ const Figure = (rowsums, colsums, thresholds, changeThreshold, type) => {
   }
 
   const Title = (
-    <>
-      <Typography
-        variant="body1"
-        align="center"
-        style={{ paddingBottom: "5px", fontWeight: 500, color: primary }}
-      >
-        {type === "rowsum"
-          ? "# of Reads per Gene"
-          : "# of Genes Detected per Cell"}
-      </Typography>
-    </>
+    <Typography
+      variant="body1"
+      align="center"
+      style={{ paddingBottom: "5px", fontWeight: 500, color: primary }}
+    >
+      {type === "rowsum"
+        ? "# of Reads per Gene"
+        : "# of Genes Detected per Cell"}
+    </Typography>
   );
 
   const HistogramPlot = (
-    <>
-      <div style={{ width: "100%", height: "100%" }}>
-        <Histogram
-          xLabel={
-            type === "rowsum"
-              ? "log10(reads per gene + 1)"
-              : "log10(genes per cell + 1)"
-          }
-          data={sums}
-          min={type === "rowsum" ? thresholds.minRowSum : thresholds.minColSum}
-          lowerLimit={minIndex}
-          upperLimit={maxIndex}
-        />
-      </div>
-    </>
+    <div style={{ width: "100%", height: "100%" }}>
+      <Histogram
+        xLabel={
+          type === "rowsum"
+            ? "log10(reads per gene + 1)"
+            : "log10(genes per cell + 1)"
+        }
+        data={sums}
+        min={type === "rowsum" ? thresholds.minRowSum : thresholds.minColSum}
+        lowerLimit={minIndex}
+        upperLimit={maxIndex}
+      />
+    </div>
   );
 
   const Toggle = (
-    <>
-      <Slider
-        style={{ marginLeft: "20px", width: "90%", color: tertiary }}
-        onChange={(_event, value) =>
-          changeThreshold(
-            type === "rowsum" ? value : null,
-            type === "colsum" ? value : null
-          )
-        }
-        marks={marks(minIndex / 2, maxIndex / 2)}
-        defaultValue={type === "rowsum" ? 4.0 : 2.0}
-        step={0.5}
-        min={minIndex / 2}
-        max={maxIndex / 2 - 0.5}
-        valueLabelDisplay="auto"
-      />
-    </>
+    <Slider
+      style={{ marginLeft: "20px", width: "90%", color: tertiary }}
+      onChange={(_event, value) =>
+        changeThreshold(
+          type === "rowsum" ? value : null,
+          type === "colsum" ? value : null
+        )
+      }
+      marks={marks(minIndex / 2, maxIndex / 2)}
+      defaultValue={type === "rowsum" ? 4.0 : 2.0}
+      step={0.5}
+      min={minIndex / 2}
+      max={maxIndex / 2 - 0.5}
+      valueLabelDisplay="auto"
+    />
   );
 
   return (
-    <>
-      <div
+    <div
+      style={{
+        height: "250px",
+        width: "100%",
+        paddingRight: "15px",
+        paddingLeft: "15px",
+        paddingBottom: "125px",
+      }}
+    >
+      <Paper
         style={{
-          height: "250px",
-          width: "100%",
-          paddingRight: "15px",
-          paddingLeft: "15px",
-          paddingBottom: "125px",
+          padding: "15px 20px 90px 15px",
+          width: "370px",
+          height: "100%",
+          backgroundColor: "transparent",
         }}
+        variant="outlined"
+        elevation={3}
       >
-        <Paper
-          style={{
-            padding: "15px 20px 90px 15px",
-            width: "370px",
-            height: "100%",
-            backgroundColor: "transparent",
-          }}
-          variant="outlined"
-          elevation={3}
-        >
-          {Title}
-          {HistogramPlot}
-          {Toggle}
-        </Paper>
-      </div>
-    </>
+        {Title}
+        {HistogramPlot}
+        {Toggle}
+      </Paper>
+    </div>
   );
 };
 

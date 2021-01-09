@@ -21,62 +21,58 @@ const LeafletWrapper = (pixels, colors, opacity) => {
   ];
 
   return (
-    <>
-      <Map
-        crs={L.CRS.Simple}
-        minZoom={-2}
-        bounds={bounds}
-        style={{ height: "500px", width: "100%" }}
-      >
-        <ImageOverlay bounds={bounds} url="/images/tissue_image.png" />
-        {pixels.length === colors.length &&
-          pixels.map((pixel, index) => {
-            return (
-              <Circle
-                key={pixel.center}
-                center={pixel.center}
-                color="transparent"
-                fillColor={colors[index] ? colors[index] : "blue"}
-                fillOpacity={opacity}
-                radius={8}
-              />
-            );
-          })}
-      </Map>
-    </>
+    <Map
+      crs={L.CRS.Simple}
+      minZoom={-2}
+      bounds={bounds}
+      style={{ height: "500px", width: "100%" }}
+    >
+      <ImageOverlay bounds={bounds} url="/images/tissue_image.png" />
+      {pixels.length === colors.length &&
+        pixels.map((pixel, index) => {
+          return (
+            <Circle
+              key={pixel.center}
+              center={pixel.center}
+              color="transparent"
+              fillColor={colors[index] ? colors[index] : "blue"}
+              fillOpacity={opacity}
+              radius={8}
+            />
+          );
+        })}
+    </Map>
   );
 };
 
 const TypedInput = (changeDeltaX, changeDeltaY, changeScale, changeOpacity) => {
   return (
-    <>
-      <FormGroup row style={{ marginTop: "7px" }}>
-        <TextField
-          style={{ width: "50px", marginRight: "15px" }}
-          helperText="ΔX"
-          defaultValue="0"
-          onChange={changeDeltaX}
-        />
-        <TextField
-          style={{ width: "50px", marginRight: "15px" }}
-          helperText="ΔY"
-          defaultValue="1965"
-          onChange={changeDeltaY}
-        />
-        <TextField
-          style={{ width: "250px", marginRight: "15px" }}
-          helperText="Scale (< 1 to downscale or > 1 to upscale)"
-          defaultValue="0.176"
-          onChange={changeScale}
-        />
-        <TextField
-          style={{ width: "100px" }}
-          helperText="Opacity (0 - 1)"
-          defaultValue="1"
-          onChange={changeOpacity}
-        />
-      </FormGroup>
-    </>
+    <FormGroup row style={{ marginTop: "7px" }}>
+      <TextField
+        style={{ width: "50px", marginRight: "15px" }}
+        helperText="ΔX"
+        defaultValue="0"
+        onChange={changeDeltaX}
+      />
+      <TextField
+        style={{ width: "50px", marginRight: "15px" }}
+        helperText="ΔY"
+        defaultValue="1965"
+        onChange={changeDeltaY}
+      />
+      <TextField
+        style={{ width: "250px", marginRight: "15px" }}
+        helperText="Scale (< 1 to downscale or > 1 to upscale)"
+        defaultValue="0.176"
+        onChange={changeScale}
+      />
+      <TextField
+        style={{ width: "100px" }}
+        helperText="Opacity (0 - 1)"
+        defaultValue="1"
+        onChange={changeOpacity}
+      />
+    </FormGroup>
   );
 };
 
@@ -89,43 +85,41 @@ const CheckboxInput = (
   flipXY
 ) => {
   return (
-    <>
-      <FormGroup row style={{ marginTop: "5px" }}>
-        <FormControlLabel
-          control={
-            <Checkbox
-              disableRipple
-              style={{ backgroundColor: "transparent", color: tertiary }}
-              checked={horizontalFlipped === -1}
-              onChange={flipHorizontal}
-            />
-          }
-          label="Flip Horizontally"
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              disableRipple
-              style={{ backgroundColor: "transparent", color: tertiary }}
-              checked={verticalFlipped === -1}
-              onChange={flipVertical}
-            />
-          }
-          label="Flip Vertically"
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              disableRipple
-              style={{ backgroundColor: "transparent", color: tertiary }}
-              checked={xyFlipped}
-              onChange={flipXY}
-            />
-          }
-          label="Swap X and Y Coordinates"
-        />
-      </FormGroup>
-    </>
+    <FormGroup row style={{ marginTop: "5px" }}>
+      <FormControlLabel
+        control={
+          <Checkbox
+            disableRipple
+            style={{ backgroundColor: "transparent", color: tertiary }}
+            checked={horizontalFlipped === -1}
+            onChange={flipHorizontal}
+          />
+        }
+        label="Flip Horizontally"
+      />
+      <FormControlLabel
+        control={
+          <Checkbox
+            disableRipple
+            style={{ backgroundColor: "transparent", color: tertiary }}
+            checked={verticalFlipped === -1}
+            onChange={flipVertical}
+          />
+        }
+        label="Flip Vertically"
+      />
+      <FormControlLabel
+        control={
+          <Checkbox
+            disableRipple
+            style={{ backgroundColor: "transparent", color: tertiary }}
+            checked={xyFlipped}
+            onChange={flipXY}
+          />
+        }
+        label="Swap X and Y Coordinates"
+      />
+    </FormGroup>
   );
 };
 

@@ -43,39 +43,35 @@ const Title = (setFeature, selectFeature, feature) => (
 );
 
 const About = (
-  <>
-    <Typography style={{ fontSize: "1.1em", fontWeight: 500 }}>
-      <Link style={{ color: primary }} underline="none" href="/about">
-        about
-      </Link>
-    </Typography>
-  </>
+  <Typography style={{ fontSize: "1.1em", fontWeight: 500 }}>
+    <Link style={{ color: primary }} underline="none" href="/about">
+      about
+    </Link>
+  </Typography>
 );
 
 const Github = (
-  <>
-    <IconButton
-      disableRipple
-      edge="end"
-      style={{
-        marginLeft: "5px",
-        marginRight: "-10px",
-        marginBottom: "-4px",
-        color: primary,
-        backgroundColor: "transparent",
-      }}
-      aria-label="menu"
+  <IconButton
+    disableRipple
+    edge="end"
+    style={{
+      marginLeft: "5px",
+      marginRight: "-10px",
+      marginBottom: "-4px",
+      color: primary,
+      backgroundColor: "transparent",
+    }}
+    aria-label="menu"
+  >
+    <Link
+      href="https://github.com/JEFworks/SpatialTranscriptomics.js"
+      target="_blank"
+      rel="noopener"
+      color="inherit"
     >
-      <Link
-        href="https://github.com/JEFworks/SpatialTranscriptomics.js"
-        target="_blank"
-        rel="noopener"
-        color="inherit"
-      >
-        <GitHubIcon />
-      </Link>
-    </IconButton>
-  </>
+      <GitHubIcon />
+    </Link>
+  </IconButton>
 );
 
 class Header extends Component {
