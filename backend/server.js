@@ -28,7 +28,10 @@ const es = require("event-stream");
 const { SparseMatrix } = require("ml-sparse-matrix");
 
 const defaultFileNum = 0; // 0 is filtered coronal brains, 1 is original coronal brain, 2 is olfactory bulb
-const dir = process.cwd();
+let dir = process.cwd();
+if (dir === "/home/ubuntu") {
+  dir += "/SpatialTranscriptomics.js/backend";
+}
 
 const storage = multer.diskStorage({
   destination: function (req, _file, cb) {
@@ -80,7 +83,7 @@ app.get("/matrix/:uuid/:count/:numBatches", function (req, res) {
 
   const instream = fs.createReadStream(filePath);
   instream.on("error", function () {
-    res.status(400).send("Matrix file was not found.\n");
+    res.status(400).send(`Matrix file ${dir} was not found.\n`);
     return 0;
   });
 
