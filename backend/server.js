@@ -16,21 +16,20 @@ app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-app.options("*", cors());
+//app.options("*", cors());
 
 const fs = require("fs");
 const es = require("event-stream");
 
 const { SparseMatrix } = require("ml-sparse-matrix");
 
-const filesMap = new Map(); // map of all user sessions and their associated files
 const defaultFileNum = 0; // 0 is filtered coronal brains, 1 is original coronal brain, 2 is olfactory bulb
-const dir = "/home/ubuntu/SpatialTranscriptomics.js/backend/example_data";
+const dir = "/home/ubuntu/SpatialTranscriptomics.js/backend";
 
 const storage = multer.diskStorage({
   destination: function (req, _file, cb) {
-    shell.mkdir("-p", "./data/" + req.params.uuid);
-    const path = "data/" + req.params.uuid + "/";
+    shell.mkdir("-p", `${dir}/data/${req.params.uuid}`);
+    const path = `${dir}/data/${req.params.uuid}/`;
     cb(null, path);
   },
   filename: function (_req, file, cb) {
@@ -51,21 +50,6 @@ app.post("/upload/:uuid", function (req, res) {
     } else if (err) {
       return res.status(500).json(err);
     }
-
-    const files = req.files;
-    const paths = {
-      matrix: null,
-      features: null,
-      barcodes: null,
-      pixels: null,
-    };
-
-    paths.matrix = files[0].path;
-    paths.features = files[1].path;
-    paths.barcodes = files[2].path;
-    paths.pixels = files[3].path;
-
-    filesMap.set(req.params.uuid, paths);
     return res.status(200).send(req.file);
   });
 });
@@ -81,13 +65,13 @@ app.get("/matrix/:uuid/:count/:numBatches", function (req, res) {
 
   let filePath =
     defaultFileNum === 0
-      ? `${dir}/coronal_brain/filtered_feature_bc_matrix/filtered/filtered_matrix.mtx`
+      ? `${dir}/example_data/coronal_brain/filtered_feature_bc_matrix/filtered/filtered_matrix.mtx`
       : defaultFileNum === 1
-      ? `${dir}/coronal_brain/filtered_feature_bc_matrix/matrix.mtx`
-      : `${dir}/olfactory_bulb/filtered_feature_bc_matrix/matrix.mtx`;
-  const files = filesMap.get(req.params.uuid);
-  if (files != null && files.matrix != null) {
-    filePath = files.matrix;
+      ? `${dir}/example_data/coronal_brain/filtered_feature_bc_matrix/matrix.mtx`
+      : `${dir}/example_data/olfactory_bulb/filtered_feature_bc_matrix/matrix.mtx`;
+
+  if (req.params.uuid !== "null") {
+    filePath = `${dir}/data/${req.params.uuid}/matrix.mtx`;
   }
 
   const instream = fs.createReadStream(filePath);
@@ -181,13 +165,13 @@ app.get("/matrix/:uuid/:count/:numBatches", function (req, res) {
 app.get("/features/:uuid", function (req, res) {
   let filePath =
     defaultFileNum === 0
-      ? `${dir}/coronal_brain/filtered_feature_bc_matrix/filtered/filtered_features.tsv`
+      ? `${dir}/example_data/coronal_brain/filtered_feature_bc_matrix/filtered/filtered_features.tsv`
       : defaultFileNum === 1
-      ? `${dir}/coronal_brain/filtered_feature_bc_matrix/features.tsv`
-      : `${dir}/olfactory_bulb/filtered_feature_bc_matrix/features.tsv`;
-  const files = filesMap.get(req.params.uuid);
-  if (files != null && files.features != null) {
-    filePath = files.features;
+      ? `${dir}/example_data/coronal_brain/filtered_feature_bc_matrix/features.tsv`
+      : `${dir}/example_data/olfactory_bulb/filtered_feature_bc_matrix/features.tsv`;
+
+  if (req.params.uuid !== "null") {
+    filePath = `${dir}/data/${req.params.uuid}/features.tsv`;
   }
 
   const instream = fs.createReadStream(filePath);
@@ -229,13 +213,13 @@ app.get("/features/:uuid", function (req, res) {
 app.get("/barcodes/:uuid", function (req, res) {
   let filePath =
     defaultFileNum === 0
-      ? `${dir}/coronal_brain/filtered_feature_bc_matrix/filtered/barcodes.tsv`
+      ? `${dir}/example_data/coronal_brain/filtered_feature_bc_matrix/filtered/barcodes.tsv`
       : defaultFileNum === 1
-      ? `${dir}/coronal_brain/filtered_feature_bc_matrix/barcodes.tsv`
-      : `${dir}/olfactory_bulb/filtered_feature_bc_matrix/barcodes.tsv`;
-  const files = filesMap.get(req.params.uuid);
-  if (files != null && files.barcodes != null) {
-    filePath = files.barcodes;
+      ? `${dir}/example_data/coronal_brain/filtered_feature_bc_matrix/barcodes.tsv`
+      : `${dir}/example_data/olfactory_bulb/filtered_feature_bc_matrix/barcodes.tsv`;
+
+  if (req.params.uuid !== "null") {
+    filePath = `${dir}/data/${req.params.uuid}/barcodes.tsv`;
   }
 
   const instream = fs.createReadStream(filePath);
@@ -268,13 +252,13 @@ app.get("/barcodes/:uuid", function (req, res) {
 app.get("/pixels/:uuid", function (req, res) {
   let filePath =
     defaultFileNum === 0
-      ? `${dir}/coronal_brain/spatial/tissue_positions_list.csv`
+      ? `${dir}/example_data/coronal_brain/spatial/tissue_positions_list.csv`
       : defaultFileNum === 1
-      ? `${dir}/coronal_brain/spatial/tissue_positions_list.csv`
-      : `${dir}/olfactory_bulb/spatial/tissue_positions_list.csv`;
-  const files = filesMap.get(req.params.uuid);
-  if (files != null && files.pixels != null) {
-    filePath = files.pixels;
+      ? `${dir}/example_data/coronal_brain/spatial/tissue_positions_list.csv`
+      : `${dir}/example_data/olfactory_bulb/spatial/tissue_positions_list.csv`;
+
+  if (req.params.uuid !== "null") {
+    filePath = `${dir}/data/${req.params.uuid}/tissue_positions_list.csv`;
   }
 
   const instream = fs.createReadStream(filePath);
