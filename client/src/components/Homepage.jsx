@@ -244,6 +244,7 @@ class Homepage extends Component {
     while (count < numBatches && !errorOccured) {
       await axios
         .get(`${api}/matrix/${uuid}/${count}/${numBatches}`)
+        // eslint-disable-next-line
         .then((response) => {
           const res = JSON.parse(response.data);
 
