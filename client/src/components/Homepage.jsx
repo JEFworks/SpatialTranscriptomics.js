@@ -2,11 +2,7 @@ import React, { Component } from "react";
 import axios from "axios";
 import api from "../api.jsx";
 import { v4 as uuidv4 } from "uuid";
-import { SparseMatrix } from "ml-sparse-matrix";
 
-import rowSums from "../functions/rowSums.jsx";
-import colSums from "../functions/colSums.jsx";
-import getFilteredData from "../functions/getFilteredData.jsx";
 import GetRGB from "../functions/GetRGB.jsx";
 import MinMaxNormalize from "../functions/MinMaxNormalize.jsx";
 import MinMaxStats from "../functions/MinMaxStats.jsx";
@@ -18,10 +14,14 @@ import PCAWrapper from "./PCA.jsx";
 import TSNEWrapper from "./tSNE.jsx";
 import SpatialVis from "./SpatialVis.jsx";
 
+import Worker_MATRIX from "workerize-loader!../workers/worker-matrix.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
+import Worker_FILTER from "workerize-loader!../workers/worker-filter.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
 import Worker_PCA from "workerize-loader!../workers/worker-pca.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
 import Worker_TSNE from "workerize-loader!../workers/worker-tsne.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
 import Worker_KMEANS from "workerize-loader!../workers/worker-kmeans.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
 
+const matrix_WorkerInstance = Worker_MATRIX();
+const filter_WorkerInstance = Worker_FILTER();
 const pca_WorkerInstance = Worker_PCA();
 const tSNE_WorkerInstance = Worker_TSNE();
 const kmeans_WorkerInstance = Worker_KMEANS();
@@ -87,9 +87,6 @@ class Homepage extends Component {
     await this.loadMatrix().catch((error) => {
       console.log(error);
     });
-    const { loading } = this.state;
-    loading.upload = false;
-    this.setState({ loading });
   }
 
   resetState() {
@@ -239,41 +236,33 @@ class Homepage extends Component {
     let count = 0;
     const numBatches = 4;
     let errorOccured = false;
+
+    let adjustedFeatures = [];
+    let matrix = [];
+    let ctr = 0;
+
     while (count < numBatches && !errorOccured) {
       await axios
         .get(`${api}/matrix/${uuid}/${count}/${numBatches}`)
         .then((response) => {
           const res = JSON.parse(response.data);
-          const m = new SparseMatrix(res.rows, res.columns);
 
           if (res.elements.distinct !== 0) {
-            const elements = m.elements;
-            elements.distinct = res.elements.distinct;
-            elements.freeEntries = res.elements.freeEntries;
-            elements.highWaterMark = res.elements.highWaterMark;
-            elements.lowWaterMark = res.elements.lowWaterMark;
-            elements.maxLoadFactor = res.elements.maxLoadFactor;
-            elements.minLoadFactor = res.elements.minLoadFactor;
-            elements.state = res.elements.state;
-            elements.table = res.elements.table;
-            elements.values = res.elements.values;
-
-            const { adjustedFeatures } = this.state;
-            const matrix = this.state.matrix.concat(
-              m.to2DArray().filter((gene, index) => {
-                for (let cell of gene) {
-                  const feature = this.state.features[index];
-                  if (cell > 0) {
-                    if (feature) {
-                      adjustedFeatures.push(feature.toLowerCase());
-                    }
-                    return true;
-                  }
-                }
-                return false;
-              })
-            );
-            this.setState({ matrix, adjustedFeatures });
+            matrix_WorkerInstance.getMatrix(res, this.state.features);
+            matrix_WorkerInstance.addEventListener("message", (message) => {
+              if (message.data.matrix && ctr < numBatches) {
+                const data = message.data;
+                matrix = matrix.concat(data.matrix);
+                adjustedFeatures = adjustedFeatures.concat(data.features);
+                ctr++;
+              }
+              if (ctr === numBatches) {
+                this.setState({ matrix, adjustedFeatures });
+                const { thresholds } = this.state;
+                this.handleFilter(thresholds.minRowSum, thresholds.minColSum);
+                ctr++;
+              }
+            });
           }
         })
         .catch((error) => {
@@ -282,9 +271,6 @@ class Homepage extends Component {
         });
       count++;
     }
-
-    const { thresholds } = this.state;
-    this.handleFilter(thresholds.minRowSum, thresholds.minColSum);
   }
 
   handleFilter(minRowSum, minColSum) {
@@ -292,42 +278,60 @@ class Homepage extends Component {
     if (!matrix[0]) {
       return;
     }
-    const { thresholds, adjustedFeatures, barcodes, feature } = this.state;
+
+    const {
+      thresholds,
+      barcodes,
+      feature,
+      adjustedFeatures,
+      loading,
+    } = this.state;
     let { rowsums, colsums } = this.state;
 
-    if (minRowSum !== null) {
-      thresholds.minRowSum = minRowSum;
-      rowsums = rowSums(matrix, thresholds.minRowSum);
-    }
-    if (minColSum !== null) {
-      thresholds.minColSum = minColSum;
-      colsums = colSums(matrix, thresholds.minColSum);
-    }
-
-    const filteredData = getFilteredData(
+    loading.upload = true;
+    this.setState({ loading });
+    let count = 0;
+    filter_WorkerInstance.filter(
       matrix,
-      adjustedFeatures,
-      barcodes,
-      rowsums.badGenes,
-      colsums.badCells
-    );
-    const colors = this.getColorsByGene(
-      filteredData.matrix,
-      filteredData.features,
-      feature
-    );
-
-    this.setState({
-      filteredMatrix: filteredData.matrix,
-      filteredFeatures: filteredData.features,
-      filteredBarcodes: filteredData.barcodes,
       thresholds,
+      barcodes,
+      adjustedFeatures,
       rowsums,
       colsums,
-      pcs: [],
-      filteredPCs: [],
-      colorOption: "gene",
-      colors,
+      minRowSum,
+      minColSum
+    );
+    filter_WorkerInstance.addEventListener("message", (message) => {
+      if (message.data.filteredData && count < 1) {
+        const data = message.data;
+
+        const { filteredData } = data;
+        rowsums = data.rowsums;
+        colsums = data.colsums;
+
+        const colors = this.getColorsByGene(
+          filteredData.matrix,
+          filteredData.features,
+          feature
+        );
+
+        loading.upload = false;
+
+        this.setState({
+          filteredMatrix: filteredData.matrix,
+          filteredFeatures: filteredData.features,
+          filteredBarcodes: filteredData.barcodes,
+          thresholds,
+          rowsums,
+          colsums,
+          pcs: [],
+          filteredPCs: [],
+          colorOption: "gene",
+          colors,
+          loading,
+        });
+        count++;
+      }
     });
   }
 
@@ -377,10 +381,8 @@ class Homepage extends Component {
           pcs: pca.eigenvectors,
           eigenvalues: pca.eigenvalues,
         });
-        setTimeout(() => {
-          loading.pca = false;
-          this.setState({ loading });
-        }, 0);
+        loading.pca = false;
+        this.setState({ loading });
         count++;
       }
     });
@@ -449,10 +451,8 @@ class Homepage extends Component {
     kmeans_WorkerInstance.addEventListener("message", (message) => {
       if (message.data.colors && count < 1) {
         const result = message.data;
-        setTimeout(() => {
-          loading.kmeans = false;
-          this.setState({ loading });
-        }, 0);
+        loading.kmeans = false;
+        this.setState({ loading });
         this.setState({ colors: result.colors });
         count++;
       }

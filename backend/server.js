@@ -24,7 +24,7 @@ const es = require("event-stream");
 
 const { SparseMatrix } = require("ml-sparse-matrix");
 
-const defaultFileNum = 0; // 0 is filtered coronal brains, 1 is original coronal brain, 2 is olfactory bulb
+const defaultFileNum = 0; // 0 is filtered coronal brains, 1 is original coronal brain, 2 is olfactory bulb, 3 is preoptic
 let dir = process.cwd();
 if (dir === "/home/ubuntu") {
   dir += "/SpatialTranscriptomics.js/backend";
@@ -72,7 +72,9 @@ app.get("/api/matrix/:uuid/:count/:numBatches", function (req, res) {
       ? `${dir}/example_data/coronal_brain/filtered_feature_bc_matrix/filtered/filtered_matrix.mtx`
       : defaultFileNum === 1
       ? `${dir}/example_data/coronal_brain/filtered_feature_bc_matrix/matrix.mtx`
-      : `${dir}/example_data/olfactory_bulb/filtered_feature_bc_matrix/matrix.mtx`;
+      : defaultFileNum === 2
+      ? `${dir}/example_data/olfactory_bulb/filtered_feature_bc_matrix/matrix.mtx`
+      : `${dir}/example_data/preoptic_region/filtered_feature_bc_matrix/matrix.mtx`;
 
   if (req.params.uuid !== "null") {
     filePath = `${dir}/data/${req.params.uuid}/matrix.mtx`;
@@ -122,7 +124,7 @@ app.get("/api/matrix/:uuid/:count/:numBatches", function (req, res) {
             const delimited = line.split(" ");
             const i = Number.parseInt(delimited[0]);
             const j = Number.parseInt(delimited[1]);
-            const value = Number.parseInt(delimited[2]);
+            const value = Number.parseFloat(delimited[2]);
             if (
               Number.isNaN(i) ||
               Number.isNaN(j) ||
@@ -172,7 +174,9 @@ app.get("/api/features/:uuid", function (req, res) {
       ? `${dir}/example_data/coronal_brain/filtered_feature_bc_matrix/filtered/filtered_features.tsv`
       : defaultFileNum === 1
       ? `${dir}/example_data/coronal_brain/filtered_feature_bc_matrix/features.tsv`
-      : `${dir}/example_data/olfactory_bulb/filtered_feature_bc_matrix/features.tsv`;
+      : defaultFileNum === 2
+      ? `${dir}/example_data/olfactory_bulb/filtered_feature_bc_matrix/features.tsv`
+      : `${dir}/example_data/preoptic_region/filtered_feature_bc_matrix/features.tsv`;
 
   if (req.params.uuid !== "null") {
     filePath = `${dir}/data/${req.params.uuid}/features.tsv`;
@@ -192,11 +196,12 @@ app.get("/api/features/:uuid", function (req, res) {
       .mapSync(function (line) {
         if (!exit) {
           const delimited = line.split("\t");
-          const geneName = delimited[1];
+          let geneName = delimited[1];
           if (geneName && geneName.length > 0) {
             array.push(geneName);
           } else if (line.trim().length !== 0) {
-            exit = true;
+            geneName = delimited[0];
+            array.push(geneName);
           }
         }
       })
@@ -220,7 +225,9 @@ app.get("/api/barcodes/:uuid", function (req, res) {
       ? `${dir}/example_data/coronal_brain/filtered_feature_bc_matrix/filtered/barcodes.tsv`
       : defaultFileNum === 1
       ? `${dir}/example_data/coronal_brain/filtered_feature_bc_matrix/barcodes.tsv`
-      : `${dir}/example_data/olfactory_bulb/filtered_feature_bc_matrix/barcodes.tsv`;
+      : defaultFileNum === 2
+      ? `${dir}/example_data/olfactory_bulb/filtered_feature_bc_matrix/barcodes.tsv`
+      : `${dir}/example_data/preoptic_region/filtered_feature_bc_matrix/barcodes.tsv`;
 
   if (req.params.uuid !== "null") {
     filePath = `${dir}/data/${req.params.uuid}/barcodes.tsv`;
@@ -259,7 +266,9 @@ app.get("/api/pixels/:uuid", function (req, res) {
       ? `${dir}/example_data/coronal_brain/spatial/tissue_positions_list.csv`
       : defaultFileNum === 1
       ? `${dir}/example_data/coronal_brain/spatial/tissue_positions_list.csv`
-      : `${dir}/example_data/olfactory_bulb/spatial/tissue_positions_list.csv`;
+      : defaultFileNum === 2
+      ? `${dir}/example_data/olfactory_bulb/spatial/tissue_positions_list.csv`
+      : `${dir}/example_data/preoptic_region/spatial/tissue_position_list.csv`;
 
   if (req.params.uuid !== "null") {
     filePath = `${dir}/data/${req.params.uuid}/tissue_positions_list.csv`;

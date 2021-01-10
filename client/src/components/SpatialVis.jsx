@@ -35,7 +35,7 @@ const LeafletWrapper = (pixels, colors, opacity) => {
               key={pixel.center}
               center={pixel.center}
               color="transparent"
-              fillColor={colors[index] ? colors[index] : "blue"}
+              fillColor={colors[index] ? colors[index] : "black"}
               fillOpacity={opacity}
               radius={8}
             />
