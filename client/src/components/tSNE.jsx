@@ -5,11 +5,13 @@ import {
   Paper,
   TextField,
   FormGroup,
+  CircularProgress,
 } from "@material-ui/core";
 import ScatterPlot from "./Plots/ScatterPlot.jsx";
 
 const primary = "#094067";
 const paragraph = "#5f6c7b";
+const blue = "#80d8ff";
 
 const Plot = (data, getColor, displayAllowed) => {
   const obj = [{ data: [] }];
@@ -145,7 +147,17 @@ class tSNEWrapper extends Component {
           Enter description here.
         </Typography>
 
-        {TypedInput(changeSettings)}
+        <div style={{ display: "flex" }}>
+          {TypedInput(changeSettings)}
+          {this.props.loading && (
+            <CircularProgress
+              disableShrink
+              size={50}
+              thickness={5}
+              style={{ color: blue, marginTop: "5px", marginLeft: "40px" }}
+            />
+          )}
+        </div>
 
         <div style={{ paddingTop: "15px" }}></div>
         <Button

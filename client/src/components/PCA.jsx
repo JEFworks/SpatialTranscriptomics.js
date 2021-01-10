@@ -12,6 +12,7 @@ import ScatterPlot from "./Plots/ScatterPlot.jsx";
 
 const primary = "#094067";
 const paragraph = "#5f6c7b";
+const blue = "#80d8ff";
 
 const Biplot = (eigenvectors, getColor, displayAllowed) => {
   const obj = [{ data: [] }];
@@ -176,8 +177,6 @@ class PCAWrapper extends Component {
 
     return (
       <>
-        {/* <CircularProgress /> */}
-
         <Typography
           style={{ marginBottom: "10px", fontWeight: 500, color: primary }}
           variant="h5"
@@ -191,7 +190,17 @@ class PCAWrapper extends Component {
           Enter description here.
         </Typography>
 
-        {TypedInput(selectNumPCs)}
+        <div style={{ display: "flex" }}>
+          {TypedInput(selectNumPCs)}
+          {this.props.loading && (
+            <CircularProgress
+              disableShrink
+              size={50}
+              thickness={5}
+              style={{ color: blue, marginTop: "5px", marginLeft: "40px" }}
+            />
+          )}
+        </div>
 
         <div style={{ paddingTop: "15px" }}></div>
         <Button

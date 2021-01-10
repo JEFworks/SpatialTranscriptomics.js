@@ -1,10 +1,17 @@
 import React, { Component } from "react";
-import { Typography, Paper, Slider, Button } from "@material-ui/core";
+import {
+  Typography,
+  Paper,
+  Slider,
+  Button,
+  CircularProgress,
+} from "@material-ui/core";
 import Histogram from "./Plots/Histogram.jsx";
 
 const primary = "#094067";
 const paragraph = "#5f6c7b";
 const tertiary = "#90b4ce";
+const blue = "#80d8ff";
 
 const marks = (min, max) => {
   const list = [];
@@ -142,18 +149,28 @@ class QualityControl extends Component {
 
   render() {
     const { props, state } = this;
-    const { rowsums, colsums } = props;
+    const { rowsums, colsums, loading } = props;
     const { minRowSum, minColSum } = state;
     const thresholds = { minRowSum: minRowSum, minColSum: minColSum };
 
     return (
       <>
-        <Typography
-          style={{ marginBottom: "10px", fontWeight: 500, color: primary }}
-          variant="h5"
-        >
-          Quality Control
-        </Typography>
+        <div style={{ display: "flex" }}>
+          <Typography
+            style={{ marginBottom: "10px", fontWeight: 500, color: primary }}
+            variant="h5"
+          >
+            Quality Control
+          </Typography>
+          {loading && (
+            <CircularProgress
+              disableShrink
+              size={40}
+              thickness={5}
+              style={{ color: blue, marginTop: "-5px", marginLeft: "40px" }}
+            />
+          )}
+        </div>
         <Typography
           style={{ marginBottom: "20px", fontWeight: 400, color: paragraph }}
           variant="body1"

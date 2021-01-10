@@ -42,7 +42,7 @@ class Homepage extends Component {
     filteredFeatures: [],
     barcodes: [],
     filteredBarcodes: [],
-    thresholds: { minRowSum: 4, minColSum: 2 },
+    thresholds: { minRowSum: 2, minColSum: 2 },
     rowsums: [],
     colsums: [],
     colors: [],
@@ -52,6 +52,7 @@ class Homepage extends Component {
     feature: "camk2n1",
     k: 10,
     colorOption: "gene",
+    loading: { upload: true, pca: false, tSNE: false, kmeans: false },
   }; // remember to update in resetState() too
 
   // for coloring
@@ -86,6 +87,9 @@ class Homepage extends Component {
     await this.loadMatrix().catch((error) => {
       console.log(error);
     });
+    const { loading } = this.state;
+    loading.upload = false;
+    this.setState({ loading });
   }
 
   resetState() {
@@ -104,7 +108,7 @@ class Homepage extends Component {
       filteredFeatures: [],
       barcodes: [],
       filteredBarcodes: [],
-      thresholds: { minRowSum: 4, minColSum: 2 },
+      thresholds: { minRowSum: 2, minColSum: 2 },
       rowsums: [],
       colsums: [],
       colors: [],
@@ -114,6 +118,7 @@ class Homepage extends Component {
       feature: "camk2n1",
       k: 10,
       colorOption: "gene",
+      loading: { upload: false, pca: false, tSNE: false, kmeans: false },
     });
   }
 
@@ -161,7 +166,7 @@ class Homepage extends Component {
 
   // upload files from state to the server
   async uploadFiles() {
-    const { files } = this.state;
+    const { files, loading } = this.state;
     if (!files.matrix || !files.barcodes || !files.features || !files.pixels) {
       return;
     }
@@ -179,7 +184,8 @@ class Homepage extends Component {
     window.history.pushState(null, null, `/?${urlParams.toString()}`);
 
     this.resetState();
-    this.setState({ uuid });
+    loading.upload = true;
+    this.setState({ uuid, loading });
     axios
       .post(`${api}/upload/${uuid}`, data, {})
       .then((_res) => {
@@ -357,26 +363,39 @@ class Homepage extends Component {
     if (!m[0] || m[0].length < 1) {
       return;
     }
+    const { loading } = this.state;
+    loading.pca = true;
+    this.setState({ loading });
+
     pca_WorkerInstance.performPCA(m);
     let count = 0;
     pca_WorkerInstance.addEventListener("message", (message) => {
       if (message.data.eigenvectors && count < 1) {
         const pca = message.data;
-        this.setState({ pcs: pca.eigenvectors, eigenvalues: pca.eigenvalues });
         this.filterPCs(num, pca.eigenvectors);
+        this.setState({
+          pcs: pca.eigenvectors,
+          eigenvalues: pca.eigenvalues,
+        });
+        setTimeout(() => {
+          loading.pca = false;
+          this.setState({ loading });
+        }, 1000);
         count++;
       }
     });
   }
 
   computeTSNE(tsneSettings) {
-    const { filteredPCs } = this.state;
+    const { filteredPCs, loading } = this.state;
     const { epsilon, perplexity, iterations } = tsneSettings;
     if (!filteredPCs[0] || filteredPCs[0].length < 1) {
       alert("Please run PCA first.");
       return [];
     }
 
+    loading.tSNE = true;
+    this.setState({ loading });
     const opt = {};
     opt.epsilon = epsilon; // epsilon is learning rate (10 = default)
     opt.perplexity = perplexity; // roughly how many neighbors each point influences (30 = default)
@@ -387,7 +406,8 @@ class Homepage extends Component {
     tSNE_WorkerInstance.addEventListener("message", (message) => {
       if (message.data.solution && count < 1) {
         const tsne = message.data;
-        this.setState({ tsneSolution: tsne.solution });
+        loading.tSNE = false;
+        this.setState({ tsneSolution: tsne.solution, loading });
         count++;
       }
     });
@@ -421,11 +441,18 @@ class Homepage extends Component {
   }
 
   getColorsByClusters(pcs, num) {
+    const { loading } = this.state;
+    loading.kmeans = true;
+    this.setState({ loading });
     kmeans_WorkerInstance.performKMeans(pcs, num);
     let count = 0;
     kmeans_WorkerInstance.addEventListener("message", (message) => {
       if (message.data.colors && count < 1) {
         const result = message.data;
+        setTimeout(() => {
+          loading.kmeans = false;
+          this.setState({ loading });
+        }, 1000);
         this.setState({ colors: result.colors });
         count++;
       }
@@ -433,12 +460,14 @@ class Homepage extends Component {
   }
 
   render() {
-    const { colors } = this.state;
-
     return (
       <>
         <div style={{ marginBottom: "40px" }}>
-          <Header setFeature={this.setFeature} setK={this.setK} />
+          <Header
+            setFeature={this.setFeature}
+            setK={this.setK}
+            loading={this.state.loading.kmeans}
+          />
         </div>
 
         <div className="site-container">
@@ -456,6 +485,7 @@ class Homepage extends Component {
             rowsums={this.state.rowsums.sums}
             colsums={this.state.colsums.sums}
             handleFilter={this.handleFilter}
+            loading={this.state.loading.upload}
           />
 
           <div style={{ paddingTop: "40px" }}></div>
@@ -464,20 +494,25 @@ class Homepage extends Component {
             eigenvectors={this.state.pcs}
             eigenvalues={this.state.eigenvalues}
             setNumPCs={this.setNumPCs}
-            colors={colors}
+            colors={this.state.colors}
             displayAllowed={this.state.pcs[0]}
+            loading={this.state.loading.pca}
           />
 
           <div style={{ paddingTop: "20px" }}></div>
           <TSNEWrapper
             computeTSNE={this.computeTSNE}
             tsneSolution={this.state.tsneSolution}
-            colors={colors}
+            colors={this.state.colors}
             pcs={this.state.filteredPCs}
+            loading={this.state.loading.tSNE}
           />
 
           <div style={{ paddingTop: "20px" }}></div>
-          <SpatialVis barcodes={this.state.filteredBarcodes} colors={colors} />
+          <SpatialVis
+            barcodes={this.state.filteredBarcodes}
+            colors={this.state.colors}
+          />
 
           <div style={{ paddingTop: "70px" }}></div>
         </div>

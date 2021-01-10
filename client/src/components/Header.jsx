@@ -7,13 +7,23 @@ import {
   Typography,
   Button,
   TextField,
+  CircularProgress,
 } from "@material-ui/core";
 import GitHubIcon from "@material-ui/icons/GitHub";
 
 const background = "#fffffe";
 const primary = "#094067";
+const blue = "#80d8ff";
 
-const Title = (selectFeature, setFeature, feature, selectK, setK, k) => (
+const Title = (
+  selectFeature,
+  setFeature,
+  feature,
+  selectK,
+  setK,
+  k,
+  loading
+) => (
   <>
     <Typography variant="h6" style={{ flexGrow: 0.04, fontWeight: 500 }}>
       <Link style={{ color: primary }} underline="none" href="/">
@@ -28,7 +38,7 @@ const Title = (selectFeature, setFeature, feature, selectK, setK, k) => (
         onChange={selectFeature}
       />
     </div>
-    <div style={{ flexGrow: 0.05, fontWeight: 500 }}>
+    <div style={{ flexGrow: 0.05 }}>
       <Button
         variant="contained"
         size="small"
@@ -39,7 +49,7 @@ const Title = (selectFeature, setFeature, feature, selectK, setK, k) => (
         Color by Gene
       </Button>
     </div>
-    <div style={{ flexGrow: 0.01, fontWeight: 500 }}>
+    <div style={{ flexGrow: 0.01 }}>
       <TextField
         style={{ width: "100px" }}
         helperText="# of Clusters (k)"
@@ -47,7 +57,7 @@ const Title = (selectFeature, setFeature, feature, selectK, setK, k) => (
         onChange={selectK}
       />
     </div>
-    <div style={{ flexGrow: 0.89, fontWeight: 500 }}>
+    <div style={{ flexGrow: 0.02 }}>
       <Button
         variant="contained"
         size="small"
@@ -57,6 +67,16 @@ const Title = (selectFeature, setFeature, feature, selectK, setK, k) => (
       >
         Color by Clusters
       </Button>
+    </div>
+    <div style={{ flexGrow: 0.87 }}>
+      {
+        <CircularProgress
+          disableShrink
+          size={40}
+          thickness={5}
+          style={{ color: !loading ? "white" : blue, marginLeft: "20px" }}
+        />
+      }
     </div>
   </>
 );
@@ -111,7 +131,7 @@ class Header extends Component {
   }
 
   render() {
-    const { setFeature, setK } = this.props;
+    const { setFeature, setK, loading } = this.props;
     const { feature, k } = this.state;
 
     return (
@@ -129,7 +149,8 @@ class Header extends Component {
               feature,
               this.selectK,
               setK,
-              k
+              k,
+              loading
             )}
             {About}
             {Github}
