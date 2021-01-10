@@ -36,13 +36,13 @@ const Title = (selectFeature, setFeature, feature, selectK, setK, k) => (
         style={{ backgroundColor: primary }}
         onClick={() => setFeature(feature)}
       >
-        Update Colors
+        Color by Gene
       </Button>
     </div>
     <div style={{ flexGrow: 0.01, fontWeight: 500 }}>
       <TextField
         style={{ width: "100px" }}
-        helperText="K Num"
+        helperText="# of Clusters (k)"
         defaultValue="10"
         onChange={selectK}
       />
@@ -55,7 +55,7 @@ const Title = (selectFeature, setFeature, feature, selectK, setK, k) => (
         style={{ backgroundColor: primary }}
         onClick={() => setK(k)}
       >
-        Update Clusters
+        Color by Clusters
       </Button>
     </div>
   </>

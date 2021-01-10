@@ -91,7 +91,6 @@ const TypedInput = (changeSettings) => {
 
 class tSNEWrapper extends Component {
   state = {
-    data: [],
     tsneSettings: {
       epsilon: 10,
       perplexity: 30,
@@ -124,8 +123,8 @@ class tSNEWrapper extends Component {
 
   run() {
     const { computeTSNE, pcs } = this.props;
-    const data = computeTSNE(this.state.tsneSettings);
-    this.setState({ data, pcs });
+    computeTSNE(this.state.tsneSettings);
+    this.setState({ pcs });
   }
 
   render() {
@@ -164,7 +163,7 @@ class tSNEWrapper extends Component {
           <div style={{ width: "50%" }}></div>
           <div className="PC-flex">
             {Plot(
-              this.state.data,
+              this.props.tsneSolution,
               this.getColor,
               this.state.pcs === this.props.pcs
             )}

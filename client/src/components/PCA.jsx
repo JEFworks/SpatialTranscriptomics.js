@@ -5,6 +5,7 @@ import {
   Button,
   FormGroup,
   TextField,
+  CircularProgress,
 } from "@material-ui/core";
 import LineChart from "./Plots/LineChart.jsx";
 import ScatterPlot from "./Plots/ScatterPlot.jsx";
@@ -28,7 +29,7 @@ const Biplot = (eigenvectors, getColor, displayAllowed) => {
       align="center"
       style={{ paddingBottom: "5px", fontWeight: 500, color: primary }}
     >
-      {"PC1 vs PC2"}
+      {"Biplot"}
     </Typography>
   );
 
@@ -131,7 +132,6 @@ const TypedInput = (selectNumPCs) => {
 
 class PCAWrapper extends Component {
   state = {
-    data: [],
     colors: [],
     numPCs: 10,
     updatedNumPCs: 10,
@@ -147,13 +147,12 @@ class PCAWrapper extends Component {
     return "blue";
   }
 
-  async run() {
-    const { setNumPCs, computePCA, colors } = this.props;
+  run() {
+    const { computePCA, colors } = this.props;
     const { updatedNumPCs } = this.state;
 
-    const data = await computePCA();
-    setNumPCs(updatedNumPCs);
-    this.setState({ data, colors, numPCs: updatedNumPCs });
+    computePCA(updatedNumPCs);
+    this.setState({ colors, numPCs: updatedNumPCs });
   }
 
   applySettings() {
@@ -172,11 +171,13 @@ class PCAWrapper extends Component {
 
   render() {
     const { selectNumPCs, getColor } = this;
-    const { data, numPCs } = this.state;
-    const { displayAllowed } = this.props;
+    const { numPCs } = this.state;
+    const { eigenvectors, eigenvalues, displayAllowed } = this.props;
 
     return (
       <>
+        {/* <CircularProgress /> */}
+
         <Typography
           style={{ marginBottom: "10px", fontWeight: 500, color: primary }}
           variant="h5"
@@ -216,8 +217,8 @@ class PCAWrapper extends Component {
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>
           <div className="PC-flex">
-            {ScreePlot(data.eigenvalues, numPCs, displayAllowed)}
-            {Biplot(data.eigenvectors, getColor, displayAllowed)}
+            {ScreePlot(eigenvalues, numPCs, displayAllowed)}
+            {Biplot(eigenvectors, getColor, displayAllowed)}
           </div>
           <div style={{ width: "50%" }}></div>
         </div>

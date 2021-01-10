@@ -3,20 +3,13 @@ import axios from "axios";
 import api from "../api.jsx";
 import { v4 as uuidv4 } from "uuid";
 import { SparseMatrix } from "ml-sparse-matrix";
-import { PCA } from "ml-pca";
-import { KMeans } from "machinelearn/cluster";
 
 import rowSums from "../functions/rowSums.jsx";
 import colSums from "../functions/colSums.jsx";
 import getFilteredData from "../functions/getFilteredData.jsx";
-import cpmNormalize from "../functions/cpmNormalize.jsx";
-import euclideanDists from "../functions/euclideanDists.jsx";
-import normalizeDists from "../functions/normalizeDists.jsx";
 import GetRGB from "../functions/GetRGB.jsx";
 import MinMaxNormalize from "../functions/MinMaxNormalize.jsx";
 import MinMaxStats from "../functions/MinMaxStats.jsx";
-import tsnejs from "../functions/tsne.js";
-import palette from "../functions/palette.jsx";
 
 import Header from "./Header.jsx";
 import DataUpload from "./DataUpload.jsx";
@@ -24,6 +17,14 @@ import QualityControl from "./QualityControl.jsx";
 import PCAWrapper from "./PCA.jsx";
 import TSNEWrapper from "./tSNE.jsx";
 import SpatialVis from "./SpatialVis.jsx";
+
+import Worker_PCA from "workerize-loader!../workers/worker-pca.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
+import Worker_TSNE from "workerize-loader!../workers/worker-tsne.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
+import Worker_KMEANS from "workerize-loader!../workers/worker-kmeans.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
+
+const pca_WorkerInstance = Worker_PCA();
+const tSNE_WorkerInstance = Worker_TSNE();
+const kmeans_WorkerInstance = Worker_KMEANS();
 
 class Homepage extends Component {
   state = {
@@ -46,6 +47,7 @@ class Homepage extends Component {
     colsums: [],
     colors: [],
     pcs: [],
+    eigenvalues: [],
     filteredPCs: [],
     feature: "camk2n1",
     k: 10,
@@ -107,6 +109,7 @@ class Homepage extends Component {
       colsums: [],
       colors: [],
       pcs: [],
+      eigenvalues: [],
       filteredPCs: [],
       feature: "camk2n1",
       k: 10,
@@ -332,41 +335,38 @@ class Homepage extends Component {
   }
 
   setNumPCs(num) {
+    this.filterPCs(num, this.state.pcs);
+  }
+
+  filterPCs(num, pcs) {
+    if (pcs == null) {
+      return;
+    }
     const filteredPCs = [];
-    this.state.pcs.forEach((pc) => {
+    pcs.forEach((pc) => {
       filteredPCs.push(pc.slice(0, num));
     });
     this.setState({ filteredPCs });
     if (this.state.colorOption === "cluster") {
-      const colors = this.getColorsByClusters(filteredPCs, this.state.k);
-      this.setState({ colors });
+      this.getColorsByClusters(filteredPCs, this.state.k);
     }
   }
 
-  computePCA() {
+  computePCA(num) {
     const m = this.state.filteredMatrix.slice();
     if (!m[0] || m[0].length < 1) {
-      return {};
+      return;
     }
-
-    const matrix = cpmNormalize(m);
-
-    const pca = new PCA(matrix, {
-      method: "SVD",
-      center: true,
-      scale: true,
-      ignoreZeroVariance: true,
+    pca_WorkerInstance.performPCA(m);
+    let count = 0;
+    pca_WorkerInstance.addEventListener("message", (message) => {
+      if (message.data.eigenvectors && count < 1) {
+        const pca = message.data;
+        this.setState({ pcs: pca.eigenvectors, eigenvalues: pca.eigenvalues });
+        this.filterPCs(num, pca.eigenvectors);
+        count++;
+      }
     });
-    const pcs = pca.getEigenvectors().data;
-    const eigenvalues = pca.getEigenvalues();
-
-    const pcsCleaned = [];
-    pcs.forEach((cell) => {
-      pcsCleaned.push([].slice.call(cell));
-    });
-
-    this.setState({ pcs: pcsCleaned });
-    return { eigenvectors: pcsCleaned, eigenvalues: eigenvalues };
   }
 
   computeTSNE(tsneSettings) {
@@ -377,21 +377,20 @@ class Homepage extends Component {
       return [];
     }
 
-    const dists = normalizeDists(euclideanDists(filteredPCs));
-
     const opt = {};
     opt.epsilon = epsilon; // epsilon is learning rate (10 = default)
     opt.perplexity = perplexity; // roughly how many neighbors each point influences (30 = default)
     opt.dim = 2; // dimensionality of the embedding (2 = default)
 
-    const tsne = new tsnejs.tSNE(opt); // create a tSNE instance
-    tsne.initDataDist(dists);
-
-    for (let k = 0; k < iterations; k++) {
-      tsne.step(); // default 500 iterations
-    }
-    const Y = tsne.getSolution(); // Y is an array of 2-D points that you can plot
-    return Y;
+    tSNE_WorkerInstance.performTSNE(filteredPCs, opt, iterations);
+    let count = 0;
+    tSNE_WorkerInstance.addEventListener("message", (message) => {
+      if (message.data.solution && count < 1) {
+        const tsne = message.data;
+        this.setState({ tsneSolution: tsne.solution });
+        count++;
+      }
+    });
   }
 
   getGene(matrix, features, name) {
@@ -413,48 +412,24 @@ class Homepage extends Component {
   }
 
   setK(k) {
-    const colors = this.getColorsByClusters(this.state.filteredPCs, k);
-    this.setState({ k });
-    if (this.state.filteredPCs[0]) {
-      this.setState({ colorOption: "cluster", colors });
+    if (!this.state.filteredPCs[0]) {
+      alert("Please run PCA first.");
+      return;
     }
-  }
-
-  performKMeans(pcs, num) {
-    const kmean = new KMeans({ k: num });
-    if (pcs[0]) {
-      kmean.fit(pcs);
-      const clusters = kmean.toJSON().clusters;
-      return clusters;
-    }
-    alert("Please run PCA first.");
-    return null;
+    this.setState({ k, colorOption: "cluster" });
+    this.getColorsByClusters(this.state.filteredPCs, k);
   }
 
   getColorsByClusters(pcs, num) {
-    const clusters = this.performKMeans(pcs, num);
-
-    const hashmap = new Map();
-    pcs.forEach((cell, index) => {
-      hashmap.set(cell, index);
+    kmeans_WorkerInstance.performKMeans(pcs, num);
+    let count = 0;
+    kmeans_WorkerInstance.addEventListener("message", (message) => {
+      if (message.data.colors && count < 1) {
+        const result = message.data;
+        this.setState({ colors: result.colors });
+        count++;
+      }
     });
-
-    const colorsMap = new Map();
-    let i = 0;
-    if (clusters != null) {
-      clusters.forEach((cluster) => {
-        cluster.forEach((cell) => {
-          const index = hashmap.get(cell);
-          colorsMap.set(index, palette[i % palette.length]);
-        });
-        i++;
-      });
-    }
-
-    const sorted = new Map(
-      [...colorsMap].sort((a, b) => parseInt(a) - parseInt(b))
-    );
-    return [...sorted.values()];
   }
 
   render() {
@@ -486,6 +461,8 @@ class Homepage extends Component {
           <div style={{ paddingTop: "40px" }}></div>
           <PCAWrapper
             computePCA={this.computePCA}
+            eigenvectors={this.state.pcs}
+            eigenvalues={this.state.eigenvalues}
             setNumPCs={this.setNumPCs}
             colors={colors}
             displayAllowed={this.state.pcs[0]}
@@ -494,6 +471,7 @@ class Homepage extends Component {
           <div style={{ paddingTop: "20px" }}></div>
           <TSNEWrapper
             computeTSNE={this.computeTSNE}
+            tsneSolution={this.state.tsneSolution}
             colors={colors}
             pcs={this.state.filteredPCs}
           />

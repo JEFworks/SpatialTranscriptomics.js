@@ -7,8 +7,9 @@ const app = express();
 const multer = require("multer");
 const shell = require("shelljs");
 
+// delete localhost from this list when deploying
 const corsOptions = {
-  origin: ["https://stjs.me"],
+  origin: ["http://localhost:8000", "https://stjs.me"],
   optionsSuccessStatus: 200, // For legacy browser support
 };
 
