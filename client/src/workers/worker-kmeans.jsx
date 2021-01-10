@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { KMeans } from "machinelearn/cluster";
 import palette from "../functions/palette.jsx";
 

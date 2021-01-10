@@ -380,7 +380,7 @@ class Homepage extends Component {
         setTimeout(() => {
           loading.pca = false;
           this.setState({ loading });
-        }, 1000);
+        }, 0);
         count++;
       }
     });
@@ -452,7 +452,7 @@ class Homepage extends Component {
         setTimeout(() => {
           loading.kmeans = false;
           this.setState({ loading });
-        }, 1000);
+        }, 0);
         this.setState({ colors: result.colors });
         count++;
       }

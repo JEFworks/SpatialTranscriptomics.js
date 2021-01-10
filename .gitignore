@@ -7,3 +7,4 @@ temp/Rplots.pdf
 backend/data/*
 st_key.pem
 client/src/api.jsx
+*.lock
