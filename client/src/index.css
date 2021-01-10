@@ -33,18 +33,30 @@ code {
   width: 370px;
 }
 
+.biplot {
+  width: 600px;
+}
+
+.tsne-plot {
+  width: 800px;
+}
+
 @media only screen and (max-width: 970px) {
   .QC-flex {
     display: grid;
   }
 }
 
-@media only screen and (max-width: 1050px) {
+@media only screen and (max-width: 1200px) {
   .PC-flex {
     display: grid;
   }
 
   .scree-plot {
+    width: 420px;
+  }
+
+  .biplot {
     width: 420px;
   }
 

@@ -518,7 +518,6 @@ class Homepage extends Component {
             eigenvalues={this.state.eigenvalues}
             setNumPCs={this.setNumPCs}
             colors={this.state.colors}
-            displayAllowed={this.state.pcs[0]}
             loading={this.state.loading.pca}
           />
 

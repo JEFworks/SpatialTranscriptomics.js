@@ -43,7 +43,7 @@ const Biplot = (eigenvectors, getColor, displayAllowed) => {
   return (
     <div
       style={{
-        height: "300px",
+        height: "400px",
         width: "100%",
         paddingLeft: "15px",
         paddingRight: "15px",
@@ -51,9 +51,9 @@ const Biplot = (eigenvectors, getColor, displayAllowed) => {
       }}
     >
       <Paper
+        className="biplot"
         style={{
           padding: "15px 20px 40px 15px",
-          width: "420px",
           height: "100%",
           backgroundColor: "transparent",
         }}
@@ -94,7 +94,7 @@ const ScreePlot = (eigenvalues, numPCs, displayAllowed) => {
   return (
     <div
       style={{
-        height: "300px",
+        height: "400px",
         width: "100%",
         paddingLeft: "15px",
         paddingRight: "15px",
@@ -172,7 +172,8 @@ class PCAWrapper extends Component {
   render() {
     const { selectNumPCs, getColor } = this;
     const { numPCs } = this.state;
-    const { eigenvectors, eigenvalues, displayAllowed, loading } = this.props;
+    const { eigenvectors, eigenvalues, loading } = this.props;
+    const displayAllowed = eigenvectors[0] != null;
 
     return (
       <>

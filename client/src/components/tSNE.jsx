@@ -43,16 +43,15 @@ const Plot = (data, getColor, displayAllowed) => {
     <div
       style={{
         height: "450px",
-        width: "800px",
         paddingLeft: "15px",
         paddingRight: "15px",
         paddingBottom: "50px",
       }}
     >
       <Paper
+        className="tsne-plot"
         style={{
           padding: "15px 15px 15px 15px",
-          width: "100%",
           height: "100%",
           backgroundColor: "transparent",
         }}
