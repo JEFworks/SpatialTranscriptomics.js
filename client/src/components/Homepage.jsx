@@ -75,8 +75,9 @@ class Homepage extends Component {
 
   componentDidMount() {
     const urlParams = new URLSearchParams(window.location.search);
-    this.setState({ uuid: urlParams.get("session") });
-    this.loadEverything();
+    this.setState({ uuid: urlParams.get("session") }, () => {
+      this.loadEverything();
+    });
   }
 
   // load data into the React state
@@ -355,18 +356,25 @@ class Homepage extends Component {
   }
 
   setNumPCs(num) {
-    this.filterPCs(num, this.state.pcs);
+    const { loading } = this.state;
+    loading.pca = true;
+    this.setState({ loading }, () => {
+      this.filterPCs(num);
+    });
   }
 
-  filterPCs(num, pcs) {
+  filterPCs(num) {
+    const { pcs, loading } = this.state;
     if (pcs == null) {
       return;
     }
+
     const filteredPCs = [];
     pcs.forEach((pc) => {
       filteredPCs.push(pc.slice(0, num));
     });
-    this.setState({ filteredPCs });
+    loading.pca = false;
+    this.setState({ filteredPCs, loading });
     if (this.state.colorOption === "cluster") {
       this.getColorsByClusters(filteredPCs, this.state.k);
     }
@@ -386,13 +394,15 @@ class Homepage extends Component {
     pca_WorkerInstance.addEventListener("message", (message) => {
       if (message.data.eigenvectors && count < 1) {
         const pca = message.data;
-        this.filterPCs(num, pca.eigenvectors);
-        this.setState({
-          pcs: pca.eigenvectors,
-          eigenvalues: pca.eigenvalues,
-        });
-        loading.pca = false;
-        this.setState({ loading });
+        this.setState(
+          {
+            pcs: pca.eigenvectors,
+            eigenvalues: pca.eigenvalues,
+          },
+          () => {
+            this.filterPCs(num);
+          }
+        );
         count++;
       }
     });
@@ -462,8 +472,7 @@ class Homepage extends Component {
       if (message.data.colors && count < 1) {
         const result = message.data;
         loading.kmeans = false;
-        this.setState({ loading });
-        this.setState({ colors: result.colors });
+        this.setState({ loading, colors: result.colors });
         count++;
       }
     });
