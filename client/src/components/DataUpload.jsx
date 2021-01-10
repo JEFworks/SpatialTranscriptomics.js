@@ -239,14 +239,13 @@ class DataUpload extends Component {
             style={{
               marginLeft: "20px",
               marginTop: "12px",
-              marginBottom: "10px",
               width: "400px",
             }}
             in
-            timeout={500}
+            timeout={1500}
           >
             <Alert
-              severity="error"
+              severity={error.length > 0 ? "error" : "none"}
               style={{
                 textOverflow: "ellipsis",
                 overflowY: "hidden",
@@ -259,7 +258,7 @@ class DataUpload extends Component {
         </div>
 
         <Typography
-          style={{ marginBottom: "0px", fontWeight: 400, color: paragraph }}
+          style={{ marginTop: "10px", fontWeight: 400, color: paragraph }}
           variant="body1"
         >
           Enter description here.
