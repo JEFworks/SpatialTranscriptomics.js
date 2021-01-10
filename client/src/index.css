@@ -38,12 +38,16 @@ code {
 }
 
 .tsne-plot {
-  width: 800px;
+  width: 600px;
 }
 
-@media only screen and (max-width: 970px) {
+@media only screen and (max-width: 950px) {
   .QC-flex {
     display: grid;
+  }
+
+  .tsne-plot {
+    width: 420px;
   }
 }
 

@@ -50,9 +50,9 @@ app.get("/api/", (_req, res) => {
 app.post("/api/upload/:uuid", function (req, res) {
   upload(req, res, function (err) {
     if (err instanceof multer.MulterError) {
-      return res.status(500).json(err);
+      return res.status(500).json("Files could not be uploaded.");
     } else if (err) {
-      return res.status(500).json(err);
+      return res.status(500).json("Files could not be uploaded.");
     }
     return res.status(200).send(req.file);
   });
@@ -158,11 +158,7 @@ app.get("/api/matrix/:uuid/:count/:numBatches", function (req, res) {
             })
           );
         } else {
-          res
-            .status(400)
-            .send(
-              "GET request unsuccessful due to improperly formatted .mtx file.\n"
-            );
+          res.status(400).send("Matrix file is not properly formatted.\n");
         }
       })
   );
@@ -184,7 +180,7 @@ app.get("/api/features/:uuid", function (req, res) {
 
   const instream = fs.createReadStream(filePath);
   instream.on("error", function () {
-    res.status(400).send("Features tsv file was not found.\n");
+    res.status(400).send("Features file was not found.\n");
     return 0;
   });
 
@@ -209,11 +205,7 @@ app.get("/api/features/:uuid", function (req, res) {
         if (array.length > 0 && !exit) {
           res.json(JSON.stringify(array));
         } else {
-          res
-            .status(400)
-            .send(
-              "GET request unsuccessful due to improperly formatted features.tsv file.\n"
-            );
+          res.status(400).send("Features file is not properly formatted.\n");
         }
       })
   );
@@ -235,7 +227,7 @@ app.get("/api/barcodes/:uuid", function (req, res) {
 
   const instream = fs.createReadStream(filePath);
   instream.on("error", function () {
-    res.status(400).send("Barcodes tsv file was not found.\n");
+    res.status(400).send("Barcodes file was not found.\n");
     return 0;
   });
 
@@ -252,9 +244,7 @@ app.get("/api/barcodes/:uuid", function (req, res) {
         if (array.length > 0) {
           res.json(JSON.stringify(array));
         } else {
-          res
-            .status(400)
-            .send("GET request unsuccessful due to empty barcodes.tsv file.\n");
+          res.status(400).send("Barcodes file is not properly formatted.\n");
         }
       })
   );
@@ -276,7 +266,7 @@ app.get("/api/pixels/:uuid", function (req, res) {
 
   const instream = fs.createReadStream(filePath);
   instream.on("error", function () {
-    res.status(400).send("Positions csv file was not found.\n");
+    res.status(400).send("Tissue spatial positions file was not found.\n");
     return 0;
   });
 
@@ -289,6 +279,7 @@ app.get("/api/pixels/:uuid", function (req, res) {
         if (!exit) {
           let delimited = line.split(",");
           if (delimited.length == 1) delimited = delimited[0].split("\t");
+          if (delimited.length == 1) delimited = delimited[0].split(" ");
           if (delimited.length >= 3) {
             const barcode = delimited[0].trim();
             const x = delimited[delimited.length - 2].trim();
@@ -309,9 +300,7 @@ app.get("/api/pixels/:uuid", function (req, res) {
         } else {
           res
             .status(400)
-            .send(
-              "GET request unsuccessful due to poorly formatted positions.csv file.\n"
-            );
+            .send("Tissue spatial positions file is not properly formatted.\n");
         }
       })
   );

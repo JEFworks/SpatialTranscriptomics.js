@@ -52,6 +52,7 @@ class Homepage extends Component {
     k: 10,
     colorOption: "gene",
     loading: { upload: true, pca: false, tSNE: false, kmeans: false },
+    errors: [],
   }; // remember to update in resetState() too
 
   // for coloring
@@ -80,12 +81,21 @@ class Homepage extends Component {
     });
   }
 
+  reportError(error) {
+    if (error.response) {
+      const { loading, errors } = this.state;
+      loading.upload = false;
+      errors.push(error.response.data);
+      this.setState({ loading, errors });
+    }
+  }
+
   // load data into the React state
   async loadEverything() {
     await this.loadFeatures();
     await this.loadBarcodes();
     await this.loadMatrix().catch((error) => {
-      console.log(error);
+      this.reportError(error);
     });
   }
 
@@ -116,6 +126,7 @@ class Homepage extends Component {
       k: 10,
       colorOption: "gene",
       loading: { upload: false, pca: false, tSNE: false, kmeans: false },
+      errors: [],
     });
   }
 
@@ -188,7 +199,9 @@ class Homepage extends Component {
         .then((_res) => {
           this.loadEverything();
         })
-        .catch(() => {});
+        .catch((error) => {
+          this.reportError(error);
+        });
     });
   }
 
@@ -200,7 +213,9 @@ class Homepage extends Component {
         const features = JSON.parse(response.data);
         this.setState({ features });
       })
-      .catch(() => {});
+      .catch((error) => {
+        this.reportError(error);
+      });
   }
 
   async loadBarcodes() {
@@ -209,10 +224,16 @@ class Homepage extends Component {
       .get(`${api}/barcodes/${uuid}`)
       .then((response) => {
         const barcodes = JSON.parse(response.data);
-        this.setState({ barcodes });
-        this.loadPixels(barcodes);
+        this.setState({ barcodes }, () => {
+          this.loadPixels(barcodes);
+        });
       })
-      .catch(() => {});
+      .catch((error) => {
+        this.reportError(error);
+        axios.get(`${api}/pixels/${uuid}`).catch((error) => {
+          this.reportError(error);
+        });
+      });
   }
 
   async loadPixels(barcodes) {
@@ -229,7 +250,9 @@ class Homepage extends Component {
         });
         this.setState({ barcodes });
       })
-      .catch(() => {});
+      .catch((error) => {
+        this.reportError(error);
+      });
   }
 
   async loadMatrix() {
@@ -365,6 +388,8 @@ class Homepage extends Component {
   filterPCs(num) {
     const { pcs, loading } = this.state;
     if (!pcs[0]) {
+      loading.pca = false;
+      this.setState({ loading });
       return;
     }
 
@@ -413,6 +438,7 @@ class Homepage extends Component {
     const { epsilon, perplexity, iterations } = tsneSettings;
     if (!filteredPCs[0] || filteredPCs[0].length < 1) {
       alert("Please run PCA first.");
+      return;
     }
 
     loading.tSNE = true;
@@ -483,6 +509,12 @@ class Homepage extends Component {
   }
 
   render() {
+    const { errors } = this.state;
+    let errorMsg = "";
+    for (let i = 0; i < errors.length; i++) {
+      errorMsg += errors[i];
+    }
+
     return (
       <>
         <div style={{ marginBottom: "40px" }}>
@@ -501,6 +533,7 @@ class Homepage extends Component {
             pixelsFileHandler={this.pixelsFileHandler}
             uploadFiles={this.uploadFiles}
             files={this.state.files}
+            error={errorMsg}
           />
 
           <QualityControl
