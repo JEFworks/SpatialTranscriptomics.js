@@ -8,7 +8,7 @@ const multer = require("multer");
 const shell = require("shelljs");
 
 const corsOptions = {
-  origin: ["http://localhost:8000", "https://stjs.me"],
+  origin: ["https://stjs.me"],
   optionsSuccessStatus: 200, // For legacy browser support
 };
 
