@@ -136,21 +136,20 @@ class QualityControl extends Component {
   }
 
   run() {
-    const { props } = this;
+    const { handleFilter } = this.props;
     const { minRowSum, minColSum } = this.state;
     if (this.state.status0) {
-      props.handleFilter(minRowSum, null);
+      handleFilter(minRowSum, null);
     }
     if (this.state.status1) {
-      props.handleFilter(null, minColSum);
+      handleFilter(null, minColSum);
     }
     this.setState({ status0: false, status1: false });
   }
 
   render() {
-    const { props, state } = this;
-    const { rowsums, colsums, loading } = props;
-    const { minRowSum, minColSum } = state;
+    const { rowsums, colsums, loading } = this.props;
+    const { minRowSum, minColSum } = this.state;
     const thresholds = { minRowSum: minRowSum, minColSum: minColSum };
 
     return (

@@ -133,7 +133,6 @@ const TypedInput = (selectNumPCs) => {
 
 class PCAWrapper extends Component {
   state = {
-    colors: [],
     numPCs: 10,
     updatedNumPCs: 10,
   };
@@ -149,18 +148,18 @@ class PCAWrapper extends Component {
   }
 
   run() {
-    const { computePCA, colors } = this.props;
+    const { computePCA } = this.props;
     const { updatedNumPCs } = this.state;
 
     computePCA(updatedNumPCs);
-    this.setState({ colors, numPCs: updatedNumPCs });
+    this.setState({ numPCs: updatedNumPCs });
   }
 
   applySettings() {
-    const { setNumPCs, colors } = this.props;
+    const { setNumPCs } = this.props;
     const { updatedNumPCs } = this.state;
     setNumPCs(updatedNumPCs);
-    this.setState({ colors, numPCs: updatedNumPCs });
+    this.setState({ numPCs: updatedNumPCs });
   }
 
   selectNumPCs(event) {
@@ -173,7 +172,7 @@ class PCAWrapper extends Component {
   render() {
     const { selectNumPCs, getColor } = this;
     const { numPCs } = this.state;
-    const { eigenvectors, eigenvalues, displayAllowed } = this.props;
+    const { eigenvectors, eigenvalues, displayAllowed, loading } = this.props;
 
     return (
       <>
@@ -192,7 +191,7 @@ class PCAWrapper extends Component {
 
         <div style={{ display: "flex" }}>
           {TypedInput(selectNumPCs)}
-          {this.props.loading && (
+          {loading && (
             <CircularProgress
               disableShrink
               size={50}

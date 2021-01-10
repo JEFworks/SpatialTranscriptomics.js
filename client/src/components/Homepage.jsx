@@ -182,13 +182,14 @@ class Homepage extends Component {
 
     this.resetState();
     loading.upload = true;
-    this.setState({ uuid, loading });
-    axios
-      .post(`${api}/upload/${uuid}`, data, {})
-      .then((_res) => {
-        this.loadEverything();
-      })
-      .catch(() => {});
+    this.setState({ uuid, loading }, () => {
+      axios
+        .post(`${api}/upload/${uuid}`, data, {})
+        .then((_res) => {
+          this.loadEverything();
+        })
+        .catch(() => {});
+    });
   }
 
   async loadFeatures() {
@@ -285,22 +286,23 @@ class Homepage extends Component {
   }
 
   handleFilter(minRowSum, minColSum) {
-    const { matrix } = this.state;
-    if (!matrix[0]) {
-      return;
-    }
-
     const {
+      matrix,
       thresholds,
       barcodes,
       feature,
       adjustedFeatures,
       loading,
+      rowsums,
+      colsums,
     } = this.state;
-    let { rowsums, colsums } = this.state;
+    if (!matrix[0]) {
+      return;
+    }
 
     loading.upload = true;
     this.setState({ loading });
+
     let count = 0;
     filter_WorkerInstance.filter(
       matrix,
@@ -312,13 +314,11 @@ class Homepage extends Component {
       minRowSum,
       minColSum
     );
+
     filter_WorkerInstance.addEventListener("message", (message) => {
       if (message.data.filteredData && count < 1) {
         const data = message.data;
-
         const { filteredData } = data;
-        rowsums = data.rowsums;
-        colsums = data.colsums;
 
         const colors = this.getColorsByGene(
           filteredData.matrix,
@@ -327,14 +327,13 @@ class Homepage extends Component {
         );
 
         loading.upload = false;
-
         this.setState({
           filteredMatrix: filteredData.matrix,
           filteredFeatures: filteredData.features,
           filteredBarcodes: filteredData.barcodes,
           thresholds,
-          rowsums,
-          colsums,
+          rowsums: data.rowsums,
+          colsums: data.colsums,
           pcs: [],
           filteredPCs: [],
           colorOption: "gene",
@@ -365,7 +364,7 @@ class Homepage extends Component {
 
   filterPCs(num) {
     const { pcs, loading } = this.state;
-    if (pcs == null) {
+    if (!pcs[0]) {
       return;
     }
 
@@ -373,6 +372,7 @@ class Homepage extends Component {
     pcs.forEach((pc) => {
       filteredPCs.push(pc.slice(0, num));
     });
+
     loading.pca = false;
     this.setState({ filteredPCs, loading });
     if (this.state.colorOption === "cluster") {
@@ -413,7 +413,6 @@ class Homepage extends Component {
     const { epsilon, perplexity, iterations } = tsneSettings;
     if (!filteredPCs[0] || filteredPCs[0].length < 1) {
       alert("Please run PCA first.");
-      return [];
     }
 
     loading.tSNE = true;
@@ -443,10 +442,14 @@ class Homepage extends Component {
     const colors = [];
     const gene = this.getGene(matrix, features, featureName);
 
-    if (gene) {
+    if (gene != null) {
       const { max, min } = MinMaxStats(gene);
       gene.forEach((cell) => {
         colors.push(GetRGB(MinMaxNormalize(cell, min, max)));
+      });
+    } else {
+      matrix[0].forEach(() => {
+        colors.push("black");
       });
     }
 
@@ -466,6 +469,7 @@ class Homepage extends Component {
     const { loading } = this.state;
     loading.kmeans = true;
     this.setState({ loading });
+
     kmeans_WorkerInstance.performKMeans(pcs, num);
     let count = 0;
     kmeans_WorkerInstance.addEventListener("message", (message) => {
