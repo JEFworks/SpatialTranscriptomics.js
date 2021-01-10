@@ -97,14 +97,14 @@ class tSNEWrapper extends Component {
       perplexity: 30,
       iterations: 500,
     },
+    pcs: [],
   };
 
   getColor = this.getColor.bind(this);
   changeSettings = this.changeSettings.bind(this);
 
   getColor(node) {
-    if (node.index) return this.props.colors[node.index];
-    return "blue";
+    return node.index ? this.props.colors[node.index] : "blue";
   }
 
   changeSettings(event, type) {
@@ -123,9 +123,9 @@ class tSNEWrapper extends Component {
   }
 
   run() {
-    const { computeTSNE } = this.props;
+    const { computeTSNE, pcs } = this.props;
     const data = computeTSNE(this.state.tsneSettings);
-    this.setState({ data });
+    this.setState({ data, pcs });
   }
 
   render() {
@@ -163,7 +163,11 @@ class tSNEWrapper extends Component {
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>
           <div className="PC-flex">
-            {Plot(this.state.data, this.getColor, this.props.displayAllowed)}
+            {Plot(
+              this.state.data,
+              this.getColor,
+              this.state.pcs === this.props.pcs
+            )}
           </div>
           <div style={{ width: "50%" }}></div>
         </div>

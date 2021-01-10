@@ -1,5 +1,7 @@
 const GetRGB = (val) => {
-  if (val == null) return "transparent";
+  if (val == null) {
+    return "transparent";
+  }
   const colors = [
     [0, 0, 255],
     [255, 255, 255],

@@ -1,5 +1,7 @@
 const rowSums = (matrix, threshold) => {
-  if (!matrix[0]) return {};
+  if (!matrix[0]) {
+    return {};
+  }
   const sums = new Array(20).fill(0);
   const badGenes = [];
 
@@ -10,7 +12,9 @@ const rowSums = (matrix, threshold) => {
 
     const log = Math.log10(cellCount + 1);
     sums[Math.floor(log * 2)]++;
-    if (log < threshold) badGenes.push(index);
+    if (log < threshold) {
+      badGenes.push(index);
+    }
   });
 
   const obj = [];

@@ -6,8 +6,7 @@ const blue = "#80d8ff";
 const getColor = (bar) => bar.data.color;
 
 const setColor = (val, min) => {
-  if (val < min) return red;
-  else return blue;
+  return val < min ? red : blue;
 };
 
 const markers = (min, loading) => [

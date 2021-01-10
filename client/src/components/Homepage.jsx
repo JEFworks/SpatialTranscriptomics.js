@@ -46,11 +46,15 @@ class Homepage extends Component {
     colsums: [],
     colors: [],
     pcs: [],
-    numPCs: 10,
+    filteredPCs: [],
     feature: "camk2n1",
+    k: 10,
+    colorOption: "gene",
   }; // remember to update in resetState() too
 
+  // for coloring
   setFeature = this.setFeature.bind(this);
+  setK = this.setK.bind(this);
 
   // file handlers
   matrixFileHandler = this.matrixFileHandler.bind(this);
@@ -103,8 +107,10 @@ class Homepage extends Component {
       colsums: [],
       colors: [],
       pcs: [],
-      numPCs: 10,
+      filteredPCs: [],
       feature: "camk2n1",
+      k: 10,
+      colorOption: "gene",
     });
   }
 
@@ -210,7 +216,9 @@ class Homepage extends Component {
         const pixels = JSON.parse(response.data);
         pixels.forEach((pixel) => {
           const index = barcodes.indexOf(pixel.barcode);
-          if (index !== -1) barcodes[index] = pixel;
+          if (index !== -1) {
+            barcodes[index] = pixel;
+          }
         });
         this.setState({ barcodes });
       })
@@ -247,7 +255,9 @@ class Homepage extends Component {
                 for (let cell of gene) {
                   const feature = this.state.features[index];
                   if (cell > 0) {
-                    if (feature) adjustedFeatures.push(feature.toLowerCase());
+                    if (feature) {
+                      adjustedFeatures.push(feature.toLowerCase());
+                    }
                     return true;
                   }
                 }
@@ -270,8 +280,10 @@ class Homepage extends Component {
 
   handleFilter(minRowSum, minColSum) {
     const { matrix } = this.state;
-    if (!matrix[0]) return;
-    const { thresholds, adjustedFeatures, barcodes } = this.state;
+    if (!matrix[0]) {
+      return;
+    }
+    const { thresholds, adjustedFeatures, barcodes, feature } = this.state;
     let { rowsums, colsums } = this.state;
 
     if (minRowSum !== null) {
@@ -290,6 +302,11 @@ class Homepage extends Component {
       rowsums.badGenes,
       colsums.badCells
     );
+    const colors = this.getColorsByGene(
+      filteredData.matrix,
+      filteredData.features,
+      feature
+    );
 
     this.setState({
       filteredMatrix: filteredData.matrix,
@@ -299,78 +316,38 @@ class Homepage extends Component {
       rowsums,
       colsums,
       pcs: [],
+      filteredPCs: [],
+      colorOption: "gene",
+      colors,
     });
-  }
-
-  getGene(name) {
-    const { filteredMatrix, filteredFeatures } = this.state;
-    return filteredMatrix[filteredFeatures.indexOf(name)];
-  }
-
-  getColorsByGene() {
-    const colors = [];
-    const gene = this.getGene(this.state.feature);
-
-    if (gene) {
-      const { max, min } = MinMaxStats(gene);
-      gene.forEach((cell) => {
-        colors.push(GetRGB(MinMaxNormalize(cell, min, max)));
-      });
-    }
-
-    return colors;
-  }
-
-  performKMeans(num) {
-    const kmean = new KMeans({ k: num });
-    const { pcs } = this.state;
-
-    if (pcs.length > 0) {
-      kmean.fit(pcs);
-      const clusters = kmean.toJSON().clusters;
-      return clusters;
-    }
-    return null;
-  }
-
-  getColorsByClusters(num) {
-    const clusters = this.performKMeans(num);
-
-    const hashmap = new Map();
-    const { pcs } = this.state;
-    pcs.forEach((cell, index) => {
-      hashmap.set(cell, index);
-    });
-
-    const colorsMap = new Map();
-    let i = 0;
-    if (clusters != null) {
-      clusters.forEach((cluster) => {
-        cluster.forEach((cell) => {
-          const index = hashmap.get(cell);
-          colorsMap.set(index, palette[i % palette.length]);
-        });
-        i++;
-      });
-    }
-
-    const sorted = new Map(
-      [...colorsMap].sort((a, b) => parseInt(a) - parseInt(b))
-    );
-    return [...sorted.values()];
   }
 
   setFeature(name) {
-    this.setState({ feature: name });
+    const colors = this.getColorsByGene(
+      this.state.filteredMatrix,
+      this.state.filteredFeatures,
+      name
+    );
+    this.setState({ feature: name, colorOption: "gene", colors });
   }
 
   setNumPCs(num) {
-    this.setState({ numPCs: num });
+    const filteredPCs = [];
+    this.state.pcs.forEach((pc) => {
+      filteredPCs.push(pc.slice(0, num));
+    });
+    this.setState({ filteredPCs });
+    if (this.state.colorOption === "cluster") {
+      const colors = this.getColorsByClusters(filteredPCs, this.state.k);
+      this.setState({ colors });
+    }
   }
 
   computePCA() {
     const m = this.state.filteredMatrix.slice();
-    if (!m[0] || m[0].length < 1) return {};
+    if (!m[0] || m[0].length < 1) {
+      return {};
+    }
 
     const matrix = cpmNormalize(m);
 
@@ -393,19 +370,14 @@ class Homepage extends Component {
   }
 
   computeTSNE(tsneSettings) {
-    const { pcs, numPCs } = this.state;
+    const { filteredPCs } = this.state;
     const { epsilon, perplexity, iterations } = tsneSettings;
-    if (!pcs[0] || pcs[0].length < 1) {
+    if (!filteredPCs[0] || filteredPCs[0].length < 1) {
       alert("Please run PCA first.");
       return [];
     }
 
-    const filteredPCs = [];
-    pcs.forEach((pc) => {
-      filteredPCs.push(pc.slice(0, numPCs));
-    });
-    let dists = euclideanDists(filteredPCs);
-    dists = normalizeDists(dists);
+    const dists = normalizeDists(euclideanDists(filteredPCs));
 
     const opt = {};
     opt.epsilon = epsilon; // epsilon is learning rate (10 = default)
@@ -415,22 +387,83 @@ class Homepage extends Component {
     const tsne = new tsnejs.tSNE(opt); // create a tSNE instance
     tsne.initDataDist(dists);
 
-    for (let k = 0; k < iterations; k++) tsne.step(); // default 500 iterations
+    for (let k = 0; k < iterations; k++) {
+      tsne.step(); // default 500 iterations
+    }
     const Y = tsne.getSolution(); // Y is an array of 2-D points that you can plot
     return Y;
   }
 
+  getGene(matrix, features, name) {
+    return matrix[features.indexOf(name)];
+  }
+
+  getColorsByGene(matrix, features, featureName) {
+    const colors = [];
+    const gene = this.getGene(matrix, features, featureName);
+
+    if (gene) {
+      const { max, min } = MinMaxStats(gene);
+      gene.forEach((cell) => {
+        colors.push(GetRGB(MinMaxNormalize(cell, min, max)));
+      });
+    }
+
+    return colors;
+  }
+
+  setK(k) {
+    const colors = this.getColorsByClusters(this.state.filteredPCs, k);
+    this.setState({ k });
+    if (this.state.filteredPCs[0]) {
+      this.setState({ colorOption: "cluster", colors });
+    }
+  }
+
+  performKMeans(pcs, num) {
+    const kmean = new KMeans({ k: num });
+    if (pcs[0]) {
+      kmean.fit(pcs);
+      const clusters = kmean.toJSON().clusters;
+      return clusters;
+    }
+    alert("Please run PCA first.");
+    return null;
+  }
+
+  getColorsByClusters(pcs, num) {
+    const clusters = this.performKMeans(pcs, num);
+
+    const hashmap = new Map();
+    pcs.forEach((cell, index) => {
+      hashmap.set(cell, index);
+    });
+
+    const colorsMap = new Map();
+    let i = 0;
+    if (clusters != null) {
+      clusters.forEach((cluster) => {
+        cluster.forEach((cell) => {
+          const index = hashmap.get(cell);
+          colorsMap.set(index, palette[i % palette.length]);
+        });
+        i++;
+      });
+    }
+
+    const sorted = new Map(
+      [...colorsMap].sort((a, b) => parseInt(a) - parseInt(b))
+    );
+    return [...sorted.values()];
+  }
+
   render() {
-    const numCells = this.state.filteredMatrix[0]
-      ? this.state.filteredMatrix[0].length
-      : 0;
-    const geneColors = this.getColorsByGene();
-    const clusterColors = this.getColorsByClusters(10);
+    const { colors } = this.state;
 
     return (
       <>
         <div style={{ marginBottom: "40px" }}>
-          <Header setFeature={this.setFeature} />
+          <Header setFeature={this.setFeature} setK={this.setK} />
         </div>
 
         <div className="site-container">
@@ -454,23 +487,19 @@ class Homepage extends Component {
           <PCAWrapper
             computePCA={this.computePCA}
             setNumPCs={this.setNumPCs}
-            colors={geneColors}
+            colors={colors}
             displayAllowed={this.state.pcs[0]}
           />
 
           <div style={{ paddingTop: "20px" }}></div>
           <TSNEWrapper
             computeTSNE={this.computeTSNE}
-            colors={geneColors}
-            displayAllowed={this.state.pcs[0]}
+            colors={colors}
+            pcs={this.state.pcs}
           />
 
           <div style={{ paddingTop: "20px" }}></div>
-          <SpatialVis
-            barcodes={this.state.filteredBarcodes}
-            colors={clusterColors}
-            numCells={numCells}
-          />
+          <SpatialVis barcodes={this.state.filteredBarcodes} colors={colors} />
 
           <div style={{ paddingTop: "70px" }}></div>
         </div>

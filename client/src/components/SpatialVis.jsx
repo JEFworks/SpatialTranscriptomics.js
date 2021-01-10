@@ -183,13 +183,15 @@ class SpatialVis extends Component {
   }
 
   getPixels() {
-    const { barcodes, numCells } = this.props;
+    const { barcodes } = this.props;
     const pixels = [];
 
-    if (numCells > 0 && barcodes[0]) {
-      if (!barcodes[0].x || !barcodes[0].y) return [];
+    if (barcodes[0]) {
+      if (!barcodes[0].x || !barcodes[0].y) {
+        return [];
+      }
 
-      for (let i = 0; i < numCells; i++) {
+      for (let i = 0; i < barcodes.length; i++) {
         try {
           const { x, y } = barcodes[i];
           const {

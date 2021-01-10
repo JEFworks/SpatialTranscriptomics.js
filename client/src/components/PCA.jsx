@@ -141,15 +141,17 @@ class PCAWrapper extends Component {
   selectNumPCs = this.selectNumPCs.bind(this);
 
   getColor(node) {
-    if (node.index) return this.props.colors[node.index];
+    if (node.index) {
+      return this.props.colors[node.index];
+    }
     return "blue";
   }
 
-  run() {
+  async run() {
     const { setNumPCs, computePCA, colors } = this.props;
     const { updatedNumPCs } = this.state;
 
-    const data = computePCA();
+    const data = await computePCA();
     setNumPCs(updatedNumPCs);
     this.setState({ data, colors, numPCs: updatedNumPCs });
   }
@@ -163,8 +165,9 @@ class PCAWrapper extends Component {
 
   selectNumPCs(event) {
     const num = Number.parseInt(event.target.value);
-    if (!isNaN(num))
+    if (!isNaN(num)) {
       this.setState({ updatedNumPCs: num === 0 ? 1 : Math.min(num, 20) });
+    }
   }
 
   render() {

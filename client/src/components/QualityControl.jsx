@@ -8,8 +8,9 @@ const tertiary = "#90b4ce";
 
 const marks = (min, max) => {
   const list = [];
-  for (let i = min; i < max; i += 0.5)
+  for (let i = min; i < max; i += 0.5) {
     list.push({ value: i, label: i.toFixed(1) });
+  }
   return list;
 };
 
@@ -22,8 +23,12 @@ const Figure = (rowsums, colsums, thresholds, changeThreshold, type) => {
     minIndex = -1;
     maxIndex = sums.length;
     sums.forEach((datum, index) => {
-      if (datum.frequency > 0 && minIndex === -1) minIndex = index;
-      if (datum.frequency > 0) maxIndex = index;
+      if (datum.frequency > 0 && minIndex === -1) {
+        minIndex = index;
+      }
+      if (datum.frequency > 0) {
+        maxIndex = index;
+      }
     });
     minIndex = Math.max(0, minIndex - 1);
     maxIndex = Math.min(maxIndex + 2, sums.length);
@@ -115,15 +120,23 @@ class QualityControl extends Component {
   run = this.run.bind(this);
 
   changeThreshold(minRowSum, minColSum) {
-    if (minRowSum !== null) this.setState({ minRowSum, status0: true });
-    if (minColSum !== null) this.setState({ minColSum, status1: true });
+    if (minRowSum != null) {
+      this.setState({ minRowSum, status0: true });
+    }
+    if (minColSum != null) {
+      this.setState({ minColSum, status1: true });
+    }
   }
 
   run() {
     const { props } = this;
     const { minRowSum, minColSum } = this.state;
-    if (this.state.status0) props.handleFilter(minRowSum, null);
-    if (this.state.status1) props.handleFilter(null, minColSum);
+    if (this.state.status0) {
+      props.handleFilter(minRowSum, null);
+    }
+    if (this.state.status1) {
+      props.handleFilter(null, minColSum);
+    }
     this.setState({ status0: false, status1: false });
   }
 
