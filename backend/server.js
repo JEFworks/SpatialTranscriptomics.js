@@ -8,11 +8,7 @@ const multer = require("multer");
 const shell = require("shelljs");
 
 const corsOptions = {
-  origin: [
-    "https://arpansahoo.github.io",
-    "http://localhost:8000",
-    "https://stjs.me",
-  ],
+  origin: ["http://localhost:8000", "https://stjs.me"],
   optionsSuccessStatus: 200, // For legacy browser support
 };
 
@@ -20,7 +16,7 @@ app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-//app.options("*", cors());
+// app.options("*", cors());
 
 const fs = require("fs");
 const es = require("event-stream");
@@ -83,7 +79,7 @@ app.get("/api/matrix/:uuid/:count/:numBatches", function (req, res) {
 
   const instream = fs.createReadStream(filePath);
   instream.on("error", function () {
-    res.status(400).send(`Matrix file ${dir} was not found.\n`);
+    res.status(400).send(`Matrix file was not found.\n`);
     return 0;
   });
 

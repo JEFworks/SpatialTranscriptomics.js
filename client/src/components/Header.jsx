@@ -15,12 +15,12 @@ const primary = "#094067";
 
 const Title = (selectFeature, setFeature, feature, selectK, setK, k) => (
   <>
-    <Typography variant="h6" style={{ flexGrow: 0.03, fontWeight: 500 }}>
+    <Typography variant="h6" style={{ flexGrow: 0.04, fontWeight: 500 }}>
       <Link style={{ color: primary }} underline="none" href="/">
         ST.js
       </Link>
     </Typography>
-    <div style={{ flexGrow: 0.02, fontWeight: 500 }}>
+    <div style={{ flexGrow: 0.01, fontWeight: 500 }}>
       <TextField
         style={{ width: "100px" }}
         helperText="Gene name"
@@ -28,7 +28,7 @@ const Title = (selectFeature, setFeature, feature, selectK, setK, k) => (
         onChange={selectFeature}
       />
     </div>
-    <div style={{ flexGrow: 0.95, fontWeight: 500 }}>
+    <div style={{ flexGrow: 0.05, fontWeight: 500 }}>
       <Button
         variant="contained"
         size="small"
@@ -39,7 +39,7 @@ const Title = (selectFeature, setFeature, feature, selectK, setK, k) => (
         Update Colors
       </Button>
     </div>
-    <div style={{ flexGrow: 0.02, fontWeight: 500 }}>
+    <div style={{ flexGrow: 0.01, fontWeight: 500 }}>
       <TextField
         style={{ width: "100px" }}
         helperText="K Num"
@@ -47,7 +47,7 @@ const Title = (selectFeature, setFeature, feature, selectK, setK, k) => (
         onChange={selectK}
       />
     </div>
-    <div style={{ flexGrow: 0.95, fontWeight: 500 }}>
+    <div style={{ flexGrow: 0.89, fontWeight: 500 }}>
       <Button
         variant="contained"
         size="small"

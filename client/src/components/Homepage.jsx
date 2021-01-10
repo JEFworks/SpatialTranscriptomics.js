@@ -495,7 +495,7 @@ class Homepage extends Component {
           <TSNEWrapper
             computeTSNE={this.computeTSNE}
             colors={colors}
-            pcs={this.state.pcs}
+            pcs={this.state.filteredPCs}
           />
 
           <div style={{ paddingTop: "20px" }}></div>
