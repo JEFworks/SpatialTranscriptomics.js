@@ -4,7 +4,7 @@ Description here...
 
 ## Running the App
 
-You’ll need to have <b>Node<b> and <b>npm</b> installed on your local development machine.
+You’ll need to have <b>Node</b> and <b>npm</b> installed on your local development machine.
 
 To run the <b>backend server</b>, which runs on port 7000. Do the following. You can skip `npm i` if you have already downloaded the packages for the backend. The server will automatically reload if you make changes to the server (`backend/server.js`).
 
