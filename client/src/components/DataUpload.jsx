@@ -45,7 +45,7 @@ const getStepContent = (
       return (
         <div style={{ marginBottom: "10px" }}>
           <input
-            accept=".mtx"
+            accept=".mtx, .txt, .tsv"
             id="file-button1"
             type="file"
             onChange={matrixFileHandler}
@@ -57,7 +57,7 @@ const getStepContent = (
       return (
         <div style={{ marginBottom: "10px" }}>
           <input
-            accept=".tsv"
+            accept=".csv, .txt, .tsv"
             id="file-button1"
             type="file"
             onChange={featuresFileHandler}
@@ -69,7 +69,7 @@ const getStepContent = (
       return (
         <div style={{ marginBottom: "10px" }}>
           <input
-            accept=".tsv"
+            accept=".csv, .txt, .tsv"
             id="file-button1"
             type="file"
             onChange={barcodesFileHandler}
@@ -81,7 +81,7 @@ const getStepContent = (
       return (
         <div style={{ marginBottom: "10px" }}>
           <input
-            accept=".csv"
+            accept=".csv, .txt, .tsv"
             id="file-button1"
             type="file"
             onChange={pixelsFileHandler}
@@ -235,26 +235,28 @@ class DataUpload extends Component {
           >
             Data Upload
           </Typography>
-          <Fade
-            style={{
-              marginLeft: "20px",
-              marginTop: "12px",
-              width: "400px",
-            }}
-            in
-            timeout={1500}
-          >
-            <Alert
-              severity={error.length > 0 ? "error" : "none"}
+          {error.length > 0 && (
+            <Fade
               style={{
-                textOverflow: "ellipsis",
-                overflowY: "hidden",
-                whiteSpace: "nowrap",
+                marginLeft: "20px",
+                marginTop: "12px",
+                width: "400px",
               }}
+              in
+              timeout={1500}
             >
-              {error}
-            </Alert>
-          </Fade>
+              <Alert
+                severity="error"
+                style={{
+                  textOverflow: "ellipsis",
+                  overflowY: "hidden",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {error}
+              </Alert>
+            </Fade>
+          )}
         </div>
 
         <Typography

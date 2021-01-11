@@ -100,7 +100,10 @@ app.get("/api/matrix/:uuid/:count/:numBatches", function (req, res) {
       .mapSync(function (line) {
         if (line.trim().charAt(0) !== "%" && !exit) {
           if (!indexLineReached) {
-            const delimited = line.split(" ");
+            let delimited = line.split(" ");
+            if (delimited.length == 1) delimited = delimited[0].split("\t");
+            if (delimited.length == 1) delimited = delimited[0].split(",");
+
             rows = Number.parseInt(delimited[0]);
             cols = Number.parseInt(delimited[1]);
             if (
@@ -121,7 +124,10 @@ app.get("/api/matrix/:uuid/:count/:numBatches", function (req, res) {
               indexLineReached = true;
             }
           } else {
-            const delimited = line.split(" ");
+            let delimited = line.split(" ");
+            if (delimited.length == 1) delimited = delimited[0].split("\t");
+            if (delimited.length == 1) delimited = delimited[0].split(",");
+
             const i = Number.parseInt(delimited[0]);
             const j = Number.parseInt(delimited[1]);
             const value = Number.parseFloat(delimited[2]);
@@ -191,7 +197,10 @@ app.get("/api/features/:uuid", function (req, res) {
     es
       .mapSync(function (line) {
         if (!exit) {
-          const delimited = line.split("\t");
+          let delimited = line.split("\t");
+          if (delimited.length == 1) delimited = delimited[0].split(" ");
+          if (delimited.length == 1) delimited = delimited[0].split(",");
+
           let geneName = delimited[1];
           if (geneName && geneName.length > 0) {
             array.push(geneName);
@@ -236,7 +245,10 @@ app.get("/api/barcodes/:uuid", function (req, res) {
   instream.pipe(es.split()).pipe(
     es
       .mapSync(function (line) {
-        const delimited = line.split("\t");
+        let delimited = line.split("\t");
+        if (delimited.length == 1) delimited = delimited[0].split(" ");
+        if (delimited.length == 1) delimited = delimited[0].split(",");
+
         const str = delimited[delimited.length - 1].trim();
         if (str.length > 0) array.push(str);
       })

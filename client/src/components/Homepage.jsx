@@ -49,6 +49,7 @@ class Homepage extends Component {
     eigenvalues: [],
     filteredPCs: [],
     feature: "camk2n1",
+    tsneSolution: [],
     k: 10,
     colorOption: "gene",
     loading: { upload: true, pca: false, tSNE: false, kmeans: false },
@@ -123,6 +124,7 @@ class Homepage extends Component {
       eigenvalues: [],
       filteredPCs: [],
       feature: "camk2n1",
+      tsneSolution: [],
       k: 10,
       colorOption: "gene",
       loading: { upload: false, pca: false, tSNE: false, kmeans: false },
@@ -137,7 +139,7 @@ class Homepage extends Component {
     const copy = file.slice(0, file.size, file.type);
     const newFile = new File([copy], "matrix.mtx", { type: file.type });
     files.matrix = newFile;
-    this.setState({ files });
+    this.setState({ files, errors: [] });
   }
 
   // save features file to state
@@ -442,7 +444,7 @@ class Homepage extends Component {
     }
 
     loading.tSNE = true;
-    this.setState({ loading });
+    this.setState({ loading, tsneSolution: [] });
     const opt = {};
     opt.epsilon = epsilon; // epsilon is learning rate (10 = default)
     opt.perplexity = perplexity; // roughly how many neighbors each point influences (30 = default)
