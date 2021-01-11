@@ -8,13 +8,15 @@ import {
   FormControlLabel,
   Checkbox,
   Button,
+  CircularProgress,
 } from "@material-ui/core";
 
 const primary = "#094067";
 const paragraph = "#5f6c7b";
 const tertiary = "#90b4ce";
+const blue = "#80d8ff";
 
-const LeafletWrapper = (pixels, colors, opacity) => {
+const LeafletWrapper = (pixels, colors, opacity, imageLink) => {
   const bounds = [
     [0, 0],
     [1921, 2000],
@@ -27,7 +29,7 @@ const LeafletWrapper = (pixels, colors, opacity) => {
       bounds={bounds}
       style={{ height: "500px", width: "100%" }}
     >
-      <ImageOverlay bounds={bounds} url="/images/tissue_image.png" />
+      <ImageOverlay bounds={bounds} url={imageLink} />
       {pixels.length === colors.length &&
         pixels.map((pixel, index) => {
           return (
@@ -231,7 +233,7 @@ class SpatialVis extends Component {
       xyFlipped,
       opacity,
     } = this.state;
-    const { colors } = this.props;
+    const { colors, imageLink } = this.props;
 
     return (
       <>
@@ -241,6 +243,7 @@ class SpatialVis extends Component {
         >
           Spatial Visualization
         </Typography>
+
         <Typography
           style={{ marginBottom: "0px", fontWeight: 400, color: paragraph }}
           variant="body1"
@@ -248,15 +251,28 @@ class SpatialVis extends Component {
           Enter description here.
         </Typography>
 
-        {TypedInput(changeDeltaX, changeDeltaY, changeScale, changeOpacity)}
-        {CheckboxInput(
-          horizontalFlipped,
-          flipHorizontal,
-          verticalFlipped,
-          flipVertical,
-          xyFlipped,
-          flipXY
-        )}
+        <div style={{ display: "flex" }}>
+          <div>
+            {TypedInput(changeDeltaX, changeDeltaY, changeScale, changeOpacity)}
+            {CheckboxInput(
+              horizontalFlipped,
+              flipHorizontal,
+              verticalFlipped,
+              flipVertical,
+              xyFlipped,
+              flipXY
+            )}
+          </div>
+
+          {this.props.loading && (
+            <CircularProgress
+              disableShrink
+              size={50}
+              thickness={5}
+              style={{ color: blue, marginTop: "5px", marginLeft: "40px" }}
+            />
+          )}
+        </div>
 
         <div style={{ paddingTop: "10px" }}></div>
         <Button
@@ -270,7 +286,7 @@ class SpatialVis extends Component {
         </Button>
         <div style={{ paddingTop: "20px" }}></div>
 
-        {LeafletWrapper(pixels, colors, opacity)}
+        {LeafletWrapper(pixels, colors, opacity, imageLink)}
       </>
     );
   }

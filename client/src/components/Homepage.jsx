@@ -33,6 +33,7 @@ class Homepage extends Component {
       barcodes: null,
       features: null,
       pixels: null,
+      image: null,
     },
     matrix: [],
     filteredMatrix: [],
@@ -52,8 +53,15 @@ class Homepage extends Component {
     tsneSolution: [],
     k: 10,
     colorOption: "gene",
-    loading: { upload: true, pca: false, tSNE: false, kmeans: false },
+    loading: {
+      upload: true,
+      pca: false,
+      tSNE: false,
+      kmeans: false,
+      image: false,
+    },
     errors: [],
+    imageLink: "",
   }; // remember to update in resetState() too
 
   // for coloring
@@ -65,6 +73,7 @@ class Homepage extends Component {
   barcodesFileHandler = this.barcodesFileHandler.bind(this);
   pixelsFileHandler = this.pixelsFileHandler.bind(this);
   featuresFileHandler = this.featuresFileHandler.bind(this);
+  imageFileHandler = this.imageFileHandler.bind(this);
   uploadFiles = this.uploadFiles.bind(this);
 
   // quality control functions
@@ -77,7 +86,12 @@ class Homepage extends Component {
 
   componentDidMount() {
     const urlParams = new URLSearchParams(window.location.search);
-    this.setState({ uuid: urlParams.get("session") }, () => {
+    const uuid = urlParams.get("session");
+    const url = `${api}/static/${uuid}/tissue_image.png`;
+    axios.get(url).catch(() => {
+      this.state.errors.push("Tissue image file was not found.\n");
+    });
+    this.setState({ uuid, imageLink: url }, () => {
       this.loadEverything();
     });
   }
@@ -108,6 +122,7 @@ class Homepage extends Component {
         barcodes: null,
         features: null,
         pixels: null,
+        image: null,
       },
       matrix: [],
       filteredMatrix: [],
@@ -127,8 +142,15 @@ class Homepage extends Component {
       tsneSolution: [],
       k: 10,
       colorOption: "gene",
-      loading: { upload: false, pca: false, tSNE: false, kmeans: false },
+      loading: {
+        upload: false,
+        pca: false,
+        tSNE: false,
+        kmeans: false,
+        image: false,
+      },
       errors: [],
+      imageLink: "",
     });
   }
 
@@ -162,7 +184,7 @@ class Homepage extends Component {
     this.setState({ files });
   }
 
-  // save tissue_positions files to state
+  // save tissue_positions file to state
   pixelsFileHandler(event) {
     const { files } = this.state;
     const file = event.target.files[0];
@@ -174,10 +196,22 @@ class Homepage extends Component {
     this.setState({ files });
   }
 
+  // save image file to state
+  imageFileHandler(event) {
+    const { files } = this.state;
+    const file = event.target.files[0];
+    const copy = file.slice(0, file.size, file.type);
+    const newFile = new File([copy], "tissue_image.png", {
+      type: file.type,
+    });
+    files.image = newFile;
+    this.setState({ files });
+  }
+
   // upload files from state to the server
   async uploadFiles() {
     const { files, loading } = this.state;
-    if (!files.matrix || !files.barcodes || !files.features || !files.pixels) {
+    if (!files.matrix) {
       return;
     }
 
@@ -186,6 +220,7 @@ class Homepage extends Component {
     data.append("file", files.features);
     data.append("file", files.barcodes);
     data.append("file", files.pixels);
+    data.append("file", files.image);
 
     const uuid = uuidv4(); // generate unique user session ID
 
@@ -195,6 +230,23 @@ class Homepage extends Component {
 
     this.resetState();
     loading.upload = true;
+    loading.image = true;
+
+    setTimeout(() => {
+      axios
+        .get(`${api}/static/${uuid}/tissue_image.png`)
+        .then((_res) => {
+          loading.image = false;
+          this.setState({
+            imageLink: `${api}/static/${uuid}/tissue_image.png`,
+            loading,
+          });
+        })
+        .catch(() => {
+          this.state.errors.push("Tissue image file was not found.\n");
+        });
+    }, 2000);
+
     this.setState({ uuid, loading }, () => {
       axios
         .post(`${api}/upload/${uuid}`, data, {})
@@ -476,9 +528,11 @@ class Homepage extends Component {
         colors.push(GetRGB(MinMaxNormalize(cell, min, max)));
       });
     } else {
-      matrix[0].forEach(() => {
-        colors.push("black");
-      });
+      if (matrix[0]) {
+        matrix[0].forEach(() => {
+          colors.push("black");
+        });
+      }
     }
 
     return colors;
@@ -533,6 +587,7 @@ class Homepage extends Component {
             barcodesFileHandler={this.barcodesFileHandler}
             featuresFileHandler={this.featuresFileHandler}
             pixelsFileHandler={this.pixelsFileHandler}
+            imageFileHandler={this.imageFileHandler}
             uploadFiles={this.uploadFiles}
             files={this.state.files}
             error={errorMsg}
@@ -569,6 +624,8 @@ class Homepage extends Component {
           <SpatialVis
             barcodes={this.state.filteredBarcodes}
             colors={this.state.colors}
+            imageLink={this.state.imageLink}
+            loading={this.state.loading.image}
           />
 
           <div style={{ paddingTop: "70px" }}></div>

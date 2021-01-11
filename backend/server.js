@@ -34,6 +34,7 @@ const storage = multer.diskStorage({
   destination: function (req, _file, cb) {
     shell.mkdir("-p", `${dir}/data/${req.params.uuid}`);
     const path = `${dir}/data/${req.params.uuid}/`;
+    console.log(path);
     cb(null, path);
   },
   filename: function (_req, file, cb) {
@@ -50,10 +51,13 @@ app.get("/api/", (_req, res) => {
 app.post("/api/upload/:uuid", function (req, res) {
   upload(req, res, function (err) {
     if (err instanceof multer.MulterError) {
+      console.log("oh no");
       return res.status(500).json("Files could not be uploaded.");
     } else if (err) {
+      console.log("oh no");
       return res.status(500).json("Files could not be uploaded.");
     }
+    console.log("oh yes");
     return res.status(200).send(req.file);
   });
 });
@@ -319,6 +323,12 @@ app.get("/api/pixels/:uuid", function (req, res) {
 });
 
 app.use("/", router);
+
+app.use("/api/static", express.static(`${dir}/data`));
+app.use(
+  "/api/static/null",
+  express.static(`${dir}/example_data/coronal_brain/spatial`)
+);
 
 app.listen(PORT, function () {
   console.log("Server is running on Port: " + PORT);

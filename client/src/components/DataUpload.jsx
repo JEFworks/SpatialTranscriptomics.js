@@ -30,6 +30,7 @@ const getSteps = () => {
     "Select features file",
     "Select barcodes file",
     "Select tissue spatial positions file",
+    "Select tissue image file",
   ];
 };
 
@@ -38,7 +39,8 @@ const getStepContent = (
   matrixFileHandler,
   barcodesFileHandler,
   featuresFileHandler,
-  pixelsFileHandler
+  pixelsFileHandler,
+  imageFileHandler
 ) => {
   switch (step) {
     case 0:
@@ -89,6 +91,18 @@ const getStepContent = (
           />
         </div>
       );
+    case 4:
+      return (
+        <div style={{ marginBottom: "10px" }}>
+          <input
+            accept=".png, .jpg, .jpeg"
+            id="file-button1"
+            type="file"
+            onChange={imageFileHandler}
+            style={{ outline: "none" }}
+          />
+        </div>
+      );
     default:
       return "Unknown step";
   }
@@ -115,17 +129,12 @@ class VerticalLinearStepper extends Component {
   handleNext() {
     const step = this.state.activeStep;
     const { files, uploadFiles } = this.props;
-    if (
-      (step === 0 && files.matrix == null) ||
-      (step === 1 && files.features == null) ||
-      (step === 2 && files.barcodes == null) ||
-      (step === 3 && files.pixels == null)
-    ) {
+    if (step === 0 && files.matrix == null) {
       this.alertUser();
       return;
     }
 
-    if (step === 3) {
+    if (step === 4) {
       uploadFiles();
     }
     this.setActiveStep(step + 1);
@@ -149,6 +158,7 @@ class VerticalLinearStepper extends Component {
       barcodesFileHandler,
       featuresFileHandler,
       pixelsFileHandler,
+      imageFileHandler,
     } = this.props;
 
     return (
@@ -165,7 +175,8 @@ class VerticalLinearStepper extends Component {
                       matrixFileHandler,
                       barcodesFileHandler,
                       featuresFileHandler,
-                      pixelsFileHandler
+                      pixelsFileHandler,
+                      imageFileHandler
                     )}
                   </Typography>
                   <div>
@@ -215,6 +226,7 @@ class DataUpload extends Component {
       featuresFileHandler,
       barcodesFileHandler,
       pixelsFileHandler,
+      imageFileHandler,
       uploadFiles,
       files,
       error,
@@ -272,6 +284,7 @@ class DataUpload extends Component {
           featuresFileHandler={featuresFileHandler}
           barcodesFileHandler={barcodesFileHandler}
           pixelsFileHandler={pixelsFileHandler}
+          imageFileHandler={imageFileHandler}
           uploadFiles={uploadFiles}
         />
       </>
