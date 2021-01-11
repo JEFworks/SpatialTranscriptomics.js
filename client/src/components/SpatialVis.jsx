@@ -195,6 +195,7 @@ class SpatialVis extends Component {
 
       for (let i = 0; i < barcodes.length; i++) {
         try {
+          // x is the x-coordinate, y is the y-coordinate
           const { x, y } = barcodes[i];
           const {
             xyFlipped,

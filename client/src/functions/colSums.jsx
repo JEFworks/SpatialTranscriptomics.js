@@ -15,16 +15,17 @@ const colSums = (matrix, threshold) => {
 
     const log = Math.log10(geneCount + 1);
     sums[Math.floor(log * 2)]++;
+    // if value is less than the filter threshold, classify the cell as a bad cell
     if (log < threshold) {
       badCells.push(i);
     }
   }
 
   const obj = [];
-  sums.forEach((freq, index) => {
+  sums.forEach((value, index) => {
     obj.push({
       range: index / 2,
-      frequency: freq,
+      frequency: value,
     });
   });
   return { sums: obj, badCells: badCells };

@@ -64,10 +64,6 @@ class Homepage extends Component {
     imageLink: "",
   }; // remember to update in resetState() too
 
-  // for coloring
-  setFeature = this.setFeature.bind(this);
-  setK = this.setK.bind(this);
-
   // file handlers
   matrixFileHandler = this.matrixFileHandler.bind(this);
   barcodesFileHandler = this.barcodesFileHandler.bind(this);
@@ -80,42 +76,40 @@ class Homepage extends Component {
   setNumPCs = this.setNumPCs.bind(this);
   handleFilter = this.handleFilter.bind(this);
 
+  // for coloring
+  setFeature = this.setFeature.bind(this);
+  setK = this.setK.bind(this);
+
   // analysis functions
   computePCA = this.computePCA.bind(this);
   computeTSNE = this.computeTSNE.bind(this);
 
   componentDidMount() {
+    // get uuid from URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const uuid = urlParams.get("session");
-    const url = `${api}/static/${uuid}/tissue_image.png`;
-    axios.get(url).catch(() => {
-      this.state.errors.push("Tissue image file was not found.\n");
-    });
-    this.setState({ uuid, imageLink: url }, () => {
+
+    this.setState({ uuid }, () => {
       this.loadEverything();
     });
   }
 
   reportError(error) {
     if (error.response) {
-      const { loading, errors } = this.state;
-      if (
-        error.response.data === "Matrix file was not found.\n" ||
-        error.response.data === "Matrix file is not properly formatted.\n"
-      ) {
-        loading.upload = false;
-      }
-      errors.push(error.response.data);
-      this.setState({ loading, errors });
+      this.state.errors.push(error.response.data);
     }
   }
 
-  // load data into the React state
+  // load data
   async loadEverything() {
+    this.loadImage();
     await this.loadFeatures();
     await this.loadBarcodes();
     await this.loadMatrix().catch((error) => {
       this.reportError(error);
+      const { loading } = this.state;
+      loading.upload = false;
+      this.setState({ loading });
     });
   }
 
@@ -213,11 +207,12 @@ class Homepage extends Component {
     this.setState({ files });
   }
 
-  getImage(uuid, loading) {
+  loadImage() {
+    const { loading, uuid } = this.state;
+    loading.image = false;
     axios
       .get(`${api}/static/${uuid}/tissue_image.png`)
       .then((_res) => {
-        loading.image = false;
         this.setState({
           imageLink: `${api}/static/${uuid}/tissue_image.png`,
           loading,
@@ -225,10 +220,11 @@ class Homepage extends Component {
       })
       .catch(() => {
         this.state.errors.push("Tissue image file was not found.\n");
+        this.setState({ loading });
       });
   }
 
-  // upload files from state to the server
+  // upload files to server
   async uploadFiles() {
     const { files, loading } = this.state;
     if (!files.matrix) {
@@ -244,6 +240,7 @@ class Homepage extends Component {
 
     const uuid = uuidv4(); // generate unique user session ID
 
+    // add uuid to URL
     const urlParams = new URLSearchParams(window.location.search);
     urlParams.set("session", uuid);
     window.history.pushState(null, null, `/?${urlParams.toString()}`);
@@ -256,9 +253,6 @@ class Homepage extends Component {
       axios
         .post(`${api}/upload/${uuid}`, data, {})
         .then((_res) => {
-          setTimeout(() => {
-            this.getImage(uuid, loading);
-          }, 0);
           this.loadEverything();
         })
         .catch((error) => {
@@ -287,7 +281,7 @@ class Homepage extends Component {
       .then((response) => {
         const barcodes = JSON.parse(response.data);
         this.setState({ barcodes }, () => {
-          this.loadPixels(barcodes);
+          this.loadPixels();
         });
       })
       .catch((error) => {
@@ -298,12 +292,13 @@ class Homepage extends Component {
       });
   }
 
-  async loadPixels(barcodes) {
-    const { uuid } = this.state;
+  async loadPixels() {
+    const { uuid, barcodes } = this.state;
     axios
       .get(`${api}/pixels/${uuid}`)
       .then((response) => {
         const pixels = JSON.parse(response.data);
+        // augment barcodes array with pixel info (e.g. "ENG1" -> {barcode: "ENG1", x: 10, y: 5})
         pixels.forEach((pixel) => {
           const index = barcodes.indexOf(pixel.barcode);
           if (index !== -1) {
@@ -322,6 +317,8 @@ class Homepage extends Component {
     let count = 0;
     const numBatches = 4;
     let errorOccured = false;
+
+    // load the matrix in 4 batches
     while (count < numBatches && !errorOccured) {
       await axios
         .get(`${api}/matrix/${uuid}/${count}/${numBatches}`)
@@ -345,15 +342,16 @@ class Homepage extends Component {
             const matrix = this.state.matrix.concat(
               m.to2DArray().filter((gene, index) => {
                 for (let cell of gene) {
-                  const feature = this.state.features[index];
+                  // if we find that the gene is expressed in any of the cells, add the gene's name to adjustedFeatures
                   if (cell > 0) {
+                    const feature = this.state.features[index];
                     if (feature) {
                       adjustedFeatures.push(feature.toLowerCase());
                     }
-                    return true;
+                    return true; // this gene is expressed so add it to the matrix
                   }
                 }
-                return false;
+                return false; // this gene is not expressed, so don't add it to the matrix
               })
             );
             this.setState({ matrix, adjustedFeatures });
@@ -388,7 +386,7 @@ class Homepage extends Component {
     loading.upload = true;
     this.setState({ loading });
 
-    let count = 0;
+    // worker filters the data
     filter_WorkerInstance.filter(
       matrix,
       thresholds,
@@ -400,11 +398,13 @@ class Homepage extends Component {
       minColSum
     );
 
+    let count = 0;
     filter_WorkerInstance.addEventListener("message", (message) => {
       if (message.data.filteredData && count < 1) {
         const data = message.data;
         const { filteredData } = data;
 
+        // compute colors based on a specific gene
         const colors = this.getColorsByGene(
           filteredData.matrix,
           filteredData.features,
@@ -430,15 +430,6 @@ class Homepage extends Component {
     });
   }
 
-  setFeature(name) {
-    const colors = this.getColorsByGene(
-      this.state.filteredMatrix,
-      this.state.filteredFeatures,
-      name
-    );
-    this.setState({ feature: name, colorOption: "gene", colors });
-  }
-
   setNumPCs(num) {
     const { loading } = this.state;
     loading.pca = true;
@@ -447,8 +438,9 @@ class Homepage extends Component {
     });
   }
 
+  // filter based on user-specified # of PCs
   filterPCs(num) {
-    const { pcs, loading } = this.state;
+    const { pcs, loading, colorOption, k } = this.state;
     if (!pcs[0]) {
       loading.pca = false;
       this.setState({ loading });
@@ -462,8 +454,8 @@ class Homepage extends Component {
 
     loading.pca = false;
     this.setState({ filteredPCs, loading });
-    if (this.state.colorOption === "cluster") {
-      this.getColorsByClusters(filteredPCs, this.state.k);
+    if (colorOption === "cluster") {
+      this.getColorsByClusters(filteredPCs, k);
     }
   }
 
@@ -522,6 +514,13 @@ class Homepage extends Component {
     });
   }
 
+  // set gene name and compute colors based on expression of this gene
+  setFeature(name) {
+    const { filteredMatrix, filteredFeatures } = this.state;
+    const colors = this.getColorsByGene(filteredMatrix, filteredFeatures, name);
+    this.setState({ feature: name, colorOption: "gene", colors });
+  }
+
   getGene(matrix, features, name) {
     return matrix[features.indexOf(name)];
   }
@@ -531,36 +530,37 @@ class Homepage extends Component {
     const gene = this.getGene(matrix, features, featureName);
 
     if (gene != null) {
+      // produce heatmap
       const { max, min } = MinMaxStats(gene);
       gene.forEach((cell) => {
         colors.push(GetRGB(MinMaxNormalize(cell, min, max)));
       });
-    } else {
-      if (matrix[0]) {
-        matrix[0].forEach(() => {
-          colors.push("black");
-        });
-      }
+    } else if (matrix[0]) {
+      matrix[0].forEach(() => {
+        colors.push("black");
+      });
     }
 
     return colors;
   }
 
+  // set K and compute colors by clusters
   setK(k) {
-    if (!this.state.filteredPCs[0]) {
+    const { filteredPCs } = this.state;
+    if (!filteredPCs[0]) {
       alert("Please run PCA first.");
       return;
     }
     this.setState({ k, colorOption: "cluster" });
-    this.getColorsByClusters(this.state.filteredPCs, k);
+    this.getColorsByClusters(filteredPCs, k);
   }
 
-  getColorsByClusters(pcs, num) {
+  getColorsByClusters(pcs, k) {
     const { loading } = this.state;
     loading.kmeans = true;
     this.setState({ loading });
 
-    kmeans_WorkerInstance.performKMeans(pcs, num);
+    kmeans_WorkerInstance.performKMeans(pcs, k);
     let count = 0;
     kmeans_WorkerInstance.addEventListener("message", (message) => {
       if (message.data.colors && count < 1) {
@@ -573,6 +573,7 @@ class Homepage extends Component {
   }
 
   render() {
+    // produce error message
     const { errors } = this.state;
     let errorMsg = "";
     for (let i = 0; i < errors.length; i++) {

@@ -12,6 +12,7 @@ const rowSums = (matrix, threshold) => {
 
     const log = Math.log10(cellCount + 1);
     sums[Math.floor(log * 2)]++;
+    // if the value is less than the threshold, classify gene as a bad gene
     if (log < threshold) {
       badGenes.push(index);
     }

@@ -16,6 +16,7 @@ const blue = "#80d8ff";
 const Plot = (data, getColor, displayAllowed) => {
   const obj = [{ data: [] }];
   if (displayAllowed && data) {
+    // 2D embedding
     data.forEach((point, index) => {
       const x = point[0] * 7 + 450;
       const y = point[1] * 7 + 300;

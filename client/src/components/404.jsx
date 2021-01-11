@@ -15,7 +15,7 @@ const Graphic = (
       width: "60%",
       minWidth: "350px",
     }}
-    src="/images/icon404.svg"
+    src="/icon404.svg"
     alt="404"
   />
 );

@@ -8,7 +8,7 @@ const getFilteredData = (matrix, features, barcodes, badGenes, badCells) => {
     if (features.length > 0 && !badGene) {
       filteredFeatures.push(features[index]);
     }
-    return !badGene;
+    return !badGene; // include only "good" genes
   });
 
   // colsum filtering
@@ -18,7 +18,7 @@ const getFilteredData = (matrix, features, barcodes, badGenes, badCells) => {
       if (barcodes.length > 0 && index === 0 && !badCell) {
         filteredBarcodes.push(barcodes[i]);
       }
-      return !badCell;
+      return !badCell; // include only "good" cells
     });
 
     filteredMatrix[index] = filteredGene;

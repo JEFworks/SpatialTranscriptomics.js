@@ -59,6 +59,7 @@ class LineChart extends Component {
           pointBorderWidth={0.5}
           markers={markers(max, data[0].data.length < 1)}
           colors={blue}
+          animate={true}
         />
       </>
     );

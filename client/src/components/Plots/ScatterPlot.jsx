@@ -53,7 +53,7 @@ class Scatter extends Component {
                 }
           }
           colors={props.getColor}
-          animate={false}
+          animate={true}
         />
       </>
     );

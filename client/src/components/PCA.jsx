@@ -18,6 +18,7 @@ const Biplot = (eigenvectors, getColor, displayAllowed) => {
   const obj = [{ data: [] }];
   if (displayAllowed && eigenvectors) {
     eigenvectors.forEach((vector, index) => {
+      // plot pc2 against pc1
       const x = vector[0];
       const y = vector[1];
       obj[0].data.push({ x: x, y: y, index: index });
