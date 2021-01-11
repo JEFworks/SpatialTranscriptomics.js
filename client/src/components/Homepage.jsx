@@ -99,7 +99,12 @@ class Homepage extends Component {
   reportError(error) {
     if (error.response) {
       const { loading, errors } = this.state;
-      loading.upload = false;
+      if (
+        error.response.data === "Matrix file was not found.\n" ||
+        error.response.data === "Matrix file is not properly formatted.\n"
+      ) {
+        loading.upload = false;
+      }
       errors.push(error.response.data);
       this.setState({ loading, errors });
     }
@@ -208,6 +213,21 @@ class Homepage extends Component {
     this.setState({ files });
   }
 
+  getImage(uuid, loading) {
+    axios
+      .get(`${api}/static/${uuid}/tissue_image.png`)
+      .then((_res) => {
+        loading.image = false;
+        this.setState({
+          imageLink: `${api}/static/${uuid}/tissue_image.png`,
+          loading,
+        });
+      })
+      .catch(() => {
+        this.state.errors.push("Tissue image file was not found.\n");
+      });
+  }
+
   // upload files from state to the server
   async uploadFiles() {
     const { files, loading } = this.state;
@@ -232,25 +252,13 @@ class Homepage extends Component {
     loading.upload = true;
     loading.image = true;
 
-    setTimeout(() => {
-      axios
-        .get(`${api}/static/${uuid}/tissue_image.png`)
-        .then((_res) => {
-          loading.image = false;
-          this.setState({
-            imageLink: `${api}/static/${uuid}/tissue_image.png`,
-            loading,
-          });
-        })
-        .catch(() => {
-          this.state.errors.push("Tissue image file was not found.\n");
-        });
-    }, 2000);
-
     this.setState({ uuid, loading }, () => {
       axios
         .post(`${api}/upload/${uuid}`, data, {})
         .then((_res) => {
+          setTimeout(() => {
+            this.getImage(uuid, loading);
+          }, 0);
           this.loadEverything();
         })
         .catch((error) => {
