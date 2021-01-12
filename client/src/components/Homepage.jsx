@@ -20,10 +20,10 @@ import Worker_PCA from "workerize-loader!../workers/worker-pca.jsx"; // eslint-d
 import Worker_TSNE from "workerize-loader!../workers/worker-tsne.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
 import Worker_KMEANS from "workerize-loader!../workers/worker-kmeans.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
 
-const filter_WorkerInstance = Worker_FILTER();
-const pca_WorkerInstance = Worker_PCA();
-const tSNE_WorkerInstance = Worker_TSNE();
-const kmeans_WorkerInstance = Worker_KMEANS();
+let filter_WorkerInstance = Worker_FILTER();
+let pca_WorkerInstance = Worker_PCA();
+let tsne_WorkerInstance = Worker_TSNE();
+let kmeans_WorkerInstance = Worker_KMEANS();
 
 class Homepage extends Component {
   state = {
@@ -56,7 +56,7 @@ class Homepage extends Component {
     loading: {
       upload: true,
       pca: false,
-      tSNE: false,
+      tsne: false,
       kmeans: false,
       image: false,
     },
@@ -144,7 +144,7 @@ class Homepage extends Component {
       loading: {
         upload: false,
         pca: false,
-        tSNE: false,
+        tsne: false,
         kmeans: false,
         image: false,
       },
@@ -383,10 +383,24 @@ class Homepage extends Component {
       return;
     }
 
+    pca_WorkerInstance.terminate();
+    tsne_WorkerInstance.terminate();
+    kmeans_WorkerInstance.terminate();
+
     loading.upload = true;
-    this.setState({ loading });
+    loading.pca = false;
+    loading.tsne = false;
+    loading.kmeans = false;
+    this.setState({
+      loading,
+      pcs: [],
+      eigenvalues: [],
+      filteredPCs: [],
+      tsneSolution: [],
+    });
 
     // worker filters the data
+    filter_WorkerInstance = Worker_FILTER();
     filter_WorkerInstance.filter(
       matrix,
       thresholds,
@@ -398,9 +412,8 @@ class Homepage extends Component {
       minColSum
     );
 
-    let count = 0;
     filter_WorkerInstance.addEventListener("message", (message) => {
-      if (message.data.filteredData && count < 1) {
+      if (message.data.filteredData) {
         const data = message.data;
         const { filteredData } = data;
 
@@ -416,24 +429,27 @@ class Homepage extends Component {
           filteredMatrix: filteredData.matrix,
           filteredFeatures: filteredData.features,
           filteredBarcodes: filteredData.barcodes,
-          thresholds,
+          thresholds: data.thresholds,
           rowsums: data.rowsums,
           colsums: data.colsums,
-          pcs: [],
-          filteredPCs: [],
           colorOption: "gene",
           colors,
           loading,
         });
-        count++;
+        filter_WorkerInstance.terminate();
       }
     });
   }
 
   setNumPCs(num) {
+    tsne_WorkerInstance.terminate();
+    kmeans_WorkerInstance.terminate();
+
     const { loading } = this.state;
     loading.pca = true;
-    this.setState({ loading }, () => {
+    loading.tsne = false;
+    loading.kmeans = false;
+    this.setState({ loading, filteredPCs: [], tsneSolution: [] }, () => {
       this.filterPCs(num);
     });
   }
@@ -464,14 +480,20 @@ class Homepage extends Component {
     if (!m[0] || m[0].length < 1) {
       return;
     }
+
+    tsne_WorkerInstance.terminate();
+    kmeans_WorkerInstance.terminate();
+
     const { loading } = this.state;
     loading.pca = true;
-    this.setState({ loading });
+    loading.tsne = false;
+    loading.kmeans = false;
+    this.setState({ loading, filteredPCs: [], tsneSolution: [] });
 
+    pca_WorkerInstance = Worker_PCA();
     pca_WorkerInstance.performPCA(m);
-    let count = 0;
     pca_WorkerInstance.addEventListener("message", (message) => {
-      if (message.data.eigenvectors && count < 1) {
+      if (message.data.eigenvectors) {
         const pca = message.data;
         this.setState(
           {
@@ -482,7 +504,7 @@ class Homepage extends Component {
             this.filterPCs(num);
           }
         );
-        count++;
+        pca_WorkerInstance.terminate();
       }
     });
   }
@@ -495,21 +517,21 @@ class Homepage extends Component {
       return;
     }
 
-    loading.tSNE = true;
-    this.setState({ loading, tsneSolution: [] });
+    loading.tsne = true;
+    this.setState({ loading });
     const opt = {};
     opt.epsilon = epsilon; // epsilon is learning rate (10 = default)
     opt.perplexity = perplexity; // roughly how many neighbors each point influences (30 = default)
     opt.dim = 2; // dimensionality of the embedding (2 = default)
 
-    tSNE_WorkerInstance.performTSNE(filteredPCs, opt, iterations);
-    let count = 0;
-    tSNE_WorkerInstance.addEventListener("message", (message) => {
-      if (message.data.solution && count < 1) {
+    tsne_WorkerInstance = Worker_TSNE();
+    tsne_WorkerInstance.performTSNE(filteredPCs, opt, iterations);
+    tsne_WorkerInstance.addEventListener("message", (message) => {
+      if (message.data.solution) {
         const tsne = message.data;
-        loading.tSNE = false;
+        loading.tsne = false;
         this.setState({ tsneSolution: tsne.solution, loading });
-        count++;
+        tsne_WorkerInstance.terminate();
       }
     });
   }
@@ -560,14 +582,14 @@ class Homepage extends Component {
     loading.kmeans = true;
     this.setState({ loading });
 
+    kmeans_WorkerInstance = Worker_KMEANS();
     kmeans_WorkerInstance.performKMeans(pcs, k);
-    let count = 0;
     kmeans_WorkerInstance.addEventListener("message", (message) => {
-      if (message.data.colors && count < 1) {
+      if (message.data.colors) {
         const result = message.data;
         loading.kmeans = false;
         this.setState({ loading, colors: result.colors });
-        count++;
+        kmeans_WorkerInstance.terminate();
       }
     });
   }
@@ -625,8 +647,7 @@ class Homepage extends Component {
             computeTSNE={this.computeTSNE}
             tsneSolution={this.state.tsneSolution}
             colors={this.state.colors}
-            pcs={this.state.filteredPCs}
-            loading={this.state.loading.tSNE}
+            loading={this.state.loading.tsne}
           />
 
           <div style={{ paddingTop: "20px" }}></div>

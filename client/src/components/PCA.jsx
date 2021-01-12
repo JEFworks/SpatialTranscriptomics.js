@@ -14,9 +14,9 @@ const primary = "#094067";
 const paragraph = "#5f6c7b";
 const blue = "#80d8ff";
 
-const Biplot = (eigenvectors, getColor, displayAllowed) => {
+const Biplot = (eigenvectors, getColor) => {
   const obj = [{ data: [] }];
-  if (displayAllowed && eigenvectors) {
+  if (eigenvectors[0]) {
     eigenvectors.forEach((vector, index) => {
       // plot pc2 against pc1
       const x = vector[0];
@@ -68,9 +68,9 @@ const Biplot = (eigenvectors, getColor, displayAllowed) => {
   );
 };
 
-const ScreePlot = (eigenvalues, numPCs, displayAllowed) => {
+const ScreePlot = (eigenvalues, numPCs) => {
   const obj = [{ data: [] }];
-  if (displayAllowed && eigenvalues) {
+  if (eigenvalues[0]) {
     eigenvalues.slice(0, 20).forEach((eigenvalue, index) => {
       obj[0].data.push({ x: index + 1, y: eigenvalue });
     });
@@ -151,9 +151,8 @@ class PCAWrapper extends Component {
   run() {
     const { computePCA } = this.props;
     const { updatedNumPCs } = this.state;
-
-    computePCA(updatedNumPCs);
     this.setState({ numPCs: updatedNumPCs });
+    computePCA(updatedNumPCs);
   }
 
   applySettings() {
@@ -174,7 +173,6 @@ class PCAWrapper extends Component {
     const { selectNumPCs, getColor } = this;
     const { numPCs } = this.state;
     const { eigenvectors, eigenvalues, loading } = this.props;
-    const displayAllowed = eigenvectors[0] != null;
 
     return (
       <>
@@ -227,8 +225,8 @@ class PCAWrapper extends Component {
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>
           <div className="PC-flex">
-            {ScreePlot(eigenvalues, numPCs, displayAllowed)}
-            {Biplot(eigenvectors, getColor, displayAllowed)}
+            {ScreePlot(eigenvalues, numPCs)}
+            {Biplot(eigenvectors, getColor)}
           </div>
           <div style={{ width: "50%" }}></div>
         </div>

@@ -37,5 +37,6 @@ export const filter = (
     filteredData: filteredData,
     rowsums: rowsums,
     colsums: colsums,
+    thresholds: thresholds,
   });
 };

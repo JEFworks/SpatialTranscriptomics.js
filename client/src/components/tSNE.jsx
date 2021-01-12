@@ -13,9 +13,9 @@ const primary = "#094067";
 const paragraph = "#5f6c7b";
 const blue = "#80d8ff";
 
-const Plot = (data, getColor, displayAllowed) => {
+const Plot = (data, getColor) => {
   const obj = [{ data: [] }];
-  if (displayAllowed && data) {
+  if (data && data.length > 0) {
     // 2D embedding
     data.forEach((point, index) => {
       const x = point[0] * 7 + 450;
@@ -98,7 +98,6 @@ class tSNEWrapper extends Component {
       perplexity: 30,
       iterations: 500,
     },
-    pcs: [],
   };
 
   getColor = this.getColor.bind(this);
@@ -124,9 +123,8 @@ class tSNEWrapper extends Component {
   }
 
   run() {
-    const { computeTSNE, pcs } = this.props;
+    const { computeTSNE } = this.props;
     computeTSNE(this.state.tsneSettings);
-    this.setState({ pcs });
   }
 
   render() {
@@ -174,11 +172,7 @@ class tSNEWrapper extends Component {
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>
           <div className="PC-flex">
-            {Plot(
-              this.props.tsneSolution,
-              this.getColor,
-              this.state.pcs === this.props.pcs
-            )}
+            {Plot(this.props.tsneSolution, this.getColor)}
           </div>
           <div style={{ width: "50%" }}></div>
         </div>
