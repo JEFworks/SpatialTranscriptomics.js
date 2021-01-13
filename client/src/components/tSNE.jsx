@@ -112,11 +112,11 @@ class tSNEWrapper extends Component {
     const { tsneSettings } = this.state;
 
     if (type === "epsilon") {
-      tsneSettings.epsilon = newSetting;
+      tsneSettings.epsilon = isNaN(newSetting) ? 0 : newSetting;
     } else if (type === "perplexity") {
-      tsneSettings.perplexity = newSetting;
+      tsneSettings.perplexity = isNaN(newSetting) ? 0 : newSetting;
     } else if (type === "iterations") {
-      tsneSettings.iterations = newSetting;
+      tsneSettings.iterations = isNaN(newSetting) ? 0 : newSetting;
     }
 
     this.setState({ tsneSettings });

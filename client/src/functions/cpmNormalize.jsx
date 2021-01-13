@@ -1,14 +1,22 @@
 const cpmNormalize = (m) => {
   const matrix = m.slice();
-  matrix.forEach((gene, index) => {
-    const totalReads = gene.reduce((a, b) => {
-      return a + b;
-    }, 0);
-    matrix[index] = gene.map((cell) => {
-      const cpm = (cell * Math.pow(10, 6)) / totalReads;
-      return Math.log10(cpm + 1);
-    });
-  });
+
+  const colsums = [];
+  for (let i = 0; i < matrix[0].length; i++) {
+    let geneCount = 0;
+    for (let j = 0; j < matrix.length; j++) {
+      geneCount += matrix[j][i];
+    }
+    colsums.push(geneCount);
+  }
+
+  for (let i = 0; i < matrix[0].length; i++) {
+    for (let j = 0; j < matrix.length; j++) {
+      matrix[j][i] /= colsums[i];
+      matrix[j][i] *= Math.pow(10, 6);
+    }
+  }
+
   return matrix;
 };
 

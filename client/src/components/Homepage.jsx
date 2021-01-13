@@ -100,6 +100,12 @@ class Homepage extends Component {
     }
   }
 
+  terminateWorkers() {
+    pca_WorkerInstance.terminate();
+    tsne_WorkerInstance.terminate();
+    kmeans_WorkerInstance.terminate();
+  }
+
   // load data
   async loadEverything() {
     this.loadImage();
@@ -383,9 +389,8 @@ class Homepage extends Component {
       return;
     }
 
-    pca_WorkerInstance.terminate();
-    tsne_WorkerInstance.terminate();
-    kmeans_WorkerInstance.terminate();
+    // terminate any ongoing analyses
+    this.terminateWorkers();
 
     loading.upload = true;
     loading.pca = false;
@@ -442,8 +447,7 @@ class Homepage extends Component {
   }
 
   setNumPCs(num) {
-    tsne_WorkerInstance.terminate();
-    kmeans_WorkerInstance.terminate();
+    this.terminateWorkers();
 
     const { loading } = this.state;
     loading.pca = true;
@@ -481,8 +485,8 @@ class Homepage extends Component {
       return;
     }
 
-    tsne_WorkerInstance.terminate();
-    kmeans_WorkerInstance.terminate();
+    // terminate ongoing analyses
+    this.terminateWorkers();
 
     const { loading } = this.state;
     loading.pca = true;
