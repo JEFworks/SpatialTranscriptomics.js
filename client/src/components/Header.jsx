@@ -34,6 +34,7 @@ const TitleContents = (
           fontWeight: 500,
           marginRight: "25px",
           marginTop: isMobile ? "10px" : "0px",
+          marginBottom: isMobile ? "10px" : "0px",
         }}
       >
         <Link style={{ color: primary }} underline="none" href="/">
@@ -42,7 +43,13 @@ const TitleContents = (
       </Typography>
 
       {!noshow && (
-        <div style={{ display: "flex", marginTop: "2px", marginBottom: "2px" }}>
+        <div
+          style={{
+            display: "flex",
+            marginTop: isMobile ? "-5px" : "2px",
+            marginBottom: "2px",
+          }}
+        >
           <div
             style={{
               display: isMobile ? "" : "flex",

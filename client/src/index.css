@@ -50,33 +50,6 @@ code {
   width: 600px;
 }
 
-@media only screen and (max-width: 950px) {
-  .QC-flex {
-    display: grid;
-  }
-}
-
-@media only screen and (max-width: 600px) {
-  .tsne-plot {
-    height: 380px;
-    width: 420px;
-  }
-
-  .icon-404 {
-    display: block;
-    margin-top: 0px;
-    margin-left: auto;
-    margin-right: auto;
-    width: 350px;
-  }
-
-  .site-container {
-    margin: 0 auto;
-    width: 92%;
-    padding-top: 170px;
-  }
-}
-
 @media only screen and (max-width: 1050px) {
   .PC-flex {
     display: grid;
@@ -91,5 +64,50 @@ code {
     margin-top: 20px;
     height: 400px;
     width: 420px;
+  }
+}
+
+@media only screen and (max-width: 950px) {
+  .QC-flex {
+    display: grid;
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  .tsne-plot {
+    height: 380px;
+    width: 420px;
+  }
+}
+
+@media only screen and (max-width: 550px) {
+  .site-container {
+    margin: 0 auto;
+    width: 92%;
+    padding-top: 160px;
+  }
+
+  .icon-404 {
+    display: block;
+    margin-top: 0px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 350px;
+  }
+}
+
+@media only screen and (max-width: 1050px) and (min-width: 550px) {
+  .site-container {
+    margin: 0 auto;
+    width: 90%;
+    padding-top: 100px;
+  }
+
+  .icon-404 {
+    display: block;
+    margin-top: 60px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 350px;
   }
 }
