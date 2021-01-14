@@ -44,18 +44,14 @@ const Biplot = (eigenvectors, getColor) => {
   return (
     <div
       style={{
-        height: "400px",
-        width: "100%",
         paddingLeft: "15px",
         paddingRight: "15px",
-        paddingBottom: "50px",
       }}
     >
       <Paper
         className="biplot"
         style={{
-          padding: "15px 20px 40px 15px",
-          height: "100%",
+          padding: "15px 15px 40px 15px",
           backgroundColor: "transparent",
         }}
         variant="outlined"
@@ -95,18 +91,14 @@ const ScreePlot = (eigenvalues, numPCs) => {
   return (
     <div
       style={{
-        height: "400px",
-        width: "100%",
         paddingLeft: "15px",
         paddingRight: "15px",
-        paddingBottom: "80px",
       }}
     >
       <Paper
         className="scree-plot"
         style={{
-          padding: "15px 20px 40px 15px",
-          height: "100%",
+          padding: "15px 15px 40px 15px",
           backgroundColor: "transparent",
         }}
         variant="outlined"
@@ -164,8 +156,8 @@ class PCAWrapper extends Component {
 
   selectNumPCs(event) {
     const num = Number.parseInt(event.target.value);
-    if (!isNaN(num)) {
-      this.setState({ updatedNumPCs: num === 0 ? 1 : Math.min(num, 20) });
+    if (!isNaN(num) || num === 0) {
+      this.setState({ updatedNumPCs: num });
     }
   }
 

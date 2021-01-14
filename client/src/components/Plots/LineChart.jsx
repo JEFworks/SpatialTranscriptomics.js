@@ -7,7 +7,7 @@ const blue = "#80d8ff";
 const markers = (max, loading) => [
   {
     axis: "x",
-    value: max,
+    value: max > 20 ? 20 : max,
     lineStyle: {
       stroke: !loading ? red : "transparent",
       strokeWidth: 1,

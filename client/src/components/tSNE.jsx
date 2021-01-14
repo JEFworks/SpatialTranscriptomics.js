@@ -43,17 +43,14 @@ const Plot = (data, getColor) => {
   return (
     <div
       style={{
-        height: "450px",
         paddingLeft: "15px",
         paddingRight: "15px",
-        paddingBottom: "50px",
       }}
     >
       <Paper
         className="tsne-plot"
         style={{
           padding: "15px 15px 15px 15px",
-          height: "100%",
           backgroundColor: "transparent",
         }}
         variant="outlined"

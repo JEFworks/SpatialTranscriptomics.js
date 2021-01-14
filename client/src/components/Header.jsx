@@ -127,7 +127,8 @@ class Header extends Component {
   }
 
   selectK(event) {
-    this.setState({ k: Number.parseInt(event.target.value) });
+    const value = Number.parseInt(event.target.value);
+    this.setState({ k: isNaN(value) ? 0 : value });
   }
 
   render() {

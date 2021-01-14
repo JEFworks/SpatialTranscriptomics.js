@@ -96,7 +96,9 @@ class Homepage extends Component {
 
   reportError(error) {
     if (error.response) {
-      this.state.errors.push(error.response.data);
+      const { errors } = this.state;
+      errors.push(error.response.data);
+      this.setState({ errors });
     }
   }
 
@@ -216,18 +218,19 @@ class Homepage extends Component {
   loadImage() {
     const { loading, uuid } = this.state;
     loading.image = false;
+    const imageLink = `${api}/static/${uuid}/tissue_image.png`;
     axios
-      .get(`${api}/static/${uuid}/tissue_image.png`)
+      .get(imageLink)
       .then((_res) => {
-        this.setState({
-          imageLink: `${api}/static/${uuid}/tissue_image.png`,
-          loading,
-        });
+        this.setState({ imageLink });
       })
       .catch(() => {
-        this.state.errors.push("Tissue image file was not found.\n");
-        this.setState({ loading });
+        const error = {
+          response: { data: "Tissue image file was not found.\n" },
+        };
+        this.reportError(error);
       });
+    this.setState({ loading });
   }
 
   // upload files to server
@@ -480,7 +483,7 @@ class Homepage extends Component {
   }
 
   computePCA(num) {
-    const m = this.state.filteredMatrix.slice();
+    const m = this.state.filteredMatrix;
     if (!m[0] || m[0].length < 1) {
       return;
     }
@@ -542,7 +545,11 @@ class Homepage extends Component {
 
   // set gene name and compute colors based on expression of this gene
   setFeature(name) {
-    const { filteredMatrix, filteredFeatures } = this.state;
+    const { filteredMatrix, filteredFeatures, loading } = this.state;
+    kmeans_WorkerInstance.terminate();
+    loading.kmeans = false;
+    this.setState({ loading });
+
     const colors = this.getColorsByGene(filteredMatrix, filteredFeatures, name);
     this.setState({ feature: name, colorOption: "gene", colors });
   }
@@ -646,7 +653,7 @@ class Homepage extends Component {
             loading={this.state.loading.pca}
           />
 
-          <div style={{ paddingTop: "20px" }}></div>
+          <div style={{ paddingTop: "40px" }}></div>
           <TSNEWrapper
             computeTSNE={this.computeTSNE}
             tsneSolution={this.state.tsneSolution}
@@ -654,7 +661,7 @@ class Homepage extends Component {
             loading={this.state.loading.tsne}
           />
 
-          <div style={{ paddingTop: "20px" }}></div>
+          <div style={{ paddingTop: "40px" }}></div>
           <SpatialVis
             barcodes={this.state.filteredBarcodes}
             colors={this.state.colors}

@@ -272,7 +272,7 @@ class DataUpload extends Component {
         </div>
 
         <Typography
-          style={{ marginTop: "10px", fontWeight: 400, color: paragraph }}
+          style={{ fontWeight: 400, color: paragraph }}
           variant="body1"
         >
           Enter description here.
