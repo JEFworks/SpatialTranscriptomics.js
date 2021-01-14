@@ -15,6 +15,106 @@ const background = "#fffffe";
 const primary = "#094067";
 const blue = "#80d8ff";
 
+const TitleContents = (
+  selectFeature,
+  setFeature,
+  feature,
+  selectK,
+  setK,
+  k,
+  loading,
+  noshow,
+  isMobile
+) => {
+  return (
+    <>
+      <Typography
+        variant="h6"
+        style={{
+          fontWeight: 500,
+          marginRight: "25px",
+          marginTop: isMobile ? "10px" : "0px",
+        }}
+      >
+        <Link style={{ color: primary }} underline="none" href="/">
+          SpatialTranscriptomics.js
+        </Link>
+      </Typography>
+
+      {!noshow && (
+        <div style={{ display: "flex", marginTop: "2px", marginBottom: "2px" }}>
+          <div
+            style={{
+              display: isMobile ? "" : "flex",
+              marginRight: isMobile ? "20px" : "30px",
+            }}
+          >
+            <TextField
+              style={{ width: "100px", fontWeight: 500, marginRight: "10px" }}
+              helperText="Gene name"
+              defaultValue="Camk2n1"
+              onChange={selectFeature}
+            />
+            <Button
+              variant="contained"
+              size="small"
+              color="primary"
+              style={{
+                backgroundColor: primary,
+                marginTop: "15px",
+                marginBottom: "15px",
+              }}
+              onClick={() => setFeature(feature)}
+            >
+              Color by Gene
+            </Button>
+          </div>
+
+          <div style={{ display: isMobile ? "" : "flex" }}>
+            <TextField
+              style={{ width: "100px", marginRight: "10px" }}
+              helperText="# of Clusters (k)"
+              defaultValue="10"
+              onChange={selectK}
+            />
+            <Button
+              variant="contained"
+              size="small"
+              color="primary"
+              style={{
+                backgroundColor: primary,
+                marginTop: "15px",
+                marginBottom: "15px",
+              }}
+              onClick={() => setK(k)}
+            >
+              Color by Clusters
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {!isMobile && (
+        <div style={{ flexGrow: 1, marginLeft: "25px" }}>
+          <CircularProgress
+            disableShrink
+            size={40}
+            thickness={5}
+            style={{ color: !loading ? "transparent" : blue }}
+          />
+        </div>
+      )}
+
+      {!isMobile && (
+        <>
+          {About}
+          {Github}
+        </>
+      )}
+    </>
+  );
+};
+
 const Title = (
   selectFeature,
   setFeature,
@@ -22,67 +122,32 @@ const Title = (
   selectK,
   setK,
   k,
-  loading
-) => (
-  <>
-    <Typography variant="h6" style={{ flexGrow: 0.04, fontWeight: 500 }}>
-      <Link style={{ color: primary }} underline="none" href="/">
-        ST.js
-      </Link>
-    </Typography>
-    <div style={{ flexGrow: 0.01, fontWeight: 500 }}>
-      <TextField
-        style={{ width: "100px" }}
-        helperText="Gene name"
-        defaultValue="Camk2n1"
-        onChange={selectFeature}
-      />
-    </div>
-    <div style={{ flexGrow: 0.05 }}>
-      <Button
-        variant="contained"
-        size="small"
-        color="primary"
-        style={{ backgroundColor: primary }}
-        onClick={() => setFeature(feature)}
-      >
-        Color by Gene
-      </Button>
-    </div>
-    <div style={{ flexGrow: 0.01 }}>
-      <TextField
-        style={{ width: "100px" }}
-        helperText="# of Clusters (k)"
-        defaultValue="10"
-        onChange={selectK}
-      />
-    </div>
-    <div style={{ flexGrow: 0.02 }}>
-      <Button
-        variant="contained"
-        size="small"
-        color="primary"
-        style={{ backgroundColor: primary }}
-        onClick={() => setK(k)}
-      >
-        Color by Clusters
-      </Button>
-    </div>
-    <div style={{ flexGrow: 0.87 }}>
-      {
-        <CircularProgress
-          disableShrink
-          size={40}
-          thickness={5}
-          style={{ color: !loading ? "white" : blue, marginLeft: "20px" }}
-        />
-      }
-    </div>
-  </>
-);
+  loading,
+  noshow,
+  isMobile
+) => {
+  const contents = TitleContents(
+    selectFeature,
+    setFeature,
+    feature,
+    selectK,
+    setK,
+    k,
+    loading,
+    noshow,
+    isMobile
+  );
+
+  if (isMobile) {
+    return <div>{contents}</div>;
+  }
+  return <>{contents}</>;
+};
 
 const About = (
-  <Typography style={{ fontSize: "1.1em", fontWeight: 500 }}>
+  <Typography
+    style={{ fontSize: "1.1em", fontWeight: 500, marginRight: "15px" }}
+  >
     <Link style={{ color: primary }} underline="none" href="/about">
       about
     </Link>
@@ -94,7 +159,7 @@ const Github = (
     disableRipple
     edge="end"
     style={{
-      marginLeft: "5px",
+      marginLeft: "-10px",
       marginRight: "-10px",
       marginBottom: "-4px",
       color: primary,
@@ -122,6 +187,19 @@ class Header extends Component {
   selectFeature = this.selectFeature.bind(this);
   selectK = this.selectK.bind(this);
 
+  componentDidMount() {
+    this.updateDimensions();
+    window.addEventListener("resize", this.updateDimensions.bind(this));
+  }
+
+  updateDimensions() {
+    if (window.innerWidth < 980) {
+      this.setState({ resize: true });
+    } else {
+      this.setState({ resize: true });
+    }
+  }
+
   selectFeature(event) {
     this.setState({ feature: event.target.value.trim().toLowerCase() });
   }
@@ -132,8 +210,10 @@ class Header extends Component {
   }
 
   render() {
-    const { setFeature, setK, loading } = this.props;
+    const { setFeature, setK, loading, noshow } = this.props;
     const { feature, k } = this.state;
+
+    const isMobile = window.innerWidth < 980;
 
     return (
       <>
@@ -151,10 +231,10 @@ class Header extends Component {
               this.selectK,
               setK,
               k,
-              loading
+              loading,
+              noshow,
+              isMobile
             )}
-            {About}
-            {Github}
           </Toolbar>
         </AppBar>
       </>

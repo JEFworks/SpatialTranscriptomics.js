@@ -615,13 +615,11 @@ class Homepage extends Component {
 
     return (
       <>
-        <div style={{ marginBottom: "40px" }}>
-          <Header
-            setFeature={this.setFeature}
-            setK={this.setK}
-            loading={this.state.loading.kmeans}
-          />
-        </div>
+        <Header
+          setFeature={this.setFeature}
+          setK={this.setK}
+          loading={this.state.loading.kmeans}
+        />
 
         <div className="site-container">
           <DataUpload

@@ -5,20 +5,7 @@ import Header from "./Header.jsx";
 const primary = "#094067";
 const secondary = "#90b4ce";
 
-const Graphic = (
-  <img
-    style={{
-      display: "block",
-      marginTop: "-15px",
-      marginLeft: "auto",
-      marginRight: "auto",
-      width: "60%",
-      minWidth: "350px",
-    }}
-    src="/icon404.svg"
-    alt="404"
-  />
-);
+const Graphic = <img className="icon-404" src="/icon404.svg" alt="404" />;
 
 const Text = (
   <Typography
@@ -43,9 +30,7 @@ const Text = (
 
 const Page404 = () => (
   <>
-    <div style={{ marginBottom: "60px" }}>
-      <Header />
-    </div>
+    <Header noshow={true} />
 
     <div className="site-container">
       {Graphic}

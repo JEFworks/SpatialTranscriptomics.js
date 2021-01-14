@@ -42,12 +42,7 @@ const Biplot = (eigenvectors, getColor) => {
   );
 
   return (
-    <div
-      style={{
-        paddingLeft: "15px",
-        paddingRight: "15px",
-      }}
-    >
+    <div>
       <Paper
         className="biplot"
         style={{
@@ -89,12 +84,7 @@ const ScreePlot = (eigenvalues, numPCs) => {
   );
 
   return (
-    <div
-      style={{
-        paddingLeft: "15px",
-        paddingRight: "15px",
-      }}
-    >
+    <div style={{ paddingRight: "20px" }}>
       <Paper
         className="scree-plot"
         style={{

@@ -201,7 +201,7 @@ class VerticalLinearStepper extends Component {
 
         {activeStep === steps.length && (
           <Paper square elevation={0} style={{ marginBottom: "30px" }}>
-            <Typography>All steps completed - you&apos;re finished</Typography>
+            <Typography>All steps completed - wait for data to load</Typography>
             <Button
               onClick={handleReset}
               style={{
@@ -272,7 +272,7 @@ class DataUpload extends Component {
         </div>
 
         <Typography
-          style={{ fontWeight: 400, color: paragraph }}
+          style={{ fontWeight: 400, color: paragraph, marginBottom: "-5px" }}
           variant="body1"
         >
           Enter description here.

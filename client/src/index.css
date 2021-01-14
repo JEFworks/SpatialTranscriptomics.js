@@ -6,7 +6,6 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: #fffffe;
-  overflow-x: hidden;
 }
 
 code {
@@ -17,8 +16,7 @@ code {
 .site-container {
   margin: 0 auto;
   width: 90%;
-  padding-top: 30px;
-  overflow: hidden;
+  padding-top: 70px;
 }
 
 .QC-flex {
@@ -30,50 +28,68 @@ code {
 }
 
 .scree-plot {
-  width: 370px;
   height: 450px;
+  width: 370px;
 }
 
 .biplot {
-  width: 480px;
   height: 450px;
+  width: 480px;
 }
 
 .tsne-plot {
-  width: 500px;
   height: 450px;
+  width: 500px;
+}
+
+.icon-404 {
+  display: block;
+  margin-top: 40px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 600px;
 }
 
 @media only screen and (max-width: 950px) {
   .QC-flex {
     display: grid;
   }
+}
 
+@media only screen and (max-width: 600px) {
   .tsne-plot {
-    height: 450px;
-    width: 400px;
+    height: 380px;
+    width: 420px;
+  }
+
+  .icon-404 {
+    display: block;
+    margin-top: 0px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 350px;
+  }
+
+  .site-container {
+    margin: 0 auto;
+    width: 92%;
+    padding-top: 170px;
   }
 }
 
-@media only screen and (max-width: 1200px) {
+@media only screen and (max-width: 1050px) {
   .PC-flex {
     display: grid;
   }
 
   .scree-plot {
-    height: 345px;
+    height: 400px;
     width: 420px;
   }
 
   .biplot {
-    height: 450px;
+    margin-top: 20px;
+    height: 400px;
     width: 420px;
-  }
-
-  .site-container {
-    margin: 0 auto;
-    width: 95%;
-    padding-top: 30px;
-    overflow-x: hidden;
   }
 }

@@ -41,12 +41,7 @@ const Plot = (data, getColor) => {
   );
 
   return (
-    <div
-      style={{
-        paddingLeft: "15px",
-        paddingRight: "15px",
-      }}
-    >
+    <div>
       <Paper
         className="tsne-plot"
         style={{

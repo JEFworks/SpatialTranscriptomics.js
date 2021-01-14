@@ -92,8 +92,7 @@ const Figure = (rowsums, colsums, thresholds, changeThreshold, type) => {
       style={{
         height: "250px",
         width: "100%",
-        paddingRight: "15px",
-        paddingLeft: "15px",
+        paddingRight: "20px",
         paddingBottom: "125px",
       }}
     >
