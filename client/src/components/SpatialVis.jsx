@@ -16,7 +16,7 @@ const paragraph = "#5f6c7b";
 const tertiary = "#90b4ce";
 const blue = "#80d8ff";
 
-const LeafletWrapper = (pixels, colors, opacity, imageLink) => {
+const LeafletWrapper = (pixels, colors, opacity, pixelSize, imageLink) => {
   const bounds = [
     [0, 0],
     [1921, 2000],
@@ -39,7 +39,7 @@ const LeafletWrapper = (pixels, colors, opacity, imageLink) => {
               color="transparent"
               fillColor={colors[index] ? colors[index] : "transparent"}
               fillOpacity={opacity}
-              radius={8}
+              radius={pixelSize}
             />
           );
         })}
@@ -47,7 +47,13 @@ const LeafletWrapper = (pixels, colors, opacity, imageLink) => {
   );
 };
 
-const TypedInput = (changeDeltaX, changeDeltaY, changeScale, changeOpacity) => {
+const TypedInput = (
+  changeDeltaX,
+  changeDeltaY,
+  changeScale,
+  changeOpacity,
+  changePixelSize
+) => {
   return (
     <FormGroup row style={{ marginTop: "7px" }}>
       <TextField
@@ -69,10 +75,16 @@ const TypedInput = (changeDeltaX, changeDeltaY, changeScale, changeOpacity) => {
         onChange={changeScale}
       />
       <TextField
-        style={{ width: "100px" }}
+        style={{ width: "100px", marginRight: "15px" }}
         helperText="Opacity (0 - 1)"
         defaultValue="1"
         onChange={changeOpacity}
+      />
+      <TextField
+        style={{ width: "70px" }}
+        helperText="Pixel Size"
+        defaultValue="8"
+        onChange={changePixelSize}
       />
     </FormGroup>
   );
@@ -136,6 +148,8 @@ class SpatialVis extends Component {
     xyFlipped: false,
     opacity: 1,
     updatedOpacity: 1,
+    pixelSize: 8,
+    updatedPixelSize: 8,
   };
 
   getPixels = this.getPixels.bind(this);
@@ -143,6 +157,7 @@ class SpatialVis extends Component {
   changeDeltaY = this.changeDeltaY.bind(this);
   changeScale = this.changeScale.bind(this);
   changeOpacity = this.changeOpacity.bind(this);
+  changePixelSize = this.changePixelSize.bind(this);
   flipHorizontal = this.flipHorizontal.bind(this);
   flipVertical = this.flipVertical.bind(this);
   flipXY = this.flipXY.bind(this);
@@ -167,6 +182,11 @@ class SpatialVis extends Component {
     this.setState({ updatedOpacity: isNaN(opacity) ? 1 : opacity });
   }
 
+  changePixelSize(event) {
+    const pixelSize = Number.parseInt(event.target.value);
+    this.setState({ updatedPixelSize: isNaN(pixelSize) ? 0 : pixelSize });
+  }
+
   flipHorizontal() {
     this.setState({ horizontalFlipped: this.state.horizontalFlipped * -1 });
   }
@@ -181,7 +201,11 @@ class SpatialVis extends Component {
 
   run() {
     const pixels = this.getPixels();
-    this.setState({ pixels, opacity: this.state.updatedOpacity });
+    this.setState({
+      pixels,
+      opacity: this.state.updatedOpacity,
+      pixelSize: this.state.updatedPixelSize,
+    });
   }
 
   getPixels() {
@@ -226,6 +250,7 @@ class SpatialVis extends Component {
       flipHorizontal,
       flipVertical,
       flipXY,
+      changePixelSize,
     } = this;
     const {
       pixels,
@@ -233,6 +258,7 @@ class SpatialVis extends Component {
       verticalFlipped,
       xyFlipped,
       opacity,
+      pixelSize,
     } = this.state;
     const { colors, imageLink } = this.props;
 
@@ -254,7 +280,13 @@ class SpatialVis extends Component {
 
         <div style={{ display: "flex" }}>
           <div>
-            {TypedInput(changeDeltaX, changeDeltaY, changeScale, changeOpacity)}
+            {TypedInput(
+              changeDeltaX,
+              changeDeltaY,
+              changeScale,
+              changeOpacity,
+              changePixelSize
+            )}
             {CheckboxInput(
               horizontalFlipped,
               flipHorizontal,
@@ -287,7 +319,7 @@ class SpatialVis extends Component {
         </Button>
         <div style={{ paddingTop: "20px" }}></div>
 
-        {LeafletWrapper(pixels, colors, opacity, imageLink)}
+        {LeafletWrapper(pixels, colors, opacity, pixelSize, imageLink)}
       </>
     );
   }

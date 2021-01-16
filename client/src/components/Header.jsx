@@ -47,7 +47,7 @@ const TitleContents = (
           style={{
             display: "flex",
             marginTop: isMobile ? "-5px" : "2px",
-            marginBottom: "2px",
+            marginBottom: "0px",
           }}
         >
           <div
@@ -57,7 +57,7 @@ const TitleContents = (
             }}
           >
             <TextField
-              style={{ width: "100px", fontWeight: 500, marginRight: "10px" }}
+              style={{ width: "90px", fontWeight: 500, marginRight: "10px" }}
               helperText="Gene name"
               defaultValue="Camk2n1"
               onChange={selectFeature}
@@ -153,7 +153,7 @@ const Title = (
 
 const About = (
   <Typography
-    style={{ fontSize: "1.1em", fontWeight: 500, marginRight: "15px" }}
+    style={{ fontSize: "1.1em", fontWeight: 500, marginRight: "5px" }}
   >
     <Link style={{ color: primary }} underline="none" href="/about">
       about
@@ -166,7 +166,6 @@ const Github = (
     disableRipple
     edge="end"
     style={{
-      marginLeft: "-10px",
       marginRight: "-10px",
       marginBottom: "-4px",
       color: primary,
@@ -213,7 +212,7 @@ class Header extends Component {
 
   selectK(event) {
     const value = Number.parseInt(event.target.value);
-    this.setState({ k: isNaN(value) ? 0 : value });
+    this.setState({ k: isNaN(value) ? 0 : Math.max(0, value) });
   }
 
   render() {

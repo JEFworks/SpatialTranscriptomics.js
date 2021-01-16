@@ -95,11 +95,16 @@ class Homepage extends Component {
   }
 
   reportError(error) {
+    const { errors } = this.state;
     if (error.response) {
-      const { errors } = this.state;
       errors.push(error.response.data);
-      this.setState({ errors });
+    } else if (
+      error.message === "Network Error" &&
+      !errors.includes("Server not responding.\n")
+    ) {
+      errors.push("Server not responding.\n");
     }
+    this.setState({ errors });
   }
 
   terminateWorkers() {

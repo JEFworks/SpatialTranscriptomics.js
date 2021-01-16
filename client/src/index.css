@@ -80,6 +80,22 @@ code {
   }
 }
 
+@media only screen and (max-width: 980px) and (min-width: 550px) {
+  .site-container {
+    margin: 0 auto;
+    width: 90%;
+    padding-top: 110px;
+  }
+
+  .icon-404 {
+    display: block;
+    margin-top: 50px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 350px;
+  }
+}
+
 @media only screen and (max-width: 550px) {
   .site-container {
     margin: 0 auto;
@@ -90,22 +106,6 @@ code {
   .icon-404 {
     display: block;
     margin-top: 0px;
-    margin-left: auto;
-    margin-right: auto;
-    width: 350px;
-  }
-}
-
-@media only screen and (max-width: 1050px) and (min-width: 550px) {
-  .site-container {
-    margin: 0 auto;
-    width: 90%;
-    padding-top: 100px;
-  }
-
-  .icon-404 {
-    display: block;
-    margin-top: 60px;
     margin-left: auto;
     margin-right: auto;
     width: 350px;

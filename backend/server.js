@@ -9,7 +9,7 @@ const shell = require("shelljs");
 
 // delete localhost from this list when deploying
 const corsOptions = {
-  origin: ["http://localhost:8000", "https://stjs.me"],
+  origin: ["https://stjs.me"],
   optionsSuccessStatus: 200, // For legacy browser support
 };
 
@@ -320,11 +320,15 @@ app.get("/api/pixels/:uuid", function (req, res) {
 
 app.use("/", router);
 
+const imageURL =
+  defaultFileNum === 0 || defaultFileNum === 1
+    ? `${dir}/example_data/coronal_brain/spatial`
+    : defaultFileNum === 2
+    ? `${dir}/example_data/olfactory_bulb/spatial`
+    : `${dir}/example_data/preoptic_region/spatial`;
+
 app.use("/api/static", express.static(`${dir}/data`));
-app.use(
-  "/api/static/null",
-  express.static(`${dir}/example_data/coronal_brain/spatial`)
-);
+app.use("/api/static/null", express.static(imageURL));
 
 app.listen(PORT, function () {
   console.log("Server is running on Port: " + PORT);

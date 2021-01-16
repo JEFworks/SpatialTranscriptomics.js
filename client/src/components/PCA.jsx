@@ -14,13 +14,13 @@ const primary = "#094067";
 const paragraph = "#5f6c7b";
 const blue = "#80d8ff";
 
-const Biplot = (eigenvectors, getColor) => {
+const Biplot = (eigenvectors, getColor, pcX, pcY) => {
   const obj = [{ data: [] }];
   if (eigenvectors[0]) {
     eigenvectors.forEach((vector, index) => {
       // plot pc2 against pc1
-      const x = vector[0];
-      const y = vector[1];
+      const x = vector[Math.min(pcX - 1, eigenvectors.length - 1)];
+      const y = vector[Math.min(pcY - 1, eigenvectors.length - 1)];
       obj[0].data.push({ x: x, y: y, index: index });
     });
   }
@@ -101,14 +101,26 @@ const ScreePlot = (eigenvalues, numPCs) => {
   );
 };
 
-const TypedInput = (selectNumPCs) => {
+const TypedInput = (selectNumPCs, set_pcX, set_pcY) => {
   return (
     <FormGroup row style={{ marginTop: "7px" }}>
       <TextField
-        style={{ width: "150px", marginRight: "15px" }}
-        helperText="Number of PCs"
+        style={{ width: "70px", marginRight: "15px" }}
+        helperText="# of PCs"
         defaultValue="10"
         onChange={selectNumPCs}
+      />
+      <TextField
+        style={{ width: "90px", marginRight: "15px" }}
+        helperText="PC on x-axis"
+        defaultValue="1"
+        onChange={set_pcX}
+      />
+      <TextField
+        style={{ width: "90px" }}
+        helperText="PC on y-axis"
+        defaultValue="2"
+        onChange={set_pcY}
       />
     </FormGroup>
   );
@@ -118,10 +130,16 @@ class PCAWrapper extends Component {
   state = {
     numPCs: 10,
     updatedNumPCs: 10,
+    pcX: 1,
+    pcY: 2,
+    new_pcX: 1,
+    new_pcY: 2,
   };
 
   getColor = this.getColor.bind(this);
   selectNumPCs = this.selectNumPCs.bind(this);
+  set_pcX = this.set_pcX.bind(this);
+  set_pcY = this.set_pcY.bind(this);
 
   getColor(node) {
     if (node.index) {
@@ -132,28 +150,46 @@ class PCAWrapper extends Component {
 
   run() {
     const { computePCA } = this.props;
-    const { updatedNumPCs } = this.state;
-    this.setState({ numPCs: updatedNumPCs });
+    const { updatedNumPCs, new_pcX, new_pcY } = this.state;
+    this.setState({ numPCs: updatedNumPCs, pcX: new_pcX, pcY: new_pcY });
     computePCA(updatedNumPCs);
   }
 
   applySettings() {
     const { setNumPCs } = this.props;
-    const { updatedNumPCs } = this.state;
+    const { updatedNumPCs, new_pcX, new_pcY } = this.state;
+    this.setState({ numPCs: updatedNumPCs, pcX: new_pcX, pcY: new_pcY });
     setNumPCs(updatedNumPCs);
-    this.setState({ numPCs: updatedNumPCs });
   }
 
   selectNumPCs(event) {
     const num = Number.parseInt(event.target.value);
-    if (!isNaN(num) || num === 0) {
+    if (!isNaN(num) && num > 0) {
       this.setState({ updatedNumPCs: num });
     }
   }
 
+  set_pcX(event) {
+    let num = Number.parseInt(event.target.value);
+    if (isNaN(num)) {
+      num = 1;
+    }
+    num = Math.max(1, num);
+    this.setState({ new_pcX: num });
+  }
+
+  set_pcY(event) {
+    let num = Number.parseInt(event.target.value);
+    if (isNaN(num)) {
+      num = 1;
+    }
+    num = Math.max(1, num);
+    this.setState({ new_pcY: num });
+  }
+
   render() {
-    const { selectNumPCs, getColor } = this;
-    const { numPCs } = this.state;
+    const { selectNumPCs, getColor, set_pcX, set_pcY } = this;
+    const { numPCs, pcX, pcY } = this.state;
     const { eigenvectors, eigenvalues, loading } = this.props;
 
     return (
@@ -172,7 +208,7 @@ class PCAWrapper extends Component {
         </Typography>
 
         <div style={{ display: "flex" }}>
-          {TypedInput(selectNumPCs)}
+          {TypedInput(selectNumPCs, set_pcX, set_pcY)}
           {loading && (
             <CircularProgress
               disableShrink
@@ -208,7 +244,7 @@ class PCAWrapper extends Component {
           <div style={{ width: "50%" }}></div>
           <div className="PC-flex">
             {ScreePlot(eigenvalues, numPCs)}
-            {Biplot(eigenvectors, getColor)}
+            {Biplot(eigenvectors, getColor, pcX, pcY)}
           </div>
           <div style={{ width: "50%" }}></div>
         </div>
