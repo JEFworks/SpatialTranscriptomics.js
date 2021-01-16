@@ -16,11 +16,11 @@ const blue = "#80d8ff";
 
 const Biplot = (eigenvectors, getColor, pcX, pcY) => {
   const obj = [{ data: [] }];
-  if (eigenvectors[0]) {
+  if (eigenvectors[0] && !isNaN(pcX) && !isNaN(pcY) && pcX > 0 && pcY > 0) {
     eigenvectors.forEach((vector, index) => {
       // plot pc2 against pc1
-      const x = vector[Math.min(pcX - 1, eigenvectors.length - 1)];
-      const y = vector[Math.min(pcY - 1, eigenvectors.length - 1)];
+      const x = vector[Math.min(pcX - 1, eigenvectors[0].length - 1)];
+      const y = vector[Math.min(pcY - 1, eigenvectors[0].length - 1)];
       obj[0].data.push({ x: x, y: y, index: index });
     });
   }
@@ -158,8 +158,11 @@ class PCAWrapper extends Component {
   applySettings() {
     const { setNumPCs } = this.props;
     const { updatedNumPCs, new_pcX, new_pcY } = this.state;
-    this.setState({ numPCs: updatedNumPCs, pcX: new_pcX, pcY: new_pcY });
-    setNumPCs(updatedNumPCs);
+    this.setState({ pcX: new_pcX, pcY: new_pcY });
+    if (updatedNumPCs !== this.state.numPCs) {
+      this.setState({ numPCs: updatedNumPCs });
+      setNumPCs(updatedNumPCs);
+    }
   }
 
   selectNumPCs(event) {
@@ -170,20 +173,12 @@ class PCAWrapper extends Component {
   }
 
   set_pcX(event) {
-    let num = Number.parseInt(event.target.value);
-    if (isNaN(num)) {
-      num = 1;
-    }
-    num = Math.max(1, num);
+    const num = Number.parseInt(event.target.value);
     this.setState({ new_pcX: num });
   }
 
   set_pcY(event) {
-    let num = Number.parseInt(event.target.value);
-    if (isNaN(num)) {
-      num = 1;
-    }
-    num = Math.max(1, num);
+    const num = Number.parseInt(event.target.value);
     this.setState({ new_pcY: num });
   }
 

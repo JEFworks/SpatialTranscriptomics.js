@@ -164,7 +164,7 @@ class SpatialVis extends Component {
 
   changeScale(event) {
     const scale = Number.parseFloat(event.target.value);
-    this.setState({ scale: isNaN(scale) ? 1 : scale });
+    this.setState({ scale: isNaN(scale) ? 0 : scale });
   }
 
   changeDeltaX(event) {
@@ -179,7 +179,7 @@ class SpatialVis extends Component {
 
   changeOpacity(event) {
     const opacity = Number.parseFloat(event.target.value);
-    this.setState({ updatedOpacity: isNaN(opacity) ? 1 : opacity });
+    this.setState({ updatedOpacity: isNaN(opacity) ? 0 : opacity });
   }
 
   changePixelSize(event) {

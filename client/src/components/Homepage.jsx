@@ -455,12 +455,18 @@ class Homepage extends Component {
   }
 
   setNumPCs(num) {
+    const m = this.state.filteredMatrix;
+    if (!m[0] || m[0].length < 1) {
+      return;
+    }
+
     this.terminateWorkers();
 
     const { loading } = this.state;
     loading.pca = true;
     loading.tsne = false;
     loading.kmeans = false;
+
     this.setState({ loading, filteredPCs: [], tsneSolution: [] }, () => {
       this.filterPCs(num);
     });
@@ -469,8 +475,8 @@ class Homepage extends Component {
   // filter based on user-specified # of PCs
   filterPCs(num) {
     const { pcs, loading, colorOption, k } = this.state;
+    loading.pca = false;
     if (!pcs[0]) {
-      loading.pca = false;
       this.setState({ loading });
       return;
     }
@@ -480,7 +486,6 @@ class Homepage extends Component {
       filteredPCs.push(pc.slice(0, num));
     });
 
-    loading.pca = false;
     this.setState({ filteredPCs, loading });
     if (colorOption === "cluster") {
       this.getColorsByClusters(filteredPCs, k);
@@ -500,6 +505,7 @@ class Homepage extends Component {
     loading.pca = true;
     loading.tsne = false;
     loading.kmeans = false;
+
     this.setState({ loading, filteredPCs: [], tsneSolution: [] });
 
     pca_WorkerInstance = Worker_PCA();
@@ -529,8 +535,14 @@ class Homepage extends Component {
       return;
     }
 
-    loading.tsne = true;
+    tsne_WorkerInstance.terminate();
+
+    loading.tsne = iterations < 1 ? false : true;
     this.setState({ loading });
+    if (iterations < 1) {
+      return;
+    }
+
     const opt = {};
     opt.epsilon = epsilon; // epsilon is learning rate (10 = default)
     opt.perplexity = perplexity; // roughly how many neighbors each point influences (30 = default)
@@ -589,6 +601,7 @@ class Homepage extends Component {
       alert("Please run PCA first.");
       return;
     }
+    kmeans_WorkerInstance.terminate();
     this.setState({ k, colorOption: "cluster" });
     this.getColorsByClusters(filteredPCs, k);
   }
