@@ -6,6 +6,7 @@ const router = express.Router();
 const app = express();
 const multer = require("multer");
 const shell = require("shelljs");
+const gunzip = require("gunzip-file");
 
 // delete localhost from this list when deploying
 const corsOptions = {
@@ -80,93 +81,111 @@ app.get("/api/matrix/:uuid/:count/:numBatches", function (req, res) {
     filePath = `${dir}/data/${req.params.uuid}/matrix.mtx`;
   }
 
-  const instream = fs.createReadStream(filePath);
-  instream.on("error", function () {
-    res.status(400).send(`Matrix file was not found.\n`);
+  try {
+    if (!fs.existsSync(filePath + ".gz")) {
+      throw new Error(`Matrix file was not found.\n`);
+    }
+  } catch (err) {
+    res.status(400).send(err.message);
     return 0;
-  });
+  }
 
-  let matrix = null;
-  let rows = null;
-  let cols = null;
-  let minRow = null;
-  let maxRow = null;
+  gunzip(
+    filePath + ".gz",
+    filePath,
+    () => {
+      const instream = fs.createReadStream(filePath);
+      instream.on("error", function () {
+        res.status(400).send(`Matrix file was not found.\n`);
+        return 0;
+      });
 
-  let exit = false;
-  let indexLineReached = false;
+      let matrix = null;
+      let rows = null;
+      let cols = null;
+      let minRow = null;
+      let maxRow = null;
 
-  instream.pipe(es.split()).pipe(
-    es
-      .mapSync(function (line) {
-        if (line.trim().charAt(0) !== "%" && !exit) {
-          if (!indexLineReached) {
-            let delimited = line.split(" ");
-            if (delimited.length == 1) delimited = delimited[0].split("\t");
-            if (delimited.length == 1) delimited = delimited[0].split(",");
+      let exit = false;
+      let indexLineReached = false;
 
-            rows = Number.parseInt(delimited[0]);
-            cols = Number.parseInt(delimited[1]);
-            if (
-              Number.isNaN(rows) ||
-              Number.isNaN(cols) ||
-              Number.isNaN(Number.parseInt(delimited[2])) ||
-              Number.parseInt(delimited[2]) > rows * cols
-            ) {
-              exit = true;
-            } else {
-              minRow = 1 + count * Math.ceil(rows / numBatches);
-              maxRow = Math.min(
-                1 + (count + 1) * Math.ceil(rows / numBatches),
-                1 + rows
-              );
-              console.log("Sending genes [" + minRow + "," + maxRow + ")");
-              matrix = new SparseMatrix(rows, cols);
-              indexLineReached = true;
-            }
-          } else {
-            let delimited = line.split(" ");
-            if (delimited.length == 1) delimited = delimited[0].split("\t");
-            if (delimited.length == 1) delimited = delimited[0].split(",");
+      instream.pipe(es.split()).pipe(
+        es
+          .mapSync(function (line) {
+            if (line.trim().charAt(0) !== "%" && !exit) {
+              if (!indexLineReached) {
+                let delimited = line.split(" ");
+                if (delimited.length == 1) delimited = delimited[0].split("\t");
+                if (delimited.length == 1) delimited = delimited[0].split(",");
 
-            const i = Number.parseInt(delimited[0]);
-            const j = Number.parseInt(delimited[1]);
-            const value = Number.parseFloat(delimited[2]);
-            if (
-              Number.isNaN(i) ||
-              Number.isNaN(j) ||
-              Number.isNaN(value) ||
-              i > rows ||
-              j > cols
-            ) {
-              if (line.trim().length !== 0) {
-                exit = true;
+                rows = Number.parseInt(delimited[0]);
+                cols = Number.parseInt(delimited[1]);
+                if (
+                  Number.isNaN(rows) ||
+                  Number.isNaN(cols) ||
+                  Number.isNaN(Number.parseInt(delimited[2])) ||
+                  Number.parseInt(delimited[2]) > rows * cols
+                ) {
+                  exit = true;
+                } else {
+                  minRow = 1 + count * Math.ceil(rows / numBatches);
+                  maxRow = Math.min(
+                    1 + (count + 1) * Math.ceil(rows / numBatches),
+                    1 + rows
+                  );
+                  console.log("Sending genes [" + minRow + "," + maxRow + ")");
+                  matrix = new SparseMatrix(rows, cols);
+                  indexLineReached = true;
+                }
+              } else {
+                let delimited = line.split(" ");
+                if (delimited.length == 1) delimited = delimited[0].split("\t");
+                if (delimited.length == 1) delimited = delimited[0].split(",");
+
+                const i = Number.parseInt(delimited[0]);
+                const j = Number.parseInt(delimited[1]);
+                const value = Number.parseFloat(delimited[2]);
+                if (
+                  Number.isNaN(i) ||
+                  Number.isNaN(j) ||
+                  Number.isNaN(value) ||
+                  i > rows ||
+                  j > cols
+                ) {
+                  if (line.trim().length !== 0) {
+                    exit = true;
+                  }
+                } else if (matrix && i >= minRow && i < maxRow && value > 0) {
+                  matrix.set(i - 1, j - 1, value);
+                }
               }
-            } else if (matrix && i >= minRow && i < maxRow) {
-              matrix.set(i - 1, j - 1, value);
+            } else if (exit) {
+              return 0;
             }
-          }
-        } else if (exit) {
-          return 0;
-        }
-      })
-      .on("end", function () {
-        if (matrix && !exit) {
-          console.log(
-            "Sparse matrix with " +
-              matrix.elements.distinct +
-              " non-zero elements sent successfully."
-          );
-          res.json(
-            JSON.stringify({
-              rows: matrix.rows,
-              columns: matrix.columns,
-              elements: matrix.elements,
-            })
-          );
-        } else {
-          res.status(400).send("Matrix file is not properly formatted.\n");
-        }
-      })
+          })
+          .on("end", function () {
+            if (matrix && !exit) {
+              console.log(
+                "Sparse matrix with " +
+                  matrix.elements.distinct +
+                  " non-zero elements sent successfully."
+              );
+              res.json(
+                JSON.stringify({
+                  rows: matrix.rows,
+                  columns: matrix.columns,
+                  elements: matrix.elements,
+                })
+              );
+            } else {
+              res.status(400).send("Matrix file is not properly formatted.\n");
+            }
+          })
+      );
+    },
+    (error) => {
+      console.log(error);
+    }
   );
 });
 
@@ -184,40 +203,51 @@ app.get("/api/features/:uuid", function (req, res) {
     filePath = `${dir}/data/${req.params.uuid}/features.tsv`;
   }
 
-  const instream = fs.createReadStream(filePath);
-  instream.on("error", function () {
-    res.status(400).send("Features file was not found.\n");
+  try {
+    if (!fs.existsSync(filePath + ".gz")) {
+      throw new Error(`Features file was not found.\n`);
+    }
+  } catch (err) {
+    res.status(400).send(err.message);
     return 0;
-  });
+  }
 
-  const array = [];
-  let exit = false;
+  gunzip(filePath + ".gz", filePath, () => {
+    const instream = fs.createReadStream(filePath);
+    instream.on("error", function () {
+      res.status(400).send("Features file was not found.\n");
+      return 0;
+    });
 
-  instream.pipe(es.split()).pipe(
-    es
-      .mapSync(function (line) {
-        if (!exit) {
-          let delimited = line.split("\t");
-          if (delimited.length == 1) delimited = delimited[0].split(" ");
-          if (delimited.length == 1) delimited = delimited[0].split(",");
+    const array = [];
+    let exit = false;
 
-          let geneName = delimited[1];
-          if (geneName && geneName.length > 0) {
-            array.push(geneName);
-          } else if (line.trim().length !== 0) {
-            geneName = delimited[0];
-            array.push(geneName);
+    instream.pipe(es.split()).pipe(
+      es
+        .mapSync(function (line) {
+          if (!exit) {
+            let delimited = line.split("\t");
+            if (delimited.length == 1) delimited = delimited[0].split(" ");
+            if (delimited.length == 1) delimited = delimited[0].split(",");
+
+            let geneName = delimited[1];
+            if (geneName && geneName.length > 0) {
+              array.push(geneName);
+            } else if (line.trim().length !== 0) {
+              geneName = delimited[0];
+              array.push(geneName);
+            }
           }
-        }
-      })
-      .on("end", function () {
-        if (array.length > 0 && !exit) {
-          res.json(JSON.stringify(array));
-        } else {
-          res.status(400).send("Features file is not properly formatted.\n");
-        }
-      })
-  );
+        })
+        .on("end", function () {
+          if (array.length > 0 && !exit) {
+            res.json(JSON.stringify(array));
+          } else {
+            res.status(400).send("Features file is not properly formatted.\n");
+          }
+        })
+    );
+  });
 });
 
 app.get("/api/barcodes/:uuid", function (req, res) {
@@ -234,32 +264,43 @@ app.get("/api/barcodes/:uuid", function (req, res) {
     filePath = `${dir}/data/${req.params.uuid}/barcodes.tsv`;
   }
 
-  const instream = fs.createReadStream(filePath);
-  instream.on("error", function () {
-    res.status(400).send("Barcodes file was not found.\n");
+  try {
+    if (!fs.existsSync(filePath + ".gz")) {
+      throw new Error(`Barcodes file was not found.\n`);
+    }
+  } catch (err) {
+    res.status(400).send(err.message);
     return 0;
+  }
+
+  gunzip(filePath + ".gz", filePath, () => {
+    const instream = fs.createReadStream(filePath);
+    instream.on("error", function () {
+      res.status(400).send("Barcodes file was not found.\n");
+      return 0;
+    });
+
+    const array = [];
+
+    instream.pipe(es.split()).pipe(
+      es
+        .mapSync(function (line) {
+          let delimited = line.split("\t");
+          if (delimited.length == 1) delimited = delimited[0].split(" ");
+          if (delimited.length == 1) delimited = delimited[0].split(",");
+
+          const str = delimited[delimited.length - 1].trim();
+          if (str.length > 0) array.push(str);
+        })
+        .on("end", function () {
+          if (array.length > 0) {
+            res.json(JSON.stringify(array));
+          } else {
+            res.status(400).send("Barcodes file is not properly formatted.\n");
+          }
+        })
+    );
   });
-
-  const array = [];
-
-  instream.pipe(es.split()).pipe(
-    es
-      .mapSync(function (line) {
-        let delimited = line.split("\t");
-        if (delimited.length == 1) delimited = delimited[0].split(" ");
-        if (delimited.length == 1) delimited = delimited[0].split(",");
-
-        const str = delimited[delimited.length - 1].trim();
-        if (str.length > 0) array.push(str);
-      })
-      .on("end", function () {
-        if (array.length > 0) {
-          res.json(JSON.stringify(array));
-        } else {
-          res.status(400).send("Barcodes file is not properly formatted.\n");
-        }
-      })
-  );
 });
 
 app.get("/api/pixels/:uuid", function (req, res) {
@@ -276,46 +317,59 @@ app.get("/api/pixels/:uuid", function (req, res) {
     filePath = `${dir}/data/${req.params.uuid}/tissue_positions_list.csv`;
   }
 
-  const instream = fs.createReadStream(filePath);
-  instream.on("error", function () {
-    res.status(400).send("Tissue spatial positions file was not found.\n");
+  try {
+    if (!fs.existsSync(filePath + ".gz")) {
+      throw new Error(`Tissue spatial positions file was not found.\n`);
+    }
+  } catch (err) {
+    res.status(400).send(err.message);
     return 0;
-  });
+  }
 
-  const array = [];
-  let exit = false;
+  gunzip(filePath + ".gz", filePath, () => {
+    const instream = fs.createReadStream(filePath);
+    instream.on("error", function () {
+      res.status(400).send("Tissue spatial positions file was not found.\n");
+      return 0;
+    });
 
-  instream.pipe(es.split()).pipe(
-    es
-      .mapSync(function (line) {
-        if (!exit) {
-          let delimited = line.split(",");
-          if (delimited.length == 1) delimited = delimited[0].split("\t");
-          if (delimited.length == 1) delimited = delimited[0].split(" ");
-          if (delimited.length >= 3) {
-            const barcode = delimited[0].trim();
-            const x = delimited[delimited.length - 2].trim();
-            const y = delimited[delimited.length - 1].trim();
-            array.push({
-              barcode: barcode,
-              x: x,
-              y: y,
-            });
-          } else if (line.trim().length !== 0) {
-            exit = true;
+    const array = [];
+    let exit = false;
+
+    instream.pipe(es.split()).pipe(
+      es
+        .mapSync(function (line) {
+          if (!exit) {
+            let delimited = line.split(",");
+            if (delimited.length == 1) delimited = delimited[0].split("\t");
+            if (delimited.length == 1) delimited = delimited[0].split(" ");
+            if (delimited.length >= 3) {
+              const barcode = delimited[0].trim();
+              const x = delimited[delimited.length - 2].trim();
+              const y = delimited[delimited.length - 1].trim();
+              array.push({
+                barcode: barcode,
+                x: x,
+                y: y,
+              });
+            } else if (line.trim().length !== 0) {
+              exit = true;
+            }
           }
-        }
-      })
-      .on("end", function () {
-        if (array.length > 0 && !exit) {
-          res.json(JSON.stringify(array));
-        } else {
-          res
-            .status(400)
-            .send("Tissue spatial positions file is not properly formatted.\n");
-        }
-      })
-  );
+        })
+        .on("end", function () {
+          if (array.length > 0 && !exit) {
+            res.json(JSON.stringify(array));
+          } else {
+            res
+              .status(400)
+              .send(
+                "Tissue spatial positions file is not properly formatted.\n"
+              );
+          }
+        })
+    );
+  });
 });
 
 app.use("/", router);

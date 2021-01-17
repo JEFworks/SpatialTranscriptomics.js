@@ -48,8 +48,8 @@ const Figure = (rowsums, colsums, thresholds, changeThreshold, type) => {
       style={{ paddingBottom: "5px", fontWeight: 500, color: primary }}
     >
       {type === "rowsum"
-        ? "# of Reads per Gene"
-        : "# of Genes Detected per Cell"}
+        ? "# of Reads of a Gene"
+        : "# of Genes Detected in a Cell"}
     </Typography>
   );
 
@@ -58,8 +58,8 @@ const Figure = (rowsums, colsums, thresholds, changeThreshold, type) => {
       <Histogram
         xLabel={
           type === "rowsum"
-            ? "log10(reads per gene + 1)"
-            : "log10(genes per cell + 1)"
+            ? "log10(# of reads of a gene + 1)"
+            : "log10(# of genes detected in a cell + 1)"
         }
         data={sums}
         min={type === "rowsum" ? thresholds.minRowSum : thresholds.minColSum}
@@ -158,14 +158,14 @@ class QualityControl extends Component {
             style={{ marginBottom: "10px", fontWeight: 500, color: primary }}
             variant="h5"
           >
-            Quality Control
+            Quality Control (QC)
           </Typography>
           {loading && (
             <CircularProgress
               disableShrink
               size={40}
               thickness={5}
-              style={{ color: blue, marginTop: "-5px", marginLeft: "40px" }}
+              style={{ color: blue, marginTop: "-5px", marginLeft: "30px" }}
             />
           )}
         </div>
@@ -173,10 +173,12 @@ class QualityControl extends Component {
           style={{ marginBottom: "20px", fontWeight: 400, color: paragraph }}
           variant="body1"
         >
-          Use the range selectors to change the minimum threshold for each
-          quality control metric. Cells and genes below these thresholds will be
-          removed from the expression matrix for downstream analysis. Genes not
-          expressed in any cells were removed before computing quality control.
+          Use the range selectors to change the minimum threshold for each QC
+          metric.
+          <br></br>
+          Cells and genes below these thresholds are removed from the expression
+          matrix for downstream analysis. Genes not expressed in any cells were
+          automatically removed.
         </Typography>
 
         <div style={{ width: "100%", display: "flex" }}>
@@ -208,7 +210,7 @@ class QualityControl extends Component {
           style={{ backgroundColor: primary }}
           onClick={() => this.run()}
         >
-          Apply Filters
+          Apply QC Filters
         </Button>
       </>
     );

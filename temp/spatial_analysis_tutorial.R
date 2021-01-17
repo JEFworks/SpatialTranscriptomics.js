@@ -49,28 +49,28 @@ dim(mat)
 ## we will instead install a faster implementation
 #install.packages("RSpectra")
 library(RSpectra)
-#pca <- RSpectra::svds(
-#  A    = t(mat),
-#  k    = 20,
-#  opts = list(
-#    center = TRUE, scale = TRUE, maxitr = 2000, tol = 1e-10
-#  )
-#)
-
-## Scale and center data myself
-m <- t(mat)
-m <- t(t(m) - colMeans(m))
-colMeans(m) ## double check mean is ~0
-m <- scale(m)
-apply(m, 2, var) ## double check var is 1
-
 pca <- RSpectra::svds(
-  A    = m,
-  k    = 20,
-  opts = list(
-    center = FALSE, scale = FALSE, maxitr = 2000, tol = 1e-10
-  )
+ A    = t(mat),
+ k    = 20,
+ opts = list(
+   center = TRUE, scale = TRUE, maxitr = 2000, tol = 1e-10
+ )
 )
+
+# ## Scale and center data myself
+# m <- t(mat)
+# m <- t(t(m) - colMeans(m))
+# colMeans(m) ## double check mean is ~0
+# m <- scale(m)
+# apply(m, 2, var) ## double check var is 1
+
+# pca <- RSpectra::svds(
+#   A    = m,
+#   k    = 20,
+#   opts = list(
+#     center = FALSE, scale = FALSE, maxitr = 2000, tol = 1e-10
+#   )
+# )
 
 ## look at elbow plot to check what is reasonable number of pcs
 val <- pca$d
@@ -160,6 +160,7 @@ plot(pcs[,1:2], col=col, pch=".")
 
 ## Since this is spatial data, we can also see where these
 ## transcriptional clusters are spatially
+dir <- '~/Documents/Github/SpatialTranscriptomics.js/backend/example_data/coronal_brain/'
 positions <- read.csv(paste0(dir, 'spatial/tissue_positions_list.csv.gz'),
                 header=FALSE)
 head(positions)

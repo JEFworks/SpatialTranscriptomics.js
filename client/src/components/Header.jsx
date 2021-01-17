@@ -102,7 +102,7 @@ const TitleContents = (
       )}
 
       {!isMobile && (
-        <div style={{ flexGrow: 1, marginLeft: "25px" }}>
+        <div style={{ flexGrow: 1, marginLeft: "25px", marginTop: "5px" }}>
           <CircularProgress
             disableShrink
             size={40}

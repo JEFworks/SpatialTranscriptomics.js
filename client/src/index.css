@@ -39,7 +39,7 @@ code {
 
 .tsne-plot {
   height: 450px;
-  width: 500px;
+  width: 490px;
 }
 
 .icon-404 {
@@ -75,7 +75,7 @@ code {
 
 @media only screen and (max-width: 600px) {
   .tsne-plot {
-    height: 380px;
+    height: 386px;
     width: 420px;
   }
 }

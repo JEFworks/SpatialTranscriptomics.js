@@ -4,7 +4,7 @@ import { ResponsiveScatterPlot } from "@nivo/scatterplot";
 class Scatter extends Component {
   render() {
     const { props } = this;
-    const { data, tSNE } = props;
+    const { data, tSNE, getColor, pcX, pcY, visible } = props;
 
     return (
       <>
@@ -34,7 +34,7 @@ class Scatter extends Component {
                   tickSize: 5,
                   tickPadding: 5,
                   tickRotation: 0,
-                  legend: "pc1",
+                  legend: !visible ? "tsne" : "pc" + pcX,
                   legendPosition: "middle",
                   legendOffset: 40,
                 }
@@ -47,12 +47,12 @@ class Scatter extends Component {
                   tickSize: 5,
                   tickPadding: 5,
                   tickRotation: 0,
-                  legend: "pc2",
+                  legend: !visible ? "tsne" : "pc" + pcY,
                   legendPosition: "middle",
                   legendOffset: -50,
                 }
           }
-          colors={props.getColor}
+          colors={getColor}
           animate={false}
         />
       </>

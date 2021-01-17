@@ -134,7 +134,12 @@ class tSNEWrapper extends Component {
           style={{ marginBottom: "0px", fontWeight: 400, color: paragraph }}
           variant="body1"
         >
-          Enter description here.
+          Produce a tSNE map to map the principal components onto a 2D space,
+          while preserving local distances between cells.
+          <br></br>
+          Epsilon is the learning rate, perplexity is the # of neighboring cells
+          each cell influences, and iterations is the # of steps tSNE should
+          run.
         </Typography>
 
         <div style={{ display: "flex" }}>
@@ -142,9 +147,9 @@ class tSNEWrapper extends Component {
           {this.props.loading && (
             <CircularProgress
               disableShrink
-              size={50}
+              size={40}
               thickness={5}
-              style={{ color: blue, marginTop: "5px", marginLeft: "40px" }}
+              style={{ color: blue, marginTop: "13px", marginLeft: "30px" }}
             />
           )}
         </div>

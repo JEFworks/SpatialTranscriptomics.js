@@ -45,9 +45,16 @@ const getStepContent = (
   switch (step) {
     case 0:
       return (
-        <div style={{ marginBottom: "10px" }}>
+        <div style={{ marginBottom: "15px" }}>
+          <Typography
+            style={{ fontWeight: 400, color: "black", marginBottom: "10px" }}
+            variant="body2"
+          >
+            Your matrix file should be in Matrix Market coordinate format.
+            Please submit a gzipped (.mtx.gz) file.
+          </Typography>
           <input
-            accept=".mtx, .txt, .tsv"
+            accept=".gz"
             id="file-button1"
             type="file"
             onChange={matrixFileHandler}
@@ -57,9 +64,19 @@ const getStepContent = (
       );
     case 1:
       return (
-        <div style={{ marginBottom: "10px" }}>
+        <div style={{ marginBottom: "15px" }}>
+          <Typography
+            style={{ fontWeight: 400, color: "black", marginBottom: "10px" }}
+            variant="body2"
+          >
+            Your features file should be a TSV file, with features corresponding
+            to row indices in your matrix.
+            <br></br>
+            Each feature's gene name should be stored in the second column.
+            Please submit a gzipped (.tsv.gz) file.
+          </Typography>
           <input
-            accept=".csv, .txt, .tsv"
+            accept=".gz"
             id="file-button1"
             type="file"
             onChange={featuresFileHandler}
@@ -69,9 +86,19 @@ const getStepContent = (
       );
     case 2:
       return (
-        <div style={{ marginBottom: "10px" }}>
+        <div style={{ marginBottom: "15px" }}>
+          <Typography
+            style={{ fontWeight: 400, color: "black", marginBottom: "10px" }}
+            variant="body2"
+          >
+            Your barcodes file should be a TSV file, with barcodes corresponding
+            to column indices in your matrix.
+            <br></br>
+            Each barcode's sequence should be stored in the last column. Please
+            submit a gzipped (.tsv.gz) file.
+          </Typography>
           <input
-            accept=".csv, .txt, .tsv"
+            accept=".gz"
             id="file-button1"
             type="file"
             onChange={barcodesFileHandler}
@@ -81,9 +108,22 @@ const getStepContent = (
       );
     case 3:
       return (
-        <div style={{ marginBottom: "10px" }}>
+        <div style={{ marginBottom: "15px" }}>
+          <Typography
+            style={{ fontWeight: 400, color: "black", marginBottom: "10px" }}
+            variant="body2"
+          >
+            Your tissue positions file should be a CSV file, containing a table
+            with rows that corresponding to spots.
+            <br></br>
+            Each spot's column pixel coordinate should be stored in the
+            second-to-last column, and each spot's row pixel coordinate should
+            be stored in the last column.
+            <br></br>
+            Please submit a gzipped (.csv.gz) file.
+          </Typography>
           <input
-            accept=".csv, .txt, .tsv"
+            accept=".gz"
             id="file-button1"
             type="file"
             onChange={pixelsFileHandler}
@@ -93,7 +133,13 @@ const getStepContent = (
       );
     case 4:
       return (
-        <div style={{ marginBottom: "10px" }}>
+        <div style={{ marginBottom: "15px" }}>
+          <Typography
+            style={{ fontWeight: 400, color: "black", marginBottom: "10px" }}
+            variant="body2"
+          >
+            Please submit an unzipped tissue image file (.png, .jpg, or .jpeg).
+          </Typography>
           <input
             accept=".png, .jpg, .jpeg"
             id="file-button1"
@@ -130,12 +176,12 @@ class VerticalLinearStepper extends Component {
     const step = this.state.activeStep;
     const { files, uploadFiles } = this.props;
     if (step === 0 && files.matrix == null) {
-      this.alertUser();
-      return;
+      //this.alertUser();
+      //return;
     }
 
     if (step === 4) {
-      uploadFiles();
+      //uploadFiles();
     }
     this.setActiveStep(step + 1);
   }
@@ -201,7 +247,10 @@ class VerticalLinearStepper extends Component {
 
         {activeStep === steps.length && (
           <Paper square elevation={0} style={{ marginBottom: "30px" }}>
-            <Typography>All steps completed - wait for data to load</Typography>
+            <Typography>
+              All steps completed - wait for data to load and quality control
+              statistics to appear
+            </Typography>
             <Button
               onClick={handleReset}
               style={{
@@ -251,8 +300,11 @@ class DataUpload extends Component {
             <Fade
               style={{
                 marginLeft: "20px",
-                marginTop: "12px",
+                marginTop: "17px",
                 width: "400px",
+                paddingTop: "0px",
+                paddingLeft: "10px",
+                height: "30px",
               }}
               in
               timeout={1500}
@@ -275,7 +327,11 @@ class DataUpload extends Component {
           style={{ fontWeight: 400, color: paragraph, marginBottom: "-5px" }}
           variant="body1"
         >
-          Enter description here.
+          By default, a dataset of 20 genes x 2698 cells from a coronal brain
+          tissue is loaded.
+          <br></br>
+          To work with your own dataset, upload the appropriate files below. The
+          only required file is the matrix file.
         </Typography>
 
         <VerticalLinearStepper

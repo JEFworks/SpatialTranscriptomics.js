@@ -171,7 +171,7 @@ class Homepage extends Component {
     const { files } = this.state;
     const file = event.target.files[0];
     const copy = file.slice(0, file.size, file.type);
-    const newFile = new File([copy], "matrix.mtx", { type: file.type });
+    const newFile = new File([copy], "matrix.mtx.gz", { type: file.type });
     files.matrix = newFile;
     this.setState({ files, errors: [] });
   }
@@ -181,7 +181,7 @@ class Homepage extends Component {
     const { files } = this.state;
     const file = event.target.files[0];
     const copy = file.slice(0, file.size, file.type);
-    const newFile = new File([copy], "features.tsv", { type: file.type });
+    const newFile = new File([copy], "features.tsv.gz", { type: file.type });
     files.features = newFile;
     this.setState({ files });
   }
@@ -191,7 +191,7 @@ class Homepage extends Component {
     const { files } = this.state;
     const file = event.target.files[0];
     const copy = file.slice(0, file.size, file.type);
-    const newFile = new File([copy], "barcodes.tsv", { type: file.type });
+    const newFile = new File([copy], "barcodes.tsv.gz", { type: file.type });
     files.barcodes = newFile;
     this.setState({ files });
   }
@@ -201,7 +201,7 @@ class Homepage extends Component {
     const { files } = this.state;
     const file = event.target.files[0];
     const copy = file.slice(0, file.size, file.type);
-    const newFile = new File([copy], "tissue_positions_list.csv", {
+    const newFile = new File([copy], "tissue_positions_list.csv.gz", {
       type: file.type,
     });
     files.pixels = newFile;
@@ -627,8 +627,12 @@ class Homepage extends Component {
     // produce error message
     const { errors } = this.state;
     let errorMsg = "";
-    for (let i = 0; i < errors.length; i++) {
-      errorMsg += errors[i];
+    if (errors.includes("Server not responding.\n")) {
+      errorMsg = "Server not responding.\n";
+    } else {
+      for (let i = 0; i < errors.length; i++) {
+        errorMsg += errors[i];
+      }
     }
 
     return (
@@ -659,7 +663,7 @@ class Homepage extends Component {
             loading={this.state.loading.upload}
           />
 
-          <div style={{ paddingTop: "40px" }}></div>
+          <div style={{ paddingTop: "35px" }}></div>
           <PCAWrapper
             computePCA={this.computePCA}
             eigenvectors={this.state.pcs}

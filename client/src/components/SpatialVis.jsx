@@ -37,7 +37,7 @@ const LeafletWrapper = (pixels, colors, opacity, pixelSize, imageLink) => {
               key={pixel.center}
               center={pixel.center}
               color="transparent"
-              fillColor={colors[index] ? colors[index] : "transparent"}
+              fillColor={colors[index] ? colors[index] : "blue"}
               fillOpacity={opacity}
               radius={pixelSize}
             />
@@ -75,13 +75,13 @@ const TypedInput = (
         onChange={changeScale}
       />
       <TextField
-        style={{ width: "100px", marginRight: "15px" }}
+        style={{ width: "90px", marginRight: "15px" }}
         helperText="Opacity (0 - 1)"
         defaultValue="1"
         onChange={changeOpacity}
       />
       <TextField
-        style={{ width: "70px" }}
+        style={{ width: "60px" }}
         helperText="Pixel Size"
         defaultValue="8"
         onChange={changePixelSize}
@@ -275,7 +275,7 @@ class SpatialVis extends Component {
           style={{ marginBottom: "0px", fontWeight: 400, color: paragraph }}
           variant="body1"
         >
-          Enter description here.
+          Run this visualization to map results spatially onto the tissue.
         </Typography>
 
         <div style={{ display: "flex" }}>

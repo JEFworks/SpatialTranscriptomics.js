@@ -16,7 +16,8 @@ const blue = "#80d8ff";
 
 const Biplot = (eigenvectors, getColor, pcX, pcY) => {
   const obj = [{ data: [] }];
-  if (eigenvectors[0] && !isNaN(pcX) && !isNaN(pcY) && pcX > 0 && pcY > 0) {
+  const visible = !isNaN(pcX) && !isNaN(pcY) && pcX > 0 && pcY > 0;
+  if (eigenvectors[0] && visible) {
     eigenvectors.forEach((vector, index) => {
       // plot pc2 against pc1
       const x = vector[Math.min(pcX - 1, eigenvectors[0].length - 1)];
@@ -37,7 +38,13 @@ const Biplot = (eigenvectors, getColor, pcX, pcY) => {
 
   const Scatterplot = (
     <div style={{ width: "100%", height: "100%" }}>
-      <ScatterPlot data={obj} getColor={getColor} />
+      <ScatterPlot
+        data={obj}
+        getColor={getColor}
+        pcX={pcX}
+        pcY={pcY}
+        visible={visible}
+      />
     </div>
   );
 
@@ -84,7 +91,7 @@ const ScreePlot = (eigenvalues, numPCs) => {
   );
 
   return (
-    <div style={{ paddingRight: "20px" }}>
+    <div style={{ marginRight: "20px" }}>
       <Paper
         className="scree-plot"
         style={{
@@ -105,19 +112,19 @@ const TypedInput = (selectNumPCs, set_pcX, set_pcY) => {
   return (
     <FormGroup row style={{ marginTop: "7px" }}>
       <TextField
-        style={{ width: "70px", marginRight: "15px" }}
+        style={{ width: "60px", marginRight: "15px" }}
         helperText="# of PCs"
         defaultValue="10"
         onChange={selectNumPCs}
       />
       <TextField
-        style={{ width: "90px", marginRight: "15px" }}
+        style={{ width: "80px", marginRight: "15px" }}
         helperText="PC on x-axis"
         defaultValue="1"
         onChange={set_pcX}
       />
       <TextField
-        style={{ width: "90px" }}
+        style={{ width: "80px" }}
         helperText="PC on y-axis"
         defaultValue="2"
         onChange={set_pcY}
@@ -142,10 +149,7 @@ class PCAWrapper extends Component {
   set_pcY = this.set_pcY.bind(this);
 
   getColor(node) {
-    if (node.index) {
-      return this.props.colors[node.index];
-    }
-    return "blue";
+    return node.index ? this.props.colors[node.index] : "blue";
   }
 
   run() {
@@ -199,7 +203,16 @@ class PCAWrapper extends Component {
           style={{ marginBottom: "0px", fontWeight: 400, color: paragraph }}
           variant="body1"
         >
-          Enter description here.
+          Perform PCA to reduce the number of dimensions in the data and reduce
+          noise.
+          <br></br>
+          The scree plot visualizes how much variation each PC captures, and the
+          biplot plots two PCs against each other to visualize the data in a 2D
+          space.
+          <br></br>
+          To run PCA, press "Run PCA." To set how many PCs should be used in
+          downstream analysis or specify which PCs to plot in the biplot, press
+          "Apply Settings."
         </Typography>
 
         <div style={{ display: "flex" }}>
@@ -207,9 +220,9 @@ class PCAWrapper extends Component {
           {loading && (
             <CircularProgress
               disableShrink
-              size={50}
+              size={40}
               thickness={5}
-              style={{ color: blue, marginTop: "5px", marginLeft: "40px" }}
+              style={{ color: blue, marginTop: "13px", marginLeft: "30px" }}
             />
           )}
         </div>

@@ -42,7 +42,7 @@ class LineChart extends Component {
             tickSize: 5,
             tickPadding: 5,
             tickRotation: 0,
-            legend: "principal components",
+            legend: "component #",
             legendOffset: 40,
             legendPosition: "middle",
           }}
@@ -51,7 +51,7 @@ class LineChart extends Component {
             tickSize: 5,
             tickPadding: 5,
             tickRotation: 0,
-            legend: "eigenvalues",
+            legend: "eigenvalue",
             legendOffset: -40,
             legendPosition: "middle",
           }}
