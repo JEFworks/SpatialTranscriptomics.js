@@ -17,6 +17,7 @@
     "event-stream": "^4.0.1",
     "express": "^4.17.1",
     "gunzip-file": "^0.1.1",
+    "is-gzip": "^2.0.0",
     "ml-sparse-matrix": "^2.0.0",
     "multer": "^1.4.2",
     "nodemon": "^2.0.5",

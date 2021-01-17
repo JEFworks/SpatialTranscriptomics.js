@@ -176,12 +176,12 @@ class VerticalLinearStepper extends Component {
     const step = this.state.activeStep;
     const { files, uploadFiles } = this.props;
     if (step === 0 && files.matrix == null) {
-      //this.alertUser();
-      //return;
+      this.alertUser();
+      return;
     }
 
     if (step === 4) {
-      //uploadFiles();
+      uploadFiles();
     }
     this.setActiveStep(step + 1);
   }
