@@ -11,7 +11,7 @@ const isGzip = require("is-gzip");
 
 // delete localhost from this list when deploying
 const corsOptions = {
-  origin: ["https://stjs.me"],
+  origin: ["https://stjs.me", "http://localhost:8000"],
   optionsSuccessStatus: 200, // For legacy browser support
 };
 
@@ -83,9 +83,7 @@ app.get("/api/matrix/:uuid/:count/:numBatches", function (req, res) {
   }
 
   try {
-    if (isGzip(fs.readFileSync(filePath + ".gz"))) {
-      //console.log("File is great!")
-    } else {
+    if (!isGzip(fs.readFileSync(filePath + ".gz"))) {
       throw new Error();
     }
   } catch (_err) {
@@ -115,8 +113,12 @@ app.get("/api/matrix/:uuid/:count/:numBatches", function (req, res) {
           if (line.trim().charAt(0) !== "%" && !exit) {
             if (!indexLineReached) {
               let delimited = line.split(" ");
-              if (delimited.length == 1) delimited = delimited[0].split("\t");
-              if (delimited.length == 1) delimited = delimited[0].split(",");
+              if (delimited.length === 1) {
+                delimited = delimited[0].split("\t");
+              }
+              if (delimited.length === 1) {
+                delimited = delimited[0].split(",");
+              }
 
               rows = Number.parseInt(delimited[0]);
               cols = Number.parseInt(delimited[1]);
@@ -139,8 +141,12 @@ app.get("/api/matrix/:uuid/:count/:numBatches", function (req, res) {
               }
             } else {
               let delimited = line.split(" ");
-              if (delimited.length == 1) delimited = delimited[0].split("\t");
-              if (delimited.length == 1) delimited = delimited[0].split(",");
+              if (delimited.length === 1) {
+                delimited = delimited[0].split("\t");
+              }
+              if (delimited.length === 1) {
+                delimited = delimited[0].split(",");
+              }
 
               const i = Number.parseInt(delimited[0]);
               const j = Number.parseInt(delimited[1]);
@@ -200,9 +206,7 @@ app.get("/api/features/:uuid", function (req, res) {
   }
 
   try {
-    if (isGzip(fs.readFileSync(filePath + ".gz"))) {
-      //console.log("File is great!")
-    } else {
+    if (!isGzip(fs.readFileSync(filePath + ".gz"))) {
       throw new Error();
     }
   } catch (_err) {
@@ -218,27 +222,28 @@ app.get("/api/features/:uuid", function (req, res) {
     });
 
     const array = [];
-    let exit = false;
 
     instream.pipe(es.split()).pipe(
       es
         .mapSync(function (line) {
-          if (!exit) {
-            let delimited = line.split("\t");
-            if (delimited.length == 1) delimited = delimited[0].split(" ");
-            if (delimited.length == 1) delimited = delimited[0].split(",");
+          let delimited = line.split("\t");
+          if (delimited.length === 1) {
+            delimited = delimited[0].split(" ");
+          }
+          if (delimited.length === 1) {
+            delimited = delimited[0].split(",");
+          }
 
-            let geneName = delimited[1];
-            if (geneName && geneName.length > 0) {
-              array.push(geneName);
-            } else if (line.trim().length !== 0) {
-              geneName = delimited[0];
-              array.push(geneName);
-            }
+          let geneName = delimited[1];
+          if (geneName && geneName.length > 0) {
+            array.push(geneName);
+          } else if (line.trim().length !== 0) {
+            geneName = delimited[0];
+            array.push(geneName);
           }
         })
         .on("end", function () {
-          if (array.length > 0 && !exit) {
+          if (array.length > 0) {
             res.json(JSON.stringify(array));
           } else {
             res.status(400).send("Features file is not properly formatted.\n");
@@ -263,9 +268,7 @@ app.get("/api/barcodes/:uuid", function (req, res) {
   }
 
   try {
-    if (isGzip(fs.readFileSync(filePath + ".gz"))) {
-      //console.log("File is great!")
-    } else {
+    if (!isGzip(fs.readFileSync(filePath + ".gz"))) {
       throw new Error();
     }
   } catch (_err) {
@@ -286,11 +289,17 @@ app.get("/api/barcodes/:uuid", function (req, res) {
       es
         .mapSync(function (line) {
           let delimited = line.split("\t");
-          if (delimited.length == 1) delimited = delimited[0].split(" ");
-          if (delimited.length == 1) delimited = delimited[0].split(",");
+          if (delimited.length === 1) {
+            delimited = delimited[0].split(" ");
+          }
+          if (delimited.length === 1) {
+            delimited = delimited[0].split(",");
+          }
 
           const str = delimited[delimited.length - 1].trim();
-          if (str.length > 0) array.push(str);
+          if (str && str.length > 0) {
+            array.push(str);
+          }
         })
         .on("end", function () {
           if (array.length > 0) {
@@ -318,9 +327,7 @@ app.get("/api/pixels/:uuid", function (req, res) {
   }
 
   try {
-    if (isGzip(fs.readFileSync(filePath + ".gz"))) {
-      //console.log("File is great!")
-    } else {
+    if (!isGzip(fs.readFileSync(filePath + ".gz"))) {
       throw new Error();
     }
   } catch (_err) {
@@ -343,8 +350,13 @@ app.get("/api/pixels/:uuid", function (req, res) {
         .mapSync(function (line) {
           if (!exit) {
             let delimited = line.split(",");
-            if (delimited.length == 1) delimited = delimited[0].split("\t");
-            if (delimited.length == 1) delimited = delimited[0].split(" ");
+            if (delimited.length === 1) {
+              delimited = delimited[0].split("\t");
+            }
+            if (delimited.length === 1) {
+              delimited = delimited[0].split(" ");
+            }
+
             if (delimited.length >= 3) {
               const barcode = delimited[0].trim();
               const x = delimited[delimited.length - 2].trim();

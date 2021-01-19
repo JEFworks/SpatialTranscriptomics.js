@@ -4,10 +4,10 @@ import { ResponsiveLine } from "@nivo/line";
 const red = "#ff80ab";
 const blue = "#80d8ff";
 
-const markers = (max, loading) => [
+const markers = (max, loading, totalNumPCs) => [
   {
     axis: "x",
-    value: max > 20 ? 20 : max,
+    value: max >= totalNumPCs ? totalNumPCs : max,
     lineStyle: {
       stroke: !loading ? red : "transparent",
       strokeWidth: 1,
@@ -18,7 +18,7 @@ const markers = (max, loading) => [
 class LineChart extends Component {
   render() {
     const { props } = this;
-    const { data, max } = props;
+    const { data, max, totalNumPCs } = props;
 
     return (
       <>
@@ -57,7 +57,7 @@ class LineChart extends Component {
           }}
           pointSize={10}
           pointBorderWidth={0.5}
-          markers={markers(max, data[0].data.length < 1)}
+          markers={markers(max, data[0].data.length < 1, totalNumPCs)}
           colors={blue}
           animate={false}
         />

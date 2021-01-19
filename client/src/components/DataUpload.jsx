@@ -116,9 +116,9 @@ const getStepContent = (
             Your tissue positions file should be a CSV file, containing a table
             with rows that corresponding to spots.
             <br></br>
-            Each spot's column pixel coordinate should be stored in the
-            second-to-last column, and each spot's row pixel coordinate should
-            be stored in the last column.
+            Barcode sequence should be stored in the first column, column pixel
+            coordinate in the second-to-last column, and row pixel coordinate in
+            the last column.
             <br></br>
             Please submit a gzipped (.csv.gz) file.
           </Typography>
@@ -248,8 +248,8 @@ class VerticalLinearStepper extends Component {
         {activeStep === steps.length && (
           <Paper square elevation={0} style={{ marginBottom: "30px" }}>
             <Typography>
-              All steps completed - wait for data to load and quality control
-              statistics to appear
+              All steps completed - wait for data to load and for quality
+              control statistics to appear
             </Typography>
             <Button
               onClick={handleReset}
@@ -328,10 +328,8 @@ class DataUpload extends Component {
           variant="body1"
         >
           By default, a dataset of 20 genes x 2698 cells from a coronal brain
-          tissue is loaded.
-          <br></br>
-          To work with your own dataset, upload the appropriate files below. The
-          only required file is the matrix file.
+          tissue is loaded. To work with your own dataset, upload the
+          appropriate files below. The only required file is the matrix file.
         </Typography>
 
         <VerticalLinearStepper

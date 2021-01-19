@@ -3,6 +3,7 @@ import euclideanDists from "../functions/euclideanDists.jsx";
 import normalizeDists from "../functions/normalizeDists.jsx";
 import tsnejs from "../functions/tsne.js";
 
+/* Code adapted from JEFworks/tsne-online */
 export const performTSNE = (filteredPCs, opt, iterations) => {
   const dists = normalizeDists(euclideanDists(filteredPCs));
   const tsne = new tsnejs.tSNE(opt); // create a tSNE instance

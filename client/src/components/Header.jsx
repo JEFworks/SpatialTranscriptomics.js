@@ -199,7 +199,7 @@ class Header extends Component {
   }
 
   updateDimensions() {
-    if (window.innerWidth < 980) {
+    if (window.innerWidth <= 980) {
       this.setState({ resize: true });
     } else {
       this.setState({ resize: true });

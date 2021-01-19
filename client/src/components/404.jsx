@@ -31,7 +31,6 @@ const Text = (
 const Page404 = () => (
   <>
     <Header noshow={true} />
-
     <div className="site-container">
       {Graphic}
       {Text}

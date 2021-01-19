@@ -24,7 +24,7 @@ export const performKMeans = (pcs, k) => {
   // produce coloring
   const colorsMap = new Map();
   let i = 0;
-  if (clusters != null) {
+  if (clusters) {
     clusters.forEach((cluster) => {
       cluster.forEach((cell) => {
         // get the index of this cell and give the cell the color of this cluster

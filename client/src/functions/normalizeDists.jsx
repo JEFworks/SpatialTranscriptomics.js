@@ -1,3 +1,5 @@
+/* Code from JEFworks/tsne-online */
+
 const normalizeDists = (d) => {
   const dists = d.slice();
   let max_dist = 0;

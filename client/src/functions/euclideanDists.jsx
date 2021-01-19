@@ -1,3 +1,5 @@
+/* Code from JEFworks/tsne-online */
+
 const euclideanDists = (matrix) => {
   const dists = new Array(Math.min(1000, matrix.length));
   for (let i = 0; i < dists.length; i++) {

@@ -1,3 +1,5 @@
+/* Code adapted from http://www.andrewnoske.com/wiki/Code_-_heatmaps_and_color_gradients */
+
 const GetRGB = (val) => {
   if (val == null) {
     return "transparent";

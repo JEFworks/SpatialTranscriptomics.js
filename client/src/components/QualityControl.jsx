@@ -173,7 +173,7 @@ class QualityControl extends Component {
           style={{ marginBottom: "20px", fontWeight: 400, color: paragraph }}
           variant="body1"
         >
-          Use the range selectors to change the minimum threshold for each QC
+          Use the range selectors to set the minimum threshold for each QC
           metric.
           <br></br>
           Cells and genes below these thresholds are removed from the expression

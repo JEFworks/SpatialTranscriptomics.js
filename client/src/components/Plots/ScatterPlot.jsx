@@ -4,13 +4,13 @@ import { ResponsiveScatterPlot } from "@nivo/scatterplot";
 class Scatter extends Component {
   render() {
     const { props } = this;
-    const { data, tSNE, getColor, pcX, pcY, visible } = props;
+    const { data, tsne, getColor, pcX, pcY, visible } = props;
 
     return (
       <>
         <ResponsiveScatterPlot
           data={data}
-          margin={{ top: 10, right: 10, bottom: 50, left: tSNE ? 10 : 55 }}
+          margin={{ top: 10, right: 10, bottom: 50, left: tsne ? 10 : 55 }}
           xScale={{ type: "linear", min: "auto", max: "auto" }}
           xFormat={function (e) {
             return e + " kg";
@@ -27,7 +27,7 @@ class Scatter extends Component {
           axisTop={null}
           axisRight={null}
           axisBottom={
-            tSNE
+            tsne
               ? null
               : {
                   orient: "bottom",
@@ -40,7 +40,7 @@ class Scatter extends Component {
                 }
           }
           axisLeft={
-            tSNE
+            tsne
               ? null
               : {
                   orient: "left",

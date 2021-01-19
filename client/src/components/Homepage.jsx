@@ -4,16 +4,17 @@ import api from "../api.jsx";
 import { v4 as uuidv4 } from "uuid";
 import { SparseMatrix } from "ml-sparse-matrix";
 
-import GetRGB from "../functions/GetRGB.jsx";
+import GetRGB from "../functions/getRGB.jsx";
 import MinMaxNormalize from "../functions/MinMaxNormalize.jsx";
 import MinMaxStats from "../functions/MinMaxStats.jsx";
 
 import Header from "./Header.jsx";
 import DataUpload from "./DataUpload.jsx";
 import QualityControl from "./QualityControl.jsx";
-import PCAWrapper from "./PCA.jsx";
-import TSNEWrapper from "./tSNE.jsx";
+import PCAWrapper from "./PCAWrapper.jsx";
+import TSNEWrapper from "./TSNEWrapper.jsx";
 import SpatialVis from "./SpatialVis.jsx";
+import DiffExp from "./DiffExp.jsx";
 
 import Worker_FILTER from "workerize-loader!../workers/worker-filter.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
 import Worker_PCA from "workerize-loader!../workers/worker-pca.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
@@ -58,7 +59,7 @@ class Homepage extends Component {
       pca: false,
       tsne: false,
       kmeans: false,
-      image: false,
+      image: true,
     },
     errors: [],
     imageLink: "",
@@ -98,10 +99,7 @@ class Homepage extends Component {
     const { errors } = this.state;
     if (error.response) {
       errors.push(error.response.data);
-    } else if (
-      error.message === "Network Error" &&
-      !errors.includes("Server not responding.\n")
-    ) {
+    } else if (error.message === "Network Error") {
       errors.push("Server not responding.\n");
     }
     this.setState({ errors });
@@ -143,23 +141,20 @@ class Homepage extends Component {
       filteredFeatures: [],
       barcodes: [],
       filteredBarcodes: [],
-      thresholds: { minRowSum: 2, minColSum: 2 },
       rowsums: [],
       colsums: [],
       colors: [],
       pcs: [],
       eigenvalues: [],
       filteredPCs: [],
-      feature: "camk2n1",
       tsneSolution: [],
-      k: 10,
       colorOption: "gene",
       loading: {
-        upload: false,
+        upload: true,
         pca: false,
         tsne: false,
         kmeans: false,
-        image: false,
+        image: true,
       },
       errors: [],
       imageLink: "",
@@ -222,25 +217,24 @@ class Homepage extends Component {
 
   loadImage() {
     const { loading, uuid } = this.state;
-    loading.image = false;
     const imageLink = `${api}/static/${uuid}/tissue_image.png`;
     axios
       .get(imageLink)
-      .then((_res) => {
-        this.setState({ imageLink });
-      })
       .catch(() => {
         const error = {
           response: { data: "Tissue image file was not found.\n" },
         };
         this.reportError(error);
+      })
+      .finally(() => {
+        loading.image = false;
+        this.setState({ loading, imageLink });
       });
-    this.setState({ loading });
   }
 
   // upload files to server
   async uploadFiles() {
-    const { files, loading } = this.state;
+    const { files } = this.state;
     if (!files.matrix) {
       return;
     }
@@ -260,13 +254,11 @@ class Homepage extends Component {
     window.history.pushState(null, null, `/?${urlParams.toString()}`);
 
     this.resetState();
-    loading.upload = true;
-    loading.image = true;
 
-    this.setState({ uuid, loading }, () => {
+    this.setState({ uuid }, () => {
       axios
         .post(`${api}/upload/${uuid}`, data, {})
-        .then((_res) => {
+        .then((_response) => {
           this.loadEverything();
         })
         .catch((error) => {
@@ -475,8 +467,8 @@ class Homepage extends Component {
   // filter based on user-specified # of PCs
   filterPCs(num) {
     const { pcs, loading, colorOption, k } = this.state;
-    loading.pca = false;
     if (!pcs[0]) {
+      loading.pca = false;
       this.setState({ loading });
       return;
     }
@@ -486,9 +478,10 @@ class Homepage extends Component {
       filteredPCs.push(pc.slice(0, num));
     });
 
+    loading.pca = false;
     this.setState({ filteredPCs, loading });
     if (colorOption === "cluster") {
-      this.getColorsByClusters(filteredPCs, k);
+      this.setColorsByClusters(filteredPCs, k);
     }
   }
 
@@ -579,7 +572,7 @@ class Homepage extends Component {
     const colors = [];
     const gene = this.getGene(matrix, features, featureName);
 
-    if (gene != null) {
+    if (gene) {
       // produce heatmap
       const { max, min } = MinMaxStats(gene);
       gene.forEach((cell) => {
@@ -587,7 +580,7 @@ class Homepage extends Component {
       });
     } else if (matrix[0]) {
       matrix[0].forEach(() => {
-        colors.push("black");
+        colors.push("blue");
       });
     }
 
@@ -603,10 +596,10 @@ class Homepage extends Component {
     }
     kmeans_WorkerInstance.terminate();
     this.setState({ k, colorOption: "cluster" });
-    this.getColorsByClusters(filteredPCs, k);
+    this.setColorsByClusters(filteredPCs, k);
   }
 
-  getColorsByClusters(pcs, k) {
+  setColorsByClusters(pcs, k) {
     const { loading } = this.state;
     loading.kmeans = true;
     this.setState({ loading });
@@ -688,6 +681,9 @@ class Homepage extends Component {
             imageLink={this.state.imageLink}
             loading={this.state.loading.image}
           />
+
+          <div style={{ paddingTop: "40px" }}></div>
+          <DiffExp />
 
           <div style={{ paddingTop: "70px" }}></div>
         </div>

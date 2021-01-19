@@ -36,7 +36,7 @@ const Plot = (data, getColor) => {
 
   const Scatterplot = (
     <div style={{ width: "100%", height: "100%" }}>
-      <ScatterPlot data={obj} getColor={getColor} tSNE={true} />
+      <ScatterPlot data={obj} getColor={getColor} tsne={true} />
     </div>
   );
 
@@ -83,7 +83,7 @@ const TypedInput = (changeSettings) => {
   );
 };
 
-class tSNEWrapper extends Component {
+class TSNEWrapper extends Component {
   state = {
     tsneSettings: {
       epsilon: 10,
@@ -139,7 +139,7 @@ class tSNEWrapper extends Component {
           <br></br>
           Epsilon is the learning rate, perplexity is the # of neighboring cells
           each cell influences, and iterations is the # of steps tSNE should
-          run.
+          undergo.
         </Typography>
 
         <div style={{ display: "flex" }}>
@@ -149,7 +149,7 @@ class tSNEWrapper extends Component {
               disableShrink
               size={40}
               thickness={5}
-              style={{ color: blue, marginTop: "13px", marginLeft: "30px" }}
+              style={{ color: blue, marginTop: "14px", marginLeft: "30px" }}
             />
           )}
         </div>
@@ -178,4 +178,4 @@ class tSNEWrapper extends Component {
   }
 }
 
-export default tSNEWrapper;
+export default TSNEWrapper;

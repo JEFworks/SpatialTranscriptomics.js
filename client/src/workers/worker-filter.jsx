@@ -14,13 +14,13 @@ export const filter = (
   minColSum
 ) => {
   // compute rowsums (object {sums: [], badGenes: []})
-  if (minRowSum !== null) {
+  if (minRowSum != null) {
     thresholds.minRowSum = minRowSum;
     rowsums = rowSums(matrix, thresholds.minRowSum);
   }
 
   // compute colsums (object {sums: [], badCells: []})
-  if (minColSum !== null) {
+  if (minColSum != null) {
     thresholds.minColSum = minColSum;
     colsums = colSums(matrix, thresholds.minColSum);
   }

@@ -212,8 +212,8 @@ class SpatialVis extends Component {
     const { barcodes } = this.props;
     const pixels = [];
 
-    if (barcodes[0]) {
-      if (!barcodes[0].x || !barcodes[0].y) {
+    if (barcodes[0] != null) {
+      if (barcodes[0].x == null || barcodes[0].y == null) {
         return [];
       }
 
@@ -300,9 +300,9 @@ class SpatialVis extends Component {
           {this.props.loading && (
             <CircularProgress
               disableShrink
-              size={50}
+              size={40}
               thickness={5}
-              style={{ color: blue, marginTop: "5px", marginLeft: "40px" }}
+              style={{ color: blue, marginTop: "14px", marginLeft: "30px" }}
             />
           )}
         </div>

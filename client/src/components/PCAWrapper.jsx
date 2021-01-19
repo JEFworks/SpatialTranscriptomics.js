@@ -86,7 +86,11 @@ const ScreePlot = (eigenvalues, numPCs) => {
 
   const Linechart = (
     <div style={{ width: "100%", height: "100%" }}>
-      <LineChart data={obj} max={numPCs} />
+      <LineChart
+        data={obj}
+        max={numPCs}
+        totalNumPCs={eigenvalues[0] ? eigenvalues.length : 0}
+      />
     </div>
   );
 
@@ -222,7 +226,7 @@ class PCAWrapper extends Component {
               disableShrink
               size={40}
               thickness={5}
-              style={{ color: blue, marginTop: "13px", marginLeft: "30px" }}
+              style={{ color: blue, marginTop: "14px", marginLeft: "30px" }}
             />
           )}
         </div>
