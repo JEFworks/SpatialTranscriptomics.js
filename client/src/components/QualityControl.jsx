@@ -13,32 +13,14 @@ const paragraph = "#5f6c7b";
 const tertiary = "#90b4ce";
 const blue = "#80d8ff";
 
-const marks = (min, max) => {
-  const list = [];
-  for (let i = min; i < max; i += 0.5) {
-    list.push({ value: i, label: i.toFixed(1) });
-  }
-  return list;
-};
-
 const Figure = (rowsums, colsums, thresholds, changeThreshold, type) => {
   const sums = !rowsums ? [] : type === "rowsum" ? rowsums : colsums;
 
-  let minIndex = 0;
-  let maxIndex = 10;
+  let leftBound = 0;
+  let rightBound = 0;
   if (sums && sums.length > 0) {
-    minIndex = -1;
-    maxIndex = sums.length;
-    sums.forEach((datum, index) => {
-      if (datum.frequency > 0 && minIndex === -1) {
-        minIndex = index;
-      }
-      if (datum.frequency > 0) {
-        maxIndex = index;
-      }
-    });
-    minIndex = Math.max(0, minIndex - 1);
-    maxIndex = Math.min(maxIndex + 2, sums.length);
+    leftBound = sums[0].range;
+    rightBound = sums[sums.length - 1].range;
   }
 
   const Title = (
@@ -54,7 +36,7 @@ const Figure = (rowsums, colsums, thresholds, changeThreshold, type) => {
   );
 
   const HistogramPlot = (
-    <div style={{ width: "100%", height: "100%" }}>
+    <div style={{ width: "100%", height: "110%" }}>
       <Histogram
         xLabel={
           type === "rowsum"
@@ -63,8 +45,6 @@ const Figure = (rowsums, colsums, thresholds, changeThreshold, type) => {
         }
         data={sums}
         min={type === "rowsum" ? thresholds.minRowSum : thresholds.minColSum}
-        lowerLimit={minIndex}
-        upperLimit={maxIndex}
       />
     </div>
   );
@@ -78,11 +58,10 @@ const Figure = (rowsums, colsums, thresholds, changeThreshold, type) => {
           type === "colsum" ? value : null
         )
       }
-      marks={marks(minIndex / 2, maxIndex / 2)}
-      defaultValue={type === "rowsum" ? 2.0 : 2.0}
-      step={0.5}
-      min={minIndex / 2}
-      max={maxIndex / 2 - 0.5}
+      defaultValue={type === "rowsum" ? 2.0 : 1.0}
+      step={type === "rowsum" ? 0.5 : 0.1}
+      min={leftBound}
+      max={rightBound}
       valueLabelDisplay="auto"
     />
   );
@@ -202,7 +181,6 @@ class QualityControl extends Component {
           <div style={{ width: "50%" }}></div>
         </div>
 
-        <div style={{ paddingTop: "0px" }}></div>
         <Button
           variant="contained"
           size="small"

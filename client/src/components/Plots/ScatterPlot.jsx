@@ -12,13 +12,7 @@ class Scatter extends Component {
           data={data}
           margin={{ top: 10, right: 10, bottom: 50, left: tsne ? 10 : 55 }}
           xScale={{ type: "linear", min: "auto", max: "auto" }}
-          xFormat={function (e) {
-            return e + " kg";
-          }}
           yScale={{ type: "linear", min: "auto", max: "auto" }}
-          yFormat={function (e) {
-            return e + " cm";
-          }}
           blendMode="normal"
           nodeSize={3}
           isInteractive={false}
@@ -34,7 +28,7 @@ class Scatter extends Component {
                   tickSize: 5,
                   tickPadding: 5,
                   tickRotation: 0,
-                  legend: !visible ? "tsne" : "pc" + pcX,
+                  legend: !visible ? "" : `pc${pcX}`,
                   legendPosition: "middle",
                   legendOffset: 40,
                 }
@@ -47,7 +41,7 @@ class Scatter extends Component {
                   tickSize: 5,
                   tickPadding: 5,
                   tickRotation: 0,
-                  legend: !visible ? "tsne" : "pc" + pcY,
+                  legend: !visible ? "" : `pc${pcY}`,
                   legendPosition: "middle",
                   legendOffset: -50,
                 }

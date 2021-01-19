@@ -9,10 +9,20 @@ const setColor = (val, min) => {
   return val < min ? red : blue;
 };
 
+const getMarkerLine = (data, min) => {
+  const length = data.length;
+  for (let i = 0; i < length; i++) {
+    if (data[i].range >= min) {
+      return data[i].range;
+    }
+  }
+  return min;
+};
+
 const markers = (min, loading) => [
   {
     axis: "x",
-    value: min.toFixed(1),
+    value: min,
     lineStyle: {
       stroke: !loading ? red : "transparent",
       strokeWidth: 1,
@@ -40,11 +50,11 @@ const yAxis = {
 class Histogram extends Component {
   render() {
     const { props } = this;
-    const { min, lowerLimit, upperLimit } = props;
+    const { min } = props;
 
     const data = !props.data
       ? []
-      : props.data.slice(lowerLimit, upperLimit).map((datum) => {
+      : props.data.map((datum) => {
           return {
             range: datum.range.toFixed(1),
             frequency: datum.frequency,
@@ -61,7 +71,7 @@ class Histogram extends Component {
           indexBy="range"
           margin={{ top: 5, right: 0, bottom: 50, left: 45 }}
           colors={getColor}
-          markers={markers(min, data.length < 1)}
+          markers={markers(getMarkerLine(data, min), data.length < 1)}
           axisBottom={xAxis(props.xLabel)}
           axisLeft={yAxis}
           enableLabel={false}

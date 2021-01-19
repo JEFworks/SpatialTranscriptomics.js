@@ -314,9 +314,7 @@ app.get("/api/barcodes/:uuid", function (req, res) {
 
 app.get("/api/pixels/:uuid", function (req, res) {
   let filePath =
-    defaultFileNum === 0
-      ? `${dir}/example_data/coronal_brain/spatial/tissue_positions_list.csv`
-      : defaultFileNum === 1
+    defaultFileNum === 0 || defaultFileNum === 1
       ? `${dir}/example_data/coronal_brain/spatial/tissue_positions_list.csv`
       : defaultFileNum === 2
       ? `${dir}/example_data/olfactory_bulb/spatial/tissue_positions_list.csv`
