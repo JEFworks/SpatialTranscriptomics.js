@@ -37,6 +37,11 @@ code {
   width: 480px;
 }
 
+.volcano {
+  height: 450px;
+  width: 550px;
+}
+
 .tsne-plot {
   height: 450px;
   width: 490px;
@@ -73,9 +78,16 @@ code {
   }
 }
 
+@media only screen and (max-width: 650px) {
+  .volcano {
+    height: 345px;
+    width: 420px;
+  }
+}
+
 @media only screen and (max-width: 600px) {
   .tsne-plot {
-    height: 386px;
+    height: 385px;
     width: 420px;
   }
 }

@@ -1,4 +1,4 @@
-"use strict";
+/* Code from gungorbudak/mannwhitneyu.js */
 
 (function (exports) {
   var rank = {
@@ -157,7 +157,7 @@
 
     while (i < nr) {
       if (i > 0) {
-        if (ranked[i].val == ranked[i - 1].val) {
+        if (ranked[i].val === ranked[i - 1].val) {
           nt++;
         } else {
           if (nt > 1) {
@@ -210,18 +210,18 @@
     std = Math.sqrt((u.tcf * nx * ny * (nx + ny + 1)) / 12);
 
     // compute z according to given alternative
-    if (alt == "less") {
+    if (alt === "less") {
       z = (u.ux - mu) / std;
-    } else if (alt == "greater") {
+    } else if (alt === "greater") {
       z = (u.uy - mu) / std;
-    } else if (alt == "two-sided") {
+    } else if (alt === "two-sided") {
       z = Math.abs((u.big - mu) / std);
     } else {
       console.log("Unknown alternative argument");
     }
 
     // factor to correct two sided p-value
-    if (alt == "two-sided") {
+    if (alt === "two-sided") {
       f = 2;
     }
 

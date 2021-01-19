@@ -6,7 +6,7 @@ const kmeansAlgo = (pcs, k) => {
   const kmean = new KMeans({ k: k });
   if (pcs[0]) {
     kmean.fit(pcs);
-    const clusters = kmean.toJSON().clusters;
+    const { clusters } = kmean.toJSON();
     return clusters;
   }
   return null;
@@ -21,16 +21,21 @@ export const performKMeans = (pcs, k) => {
     hashmap.set(cell, index);
   });
 
+  const clusterIndices = [];
+
   // produce coloring
   const colorsMap = new Map();
   let i = 0;
   if (clusters) {
     clusters.forEach((cluster) => {
+      const indices = [];
       cluster.forEach((cell) => {
         // get the index of this cell and give the cell the color of this cluster
         const index = hashmap.get(cell);
         colorsMap.set(index, palette[i % palette.length]);
+        indices.push(index);
       });
+      clusterIndices.push(indices);
       i++;
     });
   }
@@ -41,5 +46,5 @@ export const performKMeans = (pcs, k) => {
   );
   const colors = [...sorted.values()];
 
-  self.postMessage({ colors: colors });
+  self.postMessage({ colors: colors, clusterIndices: clusterIndices });
 };

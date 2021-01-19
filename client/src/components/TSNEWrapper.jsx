@@ -36,7 +36,7 @@ const Plot = (data, getColor) => {
 
   const Scatterplot = (
     <div style={{ width: "100%", height: "100%" }}>
-      <ScatterPlot data={obj} getColor={getColor} tsne={true} />
+      <ScatterPlot data={obj} getColor={getColor} type={"tsne"} />
     </div>
   );
 
@@ -120,8 +120,6 @@ class TSNEWrapper extends Component {
   }
 
   render() {
-    const { changeSettings } = this;
-
     return (
       <>
         <Typography
@@ -143,7 +141,7 @@ class TSNEWrapper extends Component {
         </Typography>
 
         <div style={{ display: "flex" }}>
-          {TypedInput(changeSettings)}
+          {TypedInput(this.changeSettings)}
           {this.props.loading && (
             <CircularProgress
               disableShrink
@@ -168,9 +166,7 @@ class TSNEWrapper extends Component {
         <div style={{ paddingTop: "20px" }}></div>
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>
-          <div className="PC-flex">
-            {Plot(this.props.tsneSolution, this.getColor)}
-          </div>
+          {Plot(this.props.tsneSolution, this.getColor)}
           <div style={{ width: "50%" }}></div>
         </div>
       </>

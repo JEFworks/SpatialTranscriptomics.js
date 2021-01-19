@@ -16,13 +16,13 @@ const getMarkerLine = (data, min) => {
       return data[i].range;
     }
   }
-  return min;
+  return min.toFixed(1);
 };
 
-const markers = (min, loading) => [
+const markers = (markerLine, loading) => [
   {
     axis: "x",
-    value: min,
+    value: markerLine,
     lineStyle: {
       stroke: !loading ? red : "transparent",
       strokeWidth: 1,

@@ -328,8 +328,10 @@ class DataUpload extends Component {
           variant="body1"
         >
           By default, a dataset of 20 genes x 2698 cells from a coronal brain
-          tissue is loaded. To work with your own dataset, upload the
-          appropriate files below. The only required file is the matrix file.
+          tissue is loaded.
+          <br></br>
+          To work with your own dataset, upload the appropriate files below. The
+          only required file is the matrix file.
         </Typography>
 
         <VerticalLinearStepper

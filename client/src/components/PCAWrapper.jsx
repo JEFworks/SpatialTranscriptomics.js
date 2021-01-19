@@ -44,6 +44,7 @@ const Biplot = (eigenvectors, getColor, pcX, pcY) => {
         pcX={pcX}
         pcY={pcY}
         visible={visible}
+        type={"pca"}
       />
     </div>
   );
@@ -168,6 +169,10 @@ class PCAWrapper extends Component {
     const { updatedNumPCs, new_pcX, new_pcY } = this.state;
     this.setState({ pcX: new_pcX, pcY: new_pcY });
     if (updatedNumPCs !== this.state.numPCs) {
+      if (isNaN(updatedNumPCs) || updatedNumPCs < 1) {
+        alert("Please specify a positive integer value for # of PC's.");
+        return;
+      }
       this.setState({ numPCs: updatedNumPCs });
       setNumPCs(updatedNumPCs);
     }
@@ -175,9 +180,7 @@ class PCAWrapper extends Component {
 
   selectNumPCs(event) {
     const num = Number.parseInt(event.target.value);
-    if (!isNaN(num) && num > 0) {
-      this.setState({ updatedNumPCs: num });
-    }
+    this.setState({ updatedNumPCs: num });
   }
 
   set_pcX(event) {

@@ -4,7 +4,7 @@ import api from "../api.jsx";
 import { v4 as uuidv4 } from "uuid";
 import { SparseMatrix } from "ml-sparse-matrix";
 
-import GetRGB from "../functions/getRGB.jsx";
+import GetRGB from "../functions/GetRGB.jsx";
 import MinMaxNormalize from "../functions/MinMaxNormalize.jsx";
 import MinMaxStats from "../functions/MinMaxStats.jsx";
 
@@ -20,6 +20,8 @@ import Worker_FILTER from "workerize-loader!../workers/worker-filter.jsx"; // es
 import Worker_PCA from "workerize-loader!../workers/worker-pca.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
 import Worker_TSNE from "workerize-loader!../workers/worker-tsne.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
 import Worker_KMEANS from "workerize-loader!../workers/worker-kmeans.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
+
+import mannwhitneyu from "../functions/wilcox.js";
 
 let filter_WorkerInstance = Worker_FILTER();
 let pca_WorkerInstance = Worker_PCA();
@@ -43,17 +45,19 @@ class Homepage extends Component {
     filteredFeatures: [],
     barcodes: [],
     filteredBarcodes: [],
-    thresholds: { minRowSum: 2, minColSum: 2 },
+    thresholds: { minRowSum: 2, minColSum: 1 },
     rowsums: [],
     colsums: [],
-    colors: [],
-    pcs: [],
     eigenvalues: [],
+    pcs: [],
     filteredPCs: [],
-    feature: "camk2n1",
     tsneSolution: [],
+    feature: "camk2n1",
     k: 10,
+    clusterIndices: [],
+    colors: [],
     colorOption: "gene",
+    diffExpSolution: [],
     loading: {
       upload: true,
       pca: false,
@@ -84,6 +88,7 @@ class Homepage extends Component {
   // analysis functions
   computePCA = this.computePCA.bind(this);
   computeTSNE = this.computeTSNE.bind(this);
+  computeDiffExp = this.computeDiffExp.bind(this);
 
   componentDidMount() {
     // get uuid from URL parameters
@@ -143,11 +148,12 @@ class Homepage extends Component {
       filteredBarcodes: [],
       rowsums: [],
       colsums: [],
-      colors: [],
-      pcs: [],
       eigenvalues: [],
+      pcs: [],
       filteredPCs: [],
       tsneSolution: [],
+      clusterIndices: [],
+      colors: [],
       colorOption: "gene",
       loading: {
         upload: true,
@@ -390,6 +396,7 @@ class Homepage extends Component {
     }
 
     // terminate any ongoing analyses
+    filter_WorkerInstance.terminate();
     this.terminateWorkers();
 
     loading.upload = true;
@@ -398,10 +405,17 @@ class Homepage extends Component {
     loading.kmeans = false;
     this.setState({
       loading,
+      filteredMatrix: [],
+      filteredBarcodes: [],
+      filteredFeatures: [],
       pcs: [],
       eigenvalues: [],
       filteredPCs: [],
       tsneSolution: [],
+      clusterIndices: [],
+      colors: [],
+      colorOption: "gene",
+      diffExpSolution: [],
     });
 
     // worker filters the data
@@ -437,7 +451,6 @@ class Homepage extends Component {
           thresholds: data.thresholds,
           rowsums: data.rowsums,
           colsums: data.colsums,
-          colorOption: "gene",
           colors,
           loading,
         });
@@ -459,9 +472,18 @@ class Homepage extends Component {
     loading.tsne = false;
     loading.kmeans = false;
 
-    this.setState({ loading, filteredPCs: [], tsneSolution: [] }, () => {
-      this.filterPCs(num);
-    });
+    this.setState(
+      {
+        loading,
+        filteredPCs: [],
+        tsneSolution: [],
+        clusterIndices: [],
+        diffExpSolution: [],
+      },
+      () => {
+        this.filterPCs(num);
+      }
+    );
   }
 
   // filter based on user-specified # of PCs
@@ -499,7 +521,13 @@ class Homepage extends Component {
     loading.tsne = false;
     loading.kmeans = false;
 
-    this.setState({ loading, filteredPCs: [], tsneSolution: [] });
+    this.setState({
+      loading,
+      filteredPCs: [],
+      tsneSolution: [],
+      clusterIndices: [],
+      diffExpSolution: [],
+    });
 
     pca_WorkerInstance = Worker_PCA();
     pca_WorkerInstance.performPCA(m);
@@ -553,6 +581,53 @@ class Homepage extends Component {
     });
   }
 
+  computeDiffExp() {
+    const { clusterIndices, filteredMatrix, filteredFeatures } = this.state;
+
+    const diffExpSolution = [];
+
+    filteredMatrix.forEach((gene, index) => {
+      const geneName = filteredFeatures[index];
+      // console.log(`Let's look at gene ${geneName}`)
+
+      // let's just compare between cluster 0 and cluster 1
+      // x = reference group, y = non-reference group
+      const clusterX = clusterIndices[0];
+      const clusterY = clusterIndices[1];
+
+      const x = [];
+      const y = [];
+
+      clusterX.forEach((cellIndex) => {
+        x.push(gene[cellIndex]);
+      });
+
+      clusterY.forEach((cellIndex) => {
+        y.push(gene[cellIndex]);
+      });
+
+      // perform Wilcox rank sum test
+      const result = mannwhitneyu.test(x, y);
+      const p = -Math.log10(result.p);
+      // console.log(`-log10(p) is ${p}`)
+
+      // compute fold change
+      const xReads = x.reduce((a, b) => {
+        return a + b;
+      }, 0);
+      const yReads = y.reduce((a, b) => {
+        return a + b;
+      }, 0);
+      const fc = Math.log2(yReads / xReads);
+      // console.log(`There are ${xReads} xReads and ${yReads} yReads and a fc of ${yReads/xReads}, which translates to a log2(fc) = ${fc}`)
+      // console.log(`log2(FC) is ${fc}`)
+
+      diffExpSolution.push({ name: geneName, p: p, fc: fc });
+    });
+
+    this.setState({ diffExpSolution });
+  }
+
   // set gene name and compute colors based on expression of this gene
   setFeature(name) {
     const { filteredMatrix, filteredFeatures, loading } = this.state;
@@ -595,7 +670,12 @@ class Homepage extends Component {
       return;
     }
     kmeans_WorkerInstance.terminate();
-    this.setState({ k, colorOption: "cluster" });
+    this.setState({
+      k,
+      colorOption: "cluster",
+      clusterIndices: [],
+      diffExpSolution: [],
+    });
     this.setColorsByClusters(filteredPCs, k);
   }
 
@@ -607,10 +687,14 @@ class Homepage extends Component {
     kmeans_WorkerInstance = Worker_KMEANS();
     kmeans_WorkerInstance.performKMeans(pcs, k);
     kmeans_WorkerInstance.addEventListener("message", (message) => {
-      if (message.data.colors) {
+      if (message.data.colors && message.data.clusterIndices) {
         const result = message.data;
         loading.kmeans = false;
-        this.setState({ loading, colors: result.colors });
+        this.setState({
+          loading,
+          colors: result.colors,
+          clusterIndices: result.clusterIndices,
+        });
         kmeans_WorkerInstance.terminate();
       }
     });
@@ -648,6 +732,7 @@ class Homepage extends Component {
             error={errorMsg}
           />
 
+          <div style={{ paddingTop: "5px" }}></div>
           <QualityControl
             thresholds={this.state.thresholds}
             rowsums={this.state.rowsums.sums}
@@ -656,7 +741,7 @@ class Homepage extends Component {
             loading={this.state.loading.upload}
           />
 
-          <div style={{ paddingTop: "35px" }}></div>
+          <div style={{ paddingTop: "40px" }}></div>
           <PCAWrapper
             computePCA={this.computePCA}
             eigenvectors={this.state.pcs}
@@ -683,7 +768,10 @@ class Homepage extends Component {
           />
 
           <div style={{ paddingTop: "40px" }}></div>
-          <DiffExp />
+          <DiffExp
+            computeDiffExp={this.computeDiffExp}
+            diffExpSolution={this.state.diffExpSolution}
+          />
 
           <div style={{ paddingTop: "70px" }}></div>
         </div>
