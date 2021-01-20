@@ -14,19 +14,19 @@ import QualityControl from "./QualityControl.jsx";
 import PCAWrapper from "./PCAWrapper.jsx";
 import TSNEWrapper from "./TSNEWrapper.jsx";
 import SpatialVis from "./SpatialVis.jsx";
-import DiffExp from "./DiffExp.jsx";
+import DGEWrapper from "./DGEWrapper.jsx";
 
 import Worker_FILTER from "workerize-loader!../workers/worker-filter.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
 import Worker_PCA from "workerize-loader!../workers/worker-pca.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
 import Worker_TSNE from "workerize-loader!../workers/worker-tsne.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
 import Worker_KMEANS from "workerize-loader!../workers/worker-kmeans.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
-
-import mannwhitneyu from "../functions/wilcox.js";
+import Worker_DGE from "workerize-loader!../workers/worker-dge.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
 
 let filter_WorkerInstance = Worker_FILTER();
 let pca_WorkerInstance = Worker_PCA();
 let tsne_WorkerInstance = Worker_TSNE();
 let kmeans_WorkerInstance = Worker_KMEANS();
+let dge_WorkerInstance = Worker_DGE();
 
 class Homepage extends Component {
   state = {
@@ -57,12 +57,13 @@ class Homepage extends Component {
     clusterIndices: [],
     colors: [],
     colorOption: "gene",
-    diffExpSolution: [],
+    dgeSolution: [],
     loading: {
       upload: true,
       pca: false,
       tsne: false,
       kmeans: false,
+      dge: false,
       image: true,
     },
     errors: [],
@@ -88,7 +89,7 @@ class Homepage extends Component {
   // analysis functions
   computePCA = this.computePCA.bind(this);
   computeTSNE = this.computeTSNE.bind(this);
-  computeDiffExp = this.computeDiffExp.bind(this);
+  computeDGE = this.computeDGE.bind(this);
 
   componentDidMount() {
     // get uuid from URL parameters
@@ -114,6 +115,7 @@ class Homepage extends Component {
     pca_WorkerInstance.terminate();
     tsne_WorkerInstance.terminate();
     kmeans_WorkerInstance.terminate();
+    dge_WorkerInstance.terminate();
   }
 
   // load data
@@ -160,6 +162,7 @@ class Homepage extends Component {
         pca: false,
         tsne: false,
         kmeans: false,
+        dge: false,
         image: true,
       },
       errors: [],
@@ -403,6 +406,7 @@ class Homepage extends Component {
     loading.pca = false;
     loading.tsne = false;
     loading.kmeans = false;
+    loading.dge = false;
     this.setState({
       loading,
       filteredMatrix: [],
@@ -415,7 +419,7 @@ class Homepage extends Component {
       clusterIndices: [],
       colors: [],
       colorOption: "gene",
-      diffExpSolution: [],
+      dgeSolution: [],
     });
 
     // worker filters the data
@@ -471,6 +475,7 @@ class Homepage extends Component {
     loading.pca = true;
     loading.tsne = false;
     loading.kmeans = false;
+    loading.dge = false;
 
     this.setState(
       {
@@ -478,7 +483,7 @@ class Homepage extends Component {
         filteredPCs: [],
         tsneSolution: [],
         clusterIndices: [],
-        diffExpSolution: [],
+        dgeSolution: [],
       },
       () => {
         this.filterPCs(num);
@@ -520,24 +525,25 @@ class Homepage extends Component {
     loading.pca = true;
     loading.tsne = false;
     loading.kmeans = false;
+    loading.dge = false;
 
     this.setState({
       loading,
       filteredPCs: [],
       tsneSolution: [],
       clusterIndices: [],
-      diffExpSolution: [],
+      dgeSolution: [],
     });
 
     pca_WorkerInstance = Worker_PCA();
     pca_WorkerInstance.performPCA(m);
     pca_WorkerInstance.addEventListener("message", (message) => {
       if (message.data.eigenvectors) {
-        const pca = message.data;
+        const { eigenvectors, eigenvalues } = message.data;
         this.setState(
           {
-            pcs: pca.eigenvectors,
-            eigenvalues: pca.eigenvalues,
+            pcs: eigenvectors,
+            eigenvalues: eigenvalues,
           },
           () => {
             this.filterPCs(num);
@@ -573,59 +579,47 @@ class Homepage extends Component {
     tsne_WorkerInstance.performTSNE(filteredPCs, opt, iterations);
     tsne_WorkerInstance.addEventListener("message", (message) => {
       if (message.data.solution) {
-        const tsne = message.data;
+        const { solution } = message.data;
         loading.tsne = false;
-        this.setState({ tsneSolution: tsne.solution, loading });
+        this.setState({ tsneSolution: solution, loading });
         tsne_WorkerInstance.terminate();
       }
     });
   }
 
-  computeDiffExp() {
-    const { clusterIndices, filteredMatrix, filteredFeatures } = this.state;
+  computeDGE(x, y) {
+    const {
+      clusterIndices,
+      filteredMatrix,
+      filteredFeatures,
+      loading,
+    } = this.state;
 
-    const diffExpSolution = [];
+    if (clusterIndices == null || clusterIndices.length < 2) {
+      alert("Please perform clustering with k >= 2 first.");
+      return;
+    }
 
-    filteredMatrix.forEach((gene, index) => {
-      const geneName = filteredFeatures[index];
-      // console.log(`Let's look at gene ${geneName}`)
+    dge_WorkerInstance.terminate();
+    loading.dge = true;
+    this.setState({ loading });
 
-      // let's just compare between cluster 0 and cluster 1
-      // x = reference group, y = non-reference group
-      const clusterX = clusterIndices[0];
-      const clusterY = clusterIndices[1];
-
-      const x = [];
-      const y = [];
-
-      clusterX.forEach((cellIndex) => {
-        x.push(gene[cellIndex]);
-      });
-
-      clusterY.forEach((cellIndex) => {
-        y.push(gene[cellIndex]);
-      });
-
-      // perform Wilcox rank sum test
-      const result = mannwhitneyu.test(x, y);
-      const p = -Math.log10(result.p);
-      // console.log(`-log10(p) is ${p}`)
-
-      // compute fold change
-      const xReads = x.reduce((a, b) => {
-        return a + b;
-      }, 0);
-      const yReads = y.reduce((a, b) => {
-        return a + b;
-      }, 0);
-      const fc = Math.log2(yReads / xReads);
-      // console.log(`There are ${xReads} xReads and ${yReads} yReads and a fc of ${yReads/xReads}, which translates to a log2(fc) = ${fc}`)
-      // console.log(`log2(FC) is ${fc}`)
-
-      diffExpSolution.push({ name: geneName, p: p, fc: fc });
+    dge_WorkerInstance = Worker_DGE();
+    dge_WorkerInstance.performDGE(
+      clusterIndices,
+      filteredMatrix,
+      filteredFeatures,
+      x,
+      y
+    );
+    dge_WorkerInstance.addEventListener("message", (message) => {
+      if (message.data.solution) {
+        const { solution } = message.data;
+        loading.dge = false;
+        this.setState({ dgeSolution: solution, loading });
+        dge_WorkerInstance.terminate();
+      }
     });
-
-    this.setState({ diffExpSolution });
   }
 
   // set gene name and compute colors based on expression of this gene
@@ -669,12 +663,15 @@ class Homepage extends Component {
       alert("Please run PCA first.");
       return;
     }
+
     kmeans_WorkerInstance.terminate();
+    dge_WorkerInstance.terminate();
+
     this.setState({
       k,
       colorOption: "cluster",
       clusterIndices: [],
-      diffExpSolution: [],
+      dgeSolution: [],
     });
     this.setColorsByClusters(filteredPCs, k);
   }
@@ -682,18 +679,19 @@ class Homepage extends Component {
   setColorsByClusters(pcs, k) {
     const { loading } = this.state;
     loading.kmeans = true;
+    loading.dge = false;
     this.setState({ loading });
 
     kmeans_WorkerInstance = Worker_KMEANS();
     kmeans_WorkerInstance.performKMeans(pcs, k);
     kmeans_WorkerInstance.addEventListener("message", (message) => {
       if (message.data.colors && message.data.clusterIndices) {
-        const result = message.data;
+        const { colors, clusterIndices } = message.data;
         loading.kmeans = false;
         this.setState({
           loading,
-          colors: result.colors,
-          clusterIndices: result.clusterIndices,
+          colors,
+          clusterIndices,
         });
         kmeans_WorkerInstance.terminate();
       }
@@ -768,9 +766,10 @@ class Homepage extends Component {
           />
 
           <div style={{ paddingTop: "40px" }}></div>
-          <DiffExp
-            computeDiffExp={this.computeDiffExp}
-            diffExpSolution={this.state.diffExpSolution}
+          <DGEWrapper
+            computeDGE={this.computeDGE}
+            dgeSolution={this.state.dgeSolution}
+            loading={this.state.loading.dge}
           />
 
           <div style={{ paddingTop: "70px" }}></div>

@@ -162,6 +162,19 @@ class SpatialVis extends Component {
   flipVertical = this.flipVertical.bind(this);
   flipXY = this.flipXY.bind(this);
 
+  componentDidMount() {
+    this.updateDimensions();
+    window.addEventListener("resize", this.updateDimensions.bind(this));
+  }
+
+  updateDimensions() {
+    if (window.innerWidth <= 700) {
+      this.setState({ resize: true });
+    } else {
+      this.setState({ resize: true });
+    }
+  }
+
   changeScale(event) {
     const scale = Number.parseFloat(event.target.value);
     this.setState({ scale: isNaN(scale) ? 0 : scale });
@@ -261,6 +274,7 @@ class SpatialVis extends Component {
       pixelSize,
     } = this.state;
     const { colors, imageLink } = this.props;
+    const isMobile = window.innerWidth < 700;
 
     return (
       <>
@@ -297,7 +311,7 @@ class SpatialVis extends Component {
             )}
           </div>
 
-          {this.props.loading && (
+          {!isMobile && this.props.loading && (
             <CircularProgress
               disableShrink
               size={40}

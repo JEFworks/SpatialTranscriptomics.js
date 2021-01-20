@@ -7,9 +7,9 @@ class Scatter extends Component {
     const { data, getColor, pcX, pcY, visible, type } = props;
 
     let axisBottom = null;
-    if (type === "pca" || type === "diffExp") {
+    if (type === "pca" || type === "dge") {
       let legend = !visible ? "" : `pc${pcX}`;
-      if (type === "diffExp") {
+      if (type === "dge") {
         legend = "log2(fold-change)";
       }
 
@@ -25,9 +25,9 @@ class Scatter extends Component {
     }
 
     let axisLeft = null;
-    if (type === "pca" || type === "diffExp") {
+    if (type === "pca" || type === "dge") {
       let legend = !visible ? "" : `pc${pcY}`;
-      if (type === "diffExp") {
+      if (type === "dge") {
         legend = "-log10(p-value)";
       }
 
@@ -38,19 +38,19 @@ class Scatter extends Component {
         tickRotation: 0,
         legend: legend,
         legendPosition: "middle",
-        legendOffset: type === "diffExp" ? -40 : -50,
+        legendOffset: type === "dge" ? -40 : -50,
       };
     }
 
     let marginLeft = 10;
     if (type === "pca") {
       marginLeft = 55;
-    } else if (type === "diffExp") {
+    } else if (type === "dge") {
       marginLeft = 45;
     }
 
     let nodeSize = 3;
-    if (type === "diffExp") {
+    if (type === "dge") {
       nodeSize = 5;
     }
 
@@ -63,7 +63,7 @@ class Scatter extends Component {
           yScale={{ type: "linear", min: "auto", max: "auto" }}
           blendMode="normal"
           nodeSize={nodeSize}
-          isInteractive={false}
+          isInteractive={type === "dge" ? true : false}
           enableGridX={false}
           enableGridY={false}
           axisTop={null}
@@ -72,6 +72,24 @@ class Scatter extends Component {
           axisLeft={axisLeft}
           colors={getColor}
           animate={false}
+          tooltip={({ node }) => {
+            if (node.data && node.data.name) {
+              return (
+                <div
+                  style={{
+                    color: "white",
+                    background: "black",
+                    fontSize: "14px",
+                    padding: "5px",
+                  }}
+                >
+                  <strong>{node.data.name}</strong>
+                </div>
+              );
+            } else {
+              return null;
+            }
+          }}
         />
       </>
     );
