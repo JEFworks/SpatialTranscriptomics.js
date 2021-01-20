@@ -103,7 +103,13 @@ class Scatter extends Component {
           animate={false}
           markers={type === "dge" && data[0].data.length > 0 ? markers : null}
           tooltip={({ node }) => {
-            if (node.data && node.data.name) {
+            const { data } = node;
+            if (
+              data &&
+              data.name &&
+              data.y >= 1.5 &&
+              (data.x >= 1 || data.x <= -1)
+            ) {
               return (
                 <div
                   style={{
@@ -113,7 +119,7 @@ class Scatter extends Component {
                     padding: "5px",
                   }}
                 >
-                  <strong>{node.data.name}</strong>
+                  <strong>{data.name}</strong>
                 </div>
               );
             } else {

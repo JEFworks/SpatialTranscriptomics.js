@@ -11,7 +11,7 @@ const isGzip = require("is-gzip");
 
 // delete localhost from this list when deploying
 const corsOptions = {
-  origin: ["https://stjs.me", "http://localhost:8000"],
+  origin: ["https://stjs.me"],
   optionsSuccessStatus: 200, // For legacy browser support
 };
 

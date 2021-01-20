@@ -24,9 +24,11 @@ const TitleContents = (
   k,
   loading,
   noshow,
-  isMobile,
-  isMobile2
+  windowWidth
 ) => {
+  const isMobile = windowWidth < 980;
+  const isMobile2 = windowWidth < 650;
+
   return (
     <>
       <Typography
@@ -44,14 +46,7 @@ const TitleContents = (
       </Typography>
 
       {!noshow && (
-        <div
-          style={{
-            display: "flex",
-            marginTop: isMobile ? "-5px" : "2px",
-            marginBottom: "0px",
-            flexGrow: 1,
-          }}
-        >
+        <div style={{ display: "flex", marginTop: isMobile ? "-5px" : "2px" }}>
           <div
             style={{
               display: isMobile ? "" : "flex",
@@ -116,6 +111,8 @@ const TitleContents = (
         </div>
       )}
 
+      <div style={{ flexGrow: 1 }}></div>
+
       {!isMobile && (
         <>
           {About}
@@ -135,8 +132,7 @@ const Title = (
   k,
   loading,
   noshow,
-  isMobile,
-  isMobile2
+  windowWidth
 ) => {
   const contents = TitleContents(
     selectFeature,
@@ -147,11 +143,10 @@ const Title = (
     k,
     loading,
     noshow,
-    isMobile,
-    isMobile2
+    windowWidth
   );
 
-  if (isMobile) {
+  if (windowWidth < 980) {
     return <div>{contents}</div>;
   }
   return <>{contents}</>;
@@ -221,9 +216,6 @@ class Header extends Component {
     const { setFeature, setK, loading, noshow } = this.props;
     const { feature, k } = this.state;
 
-    const isMobile = window.innerWidth < 980;
-    const isMobile2 = window.innerWidth < 650;
-
     return (
       <>
         <AppBar
@@ -242,8 +234,7 @@ class Header extends Component {
               k,
               loading,
               noshow,
-              isMobile,
-              isMobile2
+              window.innerWidth
             )}
           </Toolbar>
         </AppBar>

@@ -205,7 +205,6 @@ class PCAWrapper extends Component {
   }
 
   render() {
-    const { selectNumPCs, getColor, set_pcX, set_pcY } = this;
     const { numPCs, pcX, pcY } = this.state;
     const { eigenvectors, eigenvalues, loading } = this.props;
 
@@ -217,8 +216,9 @@ class PCAWrapper extends Component {
         >
           Principal Component Analysis (PCA)
         </Typography>
+
         <Typography
-          style={{ marginBottom: "0px", fontWeight: 400, color: paragraph }}
+          style={{ fontWeight: 400, color: paragraph }}
           variant="body1"
         >
           Perform PCA to reduce the number of dimensions in the data and reduce
@@ -234,7 +234,7 @@ class PCAWrapper extends Component {
         </Typography>
 
         <div style={{ display: "flex" }}>
-          {TypedInput(selectNumPCs, set_pcX, set_pcY)}
+          {TypedInput(this.selectNumPCs, this.set_pcX, this.set_pcY)}
           {loading && (
             <CircularProgress
               disableShrink
@@ -264,13 +264,13 @@ class PCAWrapper extends Component {
         >
           Apply Settings
         </Button>
-        <div style={{ paddingTop: "20px" }}></div>
 
+        <div style={{ paddingTop: "20px" }}></div>
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>
           <div className="PC-flex">
             {ScreePlot(eigenvalues, numPCs)}
-            {Biplot(eigenvectors, getColor, pcX, pcY)}
+            {Biplot(eigenvectors, this.getColor, pcX, pcY)}
           </div>
           <div style={{ width: "50%" }}></div>
         </div>

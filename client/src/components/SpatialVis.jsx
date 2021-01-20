@@ -271,16 +271,6 @@ class SpatialVis extends Component {
 
   render() {
     const {
-      changeDeltaX,
-      changeDeltaY,
-      changeScale,
-      changeOpacity,
-      flipHorizontal,
-      flipVertical,
-      flipXY,
-      changePixelSize,
-    } = this;
-    const {
       pixels,
       horizontalFlipped,
       verticalFlipped,
@@ -301,7 +291,7 @@ class SpatialVis extends Component {
         </Typography>
 
         <Typography
-          style={{ marginBottom: "0px", fontWeight: 400, color: paragraph }}
+          style={{ fontWeight: 400, color: paragraph }}
           variant="body1"
         >
           Run this visualization to map results spatially onto the tissue.
@@ -310,19 +300,19 @@ class SpatialVis extends Component {
         <div style={{ display: "flex" }}>
           <div>
             {TypedInput(
-              changeDeltaX,
-              changeDeltaY,
-              changeScale,
-              changeOpacity,
-              changePixelSize
+              this.changeDeltaX,
+              this.changeDeltaY,
+              this.changeScale,
+              this.changeOpacity,
+              this.changePixelSize
             )}
             {CheckboxInput(
               horizontalFlipped,
-              flipHorizontal,
+              this.flipHorizontal,
               verticalFlipped,
-              flipVertical,
+              this.flipVertical,
               xyFlipped,
-              flipXY
+              this.flipXY
             )}
           </div>
 
@@ -346,8 +336,8 @@ class SpatialVis extends Component {
         >
           Run Visualization
         </Button>
-        <div style={{ paddingTop: "20px" }}></div>
 
+        <div style={{ paddingTop: "20px" }}></div>
         {LeafletWrapper(pixels, colors, opacity, pixelSize, imageLink)}
       </>
     );

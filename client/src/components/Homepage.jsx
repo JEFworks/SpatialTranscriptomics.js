@@ -774,7 +774,7 @@ class Homepage extends Component {
             loading={this.state.loading.dge}
           />
 
-          <div style={{ paddingTop: "70px" }}></div>
+          <div style={{ paddingBottom: "70px" }}></div>
         </div>
       </>
     );

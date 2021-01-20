@@ -148,6 +148,7 @@ class QualityControl extends Component {
             />
           )}
         </div>
+
         <Typography
           style={{ marginBottom: "20px", fontWeight: 400, color: paragraph }}
           variant="body1"

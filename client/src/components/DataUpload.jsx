@@ -34,124 +34,94 @@ const getSteps = () => {
   ];
 };
 
-const getStepContent = (
-  step,
-  matrixFileHandler,
-  barcodesFileHandler,
-  featuresFileHandler,
-  pixelsFileHandler,
-  imageFileHandler
-) => {
+const getStepDescription = (step) => {
   switch (step) {
     case 0:
       return (
-        <div style={{ marginBottom: "15px" }}>
-          <Typography
-            style={{ fontWeight: 400, color: "black", marginBottom: "10px" }}
-            variant="body2"
-          >
-            Your matrix file should be in Matrix Market coordinate format.
-            Please submit a gzipped (.mtx.gz) file.
-          </Typography>
-          <input
-            accept=".gz"
-            id="file-button1"
-            type="file"
-            onChange={matrixFileHandler}
-            style={{ outline: "none" }}
-          />
+        <div>
+          Your matrix file should be in Matrix Market coordinate format. Please
+          submit a gzipped (.mtx.gz) file.
         </div>
       );
     case 1:
       return (
-        <div style={{ marginBottom: "15px" }}>
-          <Typography
-            style={{ fontWeight: 400, color: "black", marginBottom: "10px" }}
-            variant="body2"
-          >
-            Your features file should be a TSV file, with features corresponding
-            to row indices in your matrix.
-            <br></br>
-            Each feature's gene name should be stored in the second column.
-            Please submit a gzipped (.tsv.gz) file.
-          </Typography>
-          <input
-            accept=".gz"
-            id="file-button1"
-            type="file"
-            onChange={featuresFileHandler}
-            style={{ outline: "none" }}
-          />
+        <div>
+          Your features file should be a TSV file, with features corresponding
+          to row indices in your matrix.
+          <br></br>
+          Each feature's gene name should be stored in the second column. Please
+          submit a gzipped (.tsv.gz) file.
         </div>
       );
     case 2:
       return (
-        <div style={{ marginBottom: "15px" }}>
-          <Typography
-            style={{ fontWeight: 400, color: "black", marginBottom: "10px" }}
-            variant="body2"
-          >
-            Your barcodes file should be a TSV file, with barcodes corresponding
-            to column indices in your matrix.
-            <br></br>
-            Each barcode's sequence should be stored in the last column. Please
-            submit a gzipped (.tsv.gz) file.
-          </Typography>
-          <input
-            accept=".gz"
-            id="file-button1"
-            type="file"
-            onChange={barcodesFileHandler}
-            style={{ outline: "none" }}
-          />
+        <div>
+          Your barcodes file should be a TSV file, with barcodes corresponding
+          to column indices in your matrix.
+          <br></br>
+          Each barcode's sequence should be stored in the last column. Please
+          submit a gzipped (.tsv.gz) file.
         </div>
       );
     case 3:
       return (
-        <div style={{ marginBottom: "15px" }}>
-          <Typography
-            style={{ fontWeight: 400, color: "black", marginBottom: "10px" }}
-            variant="body2"
-          >
-            Your tissue positions file should be a CSV file, containing a table
-            with rows that corresponding to spots.
-            <br></br>
-            Barcode sequence should be stored in the first column, column pixel
-            coordinate in the second-to-last column, and row pixel coordinate in
-            the last column.
-            <br></br>
-            Please submit a gzipped (.csv.gz) file.
-          </Typography>
-          <input
-            accept=".gz"
-            id="file-button1"
-            type="file"
-            onChange={pixelsFileHandler}
-            style={{ outline: "none" }}
-          />
+        <div>
+          Your tissue positions file should be a CSV file, containing a table
+          with rows that corresponding to spots.
+          <br></br>
+          Barcode sequence should be stored in the first column, column pixel
+          coordinate in the second-to-last column, and row pixel coordinate in
+          the last column.
+          <br></br>
+          Please submit a gzipped (.csv.gz) file.
         </div>
       );
     case 4:
       return (
-        <div style={{ marginBottom: "15px" }}>
-          <Typography
-            style={{ fontWeight: 400, color: "black", marginBottom: "10px" }}
-            variant="body2"
-          >
-            Please submit an unzipped tissue image file (.png, .jpg, or .jpeg).
-          </Typography>
-          <input
-            accept=".png, .jpg, .jpeg"
-            id="file-button1"
-            type="file"
-            onChange={imageFileHandler}
-            style={{ outline: "none" }}
-          />
+        <div>
+          Please submit an unzipped tissue image file (.png, .jpg, or .jpeg).
         </div>
       );
     default:
-      return "Unknown step";
+      return <div>Unknown step</div>;
   }
+};
+
+const getStepContent = (
+  step,
+  matrixFileHandler,
+  featuresFileHandler,
+  barcodesFileHandler,
+  pixelsFileHandler,
+  imageFileHandler
+) => {
+  return (
+    <div style={{ marginBottom: "15px" }}>
+      <Typography
+        style={{ fontWeight: 400, color: "black", marginBottom: "10px" }}
+        variant="body2"
+      >
+        {getStepDescription(step)}
+      </Typography>
+      <input
+        accept={step === 4 ? ".png, .jpg, .jpeg" : ".gz"}
+        id="file-button1"
+        type="file"
+        onChange={
+          step === 0
+            ? matrixFileHandler
+            : step === 1
+            ? featuresFileHandler
+            : step === 2
+            ? barcodesFileHandler
+            : step === 3
+            ? pixelsFileHandler
+            : imageFileHandler
+        }
+        style={{ outline: "none" }}
+      />
+    </div>
+  );
 };
 
 class VerticalLinearStepper extends Component {
@@ -198,7 +168,6 @@ class VerticalLinearStepper extends Component {
     const steps = getSteps();
     const { activeStep } = this.state;
 
-    const { handleNext, handleBack, handleReset } = this;
     const {
       matrixFileHandler,
       barcodesFileHandler,
@@ -219,21 +188,24 @@ class VerticalLinearStepper extends Component {
                     {getStepContent(
                       index,
                       matrixFileHandler,
-                      barcodesFileHandler,
                       featuresFileHandler,
+                      barcodesFileHandler,
                       pixelsFileHandler,
                       imageFileHandler
                     )}
                   </Typography>
                   <div>
                     <div>
-                      <Button disabled={activeStep === 0} onClick={handleBack}>
+                      <Button
+                        disabled={activeStep === 0}
+                        onClick={this.handleBack}
+                      >
                         Back
                       </Button>
                       <Button
                         variant="contained"
                         color="primary"
-                        onClick={handleNext}
+                        onClick={this.handleNext}
                       >
                         {activeStep === steps.length - 1 ? "Finish" : "Next"}
                       </Button>
@@ -252,7 +224,7 @@ class VerticalLinearStepper extends Component {
               control statistics to appear
             </Typography>
             <Button
-              onClick={handleReset}
+              onClick={this.handleReset}
               style={{
                 backgroundColor: primary,
                 marginTop: "10px",
@@ -296,6 +268,7 @@ class DataUpload extends Component {
           >
             Data Upload
           </Typography>
+
           {error.length > 0 && (
             <Fade
               style={{

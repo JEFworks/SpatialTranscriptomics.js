@@ -120,6 +120,8 @@ class DGEWrapper extends Component {
   }
 
   render() {
+    const { dgeSolution } = this.props;
+
     return (
       <>
         <Typography
@@ -128,8 +130,9 @@ class DGEWrapper extends Component {
         >
           Differential Gene Expression (DGE) Analysis
         </Typography>
+
         <Typography
-          style={{ marginBottom: "0px", fontWeight: 400, color: paragraph }}
+          style={{ fontWeight: 400, color: paragraph }}
           variant="body1"
         >
           First line of description...
@@ -163,7 +166,7 @@ class DGEWrapper extends Component {
         <div style={{ paddingTop: "20px" }}></div>
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>
-          {Plot(this.props.dgeSolution, this.getColor)}
+          {Plot(dgeSolution, this.getColor)}
           <div style={{ width: "50%" }}></div>
         </div>
       </>

@@ -137,6 +137,8 @@ class TSNEWrapper extends Component {
   }
 
   render() {
+    const { tsneSolution } = this.props;
+
     return (
       <>
         <Typography
@@ -145,8 +147,9 @@ class TSNEWrapper extends Component {
         >
           t-distributed Stochastic Neighbor Embedding (tSNE)
         </Typography>
+
         <Typography
-          style={{ marginBottom: "0px", fontWeight: 400, color: paragraph }}
+          style={{ fontWeight: 400, color: paragraph }}
           variant="body1"
         >
           Produce a tSNE map to map the principal components onto a 2D space,
@@ -183,7 +186,7 @@ class TSNEWrapper extends Component {
         <div style={{ paddingTop: "20px" }}></div>
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>
-          {Plot(this.props.tsneSolution, this.getColor)}
+          {Plot(tsneSolution, this.getColor)}
           <div style={{ width: "50%" }}></div>
         </div>
       </>
