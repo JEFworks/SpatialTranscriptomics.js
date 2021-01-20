@@ -12,14 +12,15 @@ import ScatterPlot from "./Plots/ScatterPlot.jsx";
 const primary = "#094067";
 const paragraph = "#5f6c7b";
 const blue = "#80d8ff";
+const red = "#ff80ab";
 
 const Plot = (data, getColor) => {
   const obj = [{ data: [] }];
 
   if (data && data.length > 0) {
-    data.forEach((gene, index) => {
+    data.forEach((gene) => {
       const { fc, p, name } = gene;
-      obj[0].data.push({ x: fc, y: p, name: name, index: index });
+      obj[0].data.push({ x: fc, y: p, name: name });
     });
   }
 
@@ -59,15 +60,15 @@ const Plot = (data, getColor) => {
 
 const TypedInput = (setX, setY) => {
   return (
-    <FormGroup row style={{ marginTop: "7px" }}>
+    <FormGroup row style={{ marginTop: "7px" }} className="dgeFlex">
       <TextField
-        style={{ width: "120px", marginRight: "15px" }}
+        style={{ width: "100px", marginRight: "15px" }}
         helperText="Reference Cluster #"
         defaultValue="1"
         onChange={(event) => setX(event)}
       />
       <TextField
-        style={{ width: "150px", marginRight: "15px" }}
+        style={{ width: "100px", marginRight: "15px" }}
         helperText="Non-Reference Cluster #"
         defaultValue="2"
         onChange={(event) => setY(event)}
@@ -86,7 +87,15 @@ class DGEWrapper extends Component {
   setX = this.setX.bind(this);
   setY = this.setY.bind(this);
 
-  getColor(_node) {
+  getColor(node) {
+    if (node) {
+      const { x, y } = node;
+      if (x >= 1 && y >= 1.5) {
+        return red;
+      } else if (x <= -1 && y >= 1.5) {
+        return blue;
+      }
+    }
     return "black";
   }
 
@@ -135,7 +144,7 @@ class DGEWrapper extends Component {
               disableShrink
               size={40}
               thickness={5}
-              style={{ color: blue, marginTop: "14px", marginLeft: "30px" }}
+              style={{ color: blue, marginTop: "15px", marginLeft: "30px" }}
             />
           )}
         </div>

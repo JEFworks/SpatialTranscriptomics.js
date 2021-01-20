@@ -2,12 +2,11 @@ import React, { Component } from "react";
 import { ResponsiveLine } from "@nivo/line";
 
 const red = "#ff80ab";
-const blue = "#80d8ff";
 
-const markers = (max, loading, totalNumPCs) => [
+const markers = (max, loading, limit) => [
   {
     axis: "x",
-    value: max >= Math.min(20, totalNumPCs) ? Math.min(20, totalNumPCs) : max,
+    value: max >= limit ? limit : max,
     lineStyle: {
       stroke: !loading ? red : "transparent",
       strokeWidth: 1,
@@ -57,8 +56,12 @@ class LineChart extends Component {
           }}
           pointSize={10}
           pointBorderWidth={0.5}
-          markers={markers(max, data[0].data.length < 1, totalNumPCs)}
-          colors={blue}
+          markers={markers(
+            max,
+            data[0].data.length < 1,
+            Math.min(20, totalNumPCs)
+          )}
+          colors={"black"}
           animate={false}
         />
       </>

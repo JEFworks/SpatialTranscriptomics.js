@@ -1,6 +1,35 @@
 import React, { Component } from "react";
 import { ResponsiveScatterPlot } from "@nivo/scatterplot";
 
+const grey = "#DDDDDD";
+
+const markers = [
+  {
+    axis: "x",
+    value: 1,
+    lineStyle: {
+      stroke: grey,
+      strokeWidth: 1,
+    },
+  },
+  {
+    axis: "x",
+    value: -1,
+    lineStyle: {
+      stroke: grey,
+      strokeWidth: 1,
+    },
+  },
+  {
+    axis: "y",
+    value: 1.5,
+    lineStyle: {
+      stroke: grey,
+      strokeWidth: 1,
+    },
+  },
+];
+
 class Scatter extends Component {
   render() {
     const { props } = this;
@@ -72,6 +101,7 @@ class Scatter extends Component {
           axisLeft={axisLeft}
           colors={getColor}
           animate={false}
+          markers={type === "dge" && data[0].data.length > 0 ? markers : null}
           tooltip={({ node }) => {
             if (node.data && node.data.name) {
               return (

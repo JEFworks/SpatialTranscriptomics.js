@@ -168,36 +168,32 @@ class SpatialVis extends Component {
   }
 
   updateDimensions() {
-    if (window.innerWidth <= 700) {
-      this.setState({ resize: true });
-    } else {
-      this.setState({ resize: true });
-    }
+    this.setState({ resize: true });
   }
 
   changeScale(event) {
     const scale = Number.parseFloat(event.target.value);
-    this.setState({ scale: isNaN(scale) ? 0 : scale });
+    this.setState({ scale: scale });
   }
 
   changeDeltaX(event) {
     const deltaX = Number.parseInt(event.target.value);
-    this.setState({ deltaX: isNaN(deltaX) ? 0 : deltaX });
+    this.setState({ deltaX: deltaX });
   }
 
   changeDeltaY(event) {
     const deltaY = Number.parseInt(event.target.value);
-    this.setState({ deltaY: isNaN(deltaY) ? 0 : deltaY });
+    this.setState({ deltaY: deltaY });
   }
 
   changeOpacity(event) {
     const opacity = Number.parseFloat(event.target.value);
-    this.setState({ updatedOpacity: isNaN(opacity) ? 0 : opacity });
+    this.setState({ updatedOpacity: opacity });
   }
 
   changePixelSize(event) {
     const pixelSize = Number.parseInt(event.target.value);
-    this.setState({ updatedPixelSize: isNaN(pixelSize) ? 0 : pixelSize });
+    this.setState({ updatedPixelSize: pixelSize });
   }
 
   flipHorizontal() {
@@ -213,11 +209,30 @@ class SpatialVis extends Component {
   }
 
   run() {
+    const {
+      deltaX,
+      deltaY,
+      scale,
+      updatedOpacity,
+      updatedPixelSize,
+    } = this.state;
+
+    if (
+      isNaN(deltaX) ||
+      isNaN(deltaY) ||
+      isNaN(scale) ||
+      isNaN(updatedOpacity) ||
+      isNaN(updatedPixelSize)
+    ) {
+      alert("Please specify a number value for each parameter.");
+      return;
+    }
+
     const pixels = this.getPixels();
     this.setState({
       pixels,
-      opacity: this.state.updatedOpacity,
-      pixelSize: this.state.updatedPixelSize,
+      opacity: updatedOpacity,
+      pixelSize: updatedPixelSize,
     });
   }
 

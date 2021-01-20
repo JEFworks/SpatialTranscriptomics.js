@@ -104,11 +104,11 @@ class TSNEWrapper extends Component {
     const { tsneSettings } = this.state;
 
     if (type === "epsilon") {
-      tsneSettings.epsilon = isNaN(newSetting) ? 0 : Math.max(0, newSetting);
+      tsneSettings.epsilon = newSetting;
     } else if (type === "perplexity") {
-      tsneSettings.perplexity = isNaN(newSetting) ? 0 : Math.max(0, newSetting);
+      tsneSettings.perplexity = newSetting;
     } else if (type === "iterations") {
-      tsneSettings.iterations = isNaN(newSetting) ? 0 : Math.max(0, newSetting);
+      tsneSettings.iterations = newSetting;
     }
 
     this.setState({ tsneSettings });
@@ -116,7 +116,24 @@ class TSNEWrapper extends Component {
 
   run() {
     const { computeTSNE } = this.props;
-    computeTSNE(this.state.tsneSettings);
+    const { tsneSettings } = this.state;
+
+    const { epsilon, perplexity, iterations } = tsneSettings;
+    if (
+      isNaN(epsilon) ||
+      isNaN(perplexity) ||
+      isNaN(iterations) ||
+      epsilon < 1 ||
+      perplexity < 1 ||
+      iterations < 1
+    ) {
+      alert(
+        "Please specify positive integer values for epsilon, perplexity, and iterations."
+      );
+      return;
+    }
+
+    computeTSNE(tsneSettings);
   }
 
   render() {

@@ -157,24 +157,35 @@ class PCAWrapper extends Component {
     return node.index ? this.props.colors[node.index] : "blue";
   }
 
+  alertParams(x, y, z) {
+    if (isNaN(x) || isNaN(x) || isNaN(y) || x < 1 || y < 1 || z < 1) {
+      alert("Please specify a positive integer value for each parameter.");
+      return true;
+    }
+    return false;
+  }
+
   run() {
     const { computePCA } = this.props;
     const { updatedNumPCs, new_pcX, new_pcY } = this.state;
-    this.setState({ numPCs: updatedNumPCs, pcX: new_pcX, pcY: new_pcY });
-    computePCA(updatedNumPCs);
+
+    if (!this.alertParams(new_pcX, new_pcY, updatedNumPCs)) {
+      this.setState({ numPCs: updatedNumPCs, pcX: new_pcX, pcY: new_pcY });
+      computePCA(updatedNumPCs);
+    }
   }
 
   applySettings() {
     const { setNumPCs } = this.props;
     const { updatedNumPCs, new_pcX, new_pcY } = this.state;
-    this.setState({ pcX: new_pcX, pcY: new_pcY });
-    if (updatedNumPCs !== this.state.numPCs) {
-      if (isNaN(updatedNumPCs) || updatedNumPCs < 1) {
-        alert("Please specify a positive integer value for # of PC's.");
-        return;
+
+    if (!this.alertParams(new_pcX, new_pcY, updatedNumPCs)) {
+      this.setState({ pcX: new_pcX, pcY: new_pcY });
+
+      if (updatedNumPCs !== this.state.numPCs) {
+        this.setState({ numPCs: updatedNumPCs });
+        setNumPCs(updatedNumPCs);
       }
-      this.setState({ numPCs: updatedNumPCs });
-      setNumPCs(updatedNumPCs);
     }
   }
 

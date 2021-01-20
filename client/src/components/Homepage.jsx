@@ -564,11 +564,8 @@ class Homepage extends Component {
 
     tsne_WorkerInstance.terminate();
 
-    loading.tsne = iterations < 1 ? false : true;
+    loading.tsne = true;
     this.setState({ loading });
-    if (iterations < 1) {
-      return;
-    }
 
     const opt = {};
     opt.epsilon = epsilon; // epsilon is learning rate (10 = default)
@@ -661,6 +658,11 @@ class Homepage extends Component {
     const { filteredPCs } = this.state;
     if (!filteredPCs[0]) {
       alert("Please run PCA first.");
+      return;
+    }
+
+    if (isNaN(k) || k < 1) {
+      alert("Please specify a positive integer value for k.");
       return;
     }
 

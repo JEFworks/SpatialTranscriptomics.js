@@ -24,7 +24,8 @@ const TitleContents = (
   k,
   loading,
   noshow,
-  isMobile
+  isMobile,
+  isMobile2
 ) => {
   return (
     <>
@@ -48,6 +49,7 @@ const TitleContents = (
             display: "flex",
             marginTop: isMobile ? "-5px" : "2px",
             marginBottom: "0px",
+            flexGrow: 1,
           }}
         >
           <div
@@ -77,38 +79,40 @@ const TitleContents = (
             </Button>
           </div>
 
-          <div style={{ display: isMobile ? "" : "flex" }}>
-            <TextField
-              style={{ width: "100px", marginRight: "10px" }}
-              helperText="# of Clusters (k)"
-              defaultValue="10"
-              onChange={selectK}
-            />
-            <Button
-              variant="contained"
-              size="small"
-              color="primary"
-              style={{
-                backgroundColor: primary,
-                marginTop: "15px",
-                marginBottom: "15px",
-              }}
-              onClick={() => setK(k)}
-            >
-              Color by Clusters
-            </Button>
-          </div>
-        </div>
-      )}
+          <div style={{ display: "flex" }}>
+            <div style={{ display: isMobile ? "" : "flex" }}>
+              <TextField
+                style={{ width: "100px", marginRight: "10px" }}
+                helperText="# of Clusters (k)"
+                defaultValue="10"
+                onChange={selectK}
+              />
+              <Button
+                variant="contained"
+                size="small"
+                color="primary"
+                style={{
+                  backgroundColor: primary,
+                  marginTop: "15px",
+                  marginBottom: "15px",
+                }}
+                onClick={() => setK(k)}
+              >
+                Color by Clusters
+              </Button>
+            </div>
 
-      {!isMobile && (
-        <div style={{ flexGrow: 1, marginLeft: "25px", marginTop: "5px" }}>
-          <CircularProgress
-            disableShrink
-            size={40}
-            thickness={5}
-            style={{ color: !loading ? "transparent" : blue }}
-          />
+            {!isMobile2 && (
+              <div style={{ marginLeft: "30px", marginTop: "10px" }}>
+                <CircularProgress
+                  disableShrink
+                  size={40}
+                  thickness={5}
+                  style={{ color: !loading ? "transparent" : blue }}
+                />
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -131,7 +135,8 @@ const Title = (
   k,
   loading,
   noshow,
-  isMobile
+  isMobile,
+  isMobile2
 ) => {
   const contents = TitleContents(
     selectFeature,
@@ -142,7 +147,8 @@ const Title = (
     k,
     loading,
     noshow,
-    isMobile
+    isMobile,
+    isMobile2
   );
 
   if (isMobile) {
@@ -199,11 +205,7 @@ class Header extends Component {
   }
 
   updateDimensions() {
-    if (window.innerWidth <= 980) {
-      this.setState({ resize: true });
-    } else {
-      this.setState({ resize: true });
-    }
+    this.setState({ resize: true });
   }
 
   selectFeature(event) {
@@ -212,7 +214,7 @@ class Header extends Component {
 
   selectK(event) {
     const value = Number.parseInt(event.target.value);
-    this.setState({ k: isNaN(value) ? 0 : Math.max(0, value) });
+    this.setState({ k: value });
   }
 
   render() {
@@ -220,6 +222,7 @@ class Header extends Component {
     const { feature, k } = this.state;
 
     const isMobile = window.innerWidth < 980;
+    const isMobile2 = window.innerWidth < 650;
 
     return (
       <>
@@ -239,7 +242,8 @@ class Header extends Component {
               k,
               loading,
               noshow,
-              isMobile
+              isMobile,
+              isMobile2
             )}
           </Toolbar>
         </AppBar>
