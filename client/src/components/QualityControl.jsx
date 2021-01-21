@@ -69,7 +69,7 @@ const Figure = (rowsums, colsums, thresholds, changeThreshold, type) => {
   return (
     <div
       style={{
-        height: "250px",
+        height: "300px",
         width: "100%",
         paddingRight: "20px",
         paddingBottom: "125px",
@@ -78,7 +78,7 @@ const Figure = (rowsums, colsums, thresholds, changeThreshold, type) => {
       <Paper
         style={{
           padding: "15px 20px 90px 15px",
-          width: "370px",
+          width: "350px",
           height: "100%",
           backgroundColor: "transparent",
         }}

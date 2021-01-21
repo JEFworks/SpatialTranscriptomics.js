@@ -19,12 +19,12 @@ const getMarkerLine = (data, min) => {
   return min.toFixed(1);
 };
 
-const markers = (markerLine, loading) => [
+const markers = (markerLine) => [
   {
     axis: "x",
     value: markerLine,
     lineStyle: {
-      stroke: !loading ? red : "transparent",
+      stroke: red,
       strokeWidth: 1,
     },
   },
@@ -53,7 +53,7 @@ class Histogram extends Component {
     const { min } = props;
 
     const data = !props.data
-      ? []
+      ? [{ range: 0, frequency: 0, color: "black" }]
       : props.data.map((datum) => {
           return {
             range: datum.range.toFixed(1),
@@ -71,7 +71,7 @@ class Histogram extends Component {
           indexBy="range"
           margin={{ top: 5, right: 0, bottom: 50, left: 45 }}
           colors={getColor}
-          markers={markers(getMarkerLine(data, min), data.length < 1)}
+          markers={data.length < 1 ? null : markers(getMarkerLine(data, min))}
           axisBottom={xAxis(props.xLabel)}
           axisLeft={yAxis}
           enableLabel={false}

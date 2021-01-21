@@ -14,7 +14,7 @@ const paragraph = "#5f6c7b";
 const blue = "#80d8ff";
 
 const Plot = (data, getColor) => {
-  const obj = [{ data: [] }];
+  const obj = [{ id: "", data: [] }];
   if (data && data.length > 0) {
     // 2D embedding
     data.forEach((point, index) => {

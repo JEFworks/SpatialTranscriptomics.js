@@ -638,7 +638,7 @@ class Homepage extends Component {
     const colors = [];
     const gene = this.getGene(matrix, features, featureName);
 
-    if (gene) {
+    if (gene != null) {
       // produce heatmap
       const { max, min } = MinMaxStats(gene);
       gene.forEach((cell) => {
@@ -773,8 +773,6 @@ class Homepage extends Component {
             dgeSolution={this.state.dgeSolution}
             loading={this.state.loading.dge}
           />
-
-          <div style={{ paddingBottom: "70px" }}></div>
         </div>
       </>
     );

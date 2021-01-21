@@ -15,7 +15,7 @@ const paragraph = "#5f6c7b";
 const blue = "#80d8ff";
 
 const Biplot = (eigenvectors, getColor, pcX, pcY) => {
-  const obj = [{ data: [] }];
+  const obj = [{ id: "", data: [] }];
   const visible = !isNaN(pcX) && !isNaN(pcY) && pcX > 0 && pcY > 0;
   if (eigenvectors[0] && visible) {
     eigenvectors.forEach((vector, index) => {
@@ -68,7 +68,7 @@ const Biplot = (eigenvectors, getColor, pcX, pcY) => {
 };
 
 const ScreePlot = (eigenvalues, numPCs) => {
-  const obj = [{ data: [] }];
+  const obj = [{ id: "", data: [] }];
   if (eigenvalues[0]) {
     eigenvalues.slice(0, 20).forEach((eigenvalue, index) => {
       obj[0].data.push({ x: index + 1, y: eigenvalue });

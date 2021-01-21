@@ -3,12 +3,12 @@ import { ResponsiveLine } from "@nivo/line";
 
 const red = "#ff80ab";
 
-const markers = (max, loading, limit) => [
+const markers = (max, limit) => [
   {
     axis: "x",
     value: max >= limit ? limit : max,
     lineStyle: {
-      stroke: !loading ? red : "transparent",
+      stroke: red,
       strokeWidth: 1,
     },
   },
@@ -30,7 +30,6 @@ class LineChart extends Component {
             min: "auto",
             max: "auto",
             stacked: true,
-            reverse: false,
           }}
           enableGridX={false}
           enableGridY={false}
@@ -56,12 +55,12 @@ class LineChart extends Component {
           }}
           pointSize={10}
           pointBorderWidth={0.5}
-          markers={markers(
-            max,
-            data[0].data.length < 1,
-            Math.min(20, totalNumPCs)
-          )}
-          colors={"black"}
+          markers={
+            data[0].data.length < 1
+              ? null
+              : markers(max, Math.min(20, totalNumPCs))
+          }
+          colors={["black"]}
           animate={false}
         />
       </>

@@ -38,34 +38,34 @@ const getStepDescription = (step) => {
   switch (step) {
     case 0:
       return (
-        <div>
+        <>
           Your matrix file should be in Matrix Market coordinate format. Please
           submit a gzipped (.mtx.gz) file.
-        </div>
+        </>
       );
     case 1:
       return (
-        <div>
+        <>
           Your features file should be a TSV file, with features corresponding
           to row indices in your matrix.
           <br></br>
           Each feature's gene name should be stored in the second column. Please
           submit a gzipped (.tsv.gz) file.
-        </div>
+        </>
       );
     case 2:
       return (
-        <div>
+        <>
           Your barcodes file should be a TSV file, with barcodes corresponding
           to column indices in your matrix.
           <br></br>
           Each barcode's sequence should be stored in the last column. Please
           submit a gzipped (.tsv.gz) file.
-        </div>
+        </>
       );
     case 3:
       return (
-        <div>
+        <>
           Your tissue positions file should be a CSV file, containing a table
           with rows that corresponding to spots.
           <br></br>
@@ -74,16 +74,14 @@ const getStepDescription = (step) => {
           the last column.
           <br></br>
           Please submit a gzipped (.csv.gz) file.
-        </div>
+        </>
       );
     case 4:
       return (
-        <div>
-          Please submit an unzipped tissue image file (.png, .jpg, or .jpeg).
-        </div>
+        <>Please submit an unzipped tissue image file (.png, .jpg, or .jpeg).</>
       );
     default:
-      return <div>Unknown step</div>;
+      return <>Unknown step</>;
   }
 };
 
@@ -184,32 +182,28 @@ class VerticalLinearStepper extends Component {
               <Step key={label}>
                 <StepLabel style={{ color: primary }}>{label}</StepLabel>
                 <StepContent>
-                  <Typography>
-                    {getStepContent(
-                      index,
-                      matrixFileHandler,
-                      featuresFileHandler,
-                      barcodesFileHandler,
-                      pixelsFileHandler,
-                      imageFileHandler
-                    )}
-                  </Typography>
+                  {getStepContent(
+                    index,
+                    matrixFileHandler,
+                    featuresFileHandler,
+                    barcodesFileHandler,
+                    pixelsFileHandler,
+                    imageFileHandler
+                  )}
                   <div>
-                    <div>
-                      <Button
-                        disabled={activeStep === 0}
-                        onClick={this.handleBack}
-                      >
-                        Back
-                      </Button>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={this.handleNext}
-                      >
-                        {activeStep === steps.length - 1 ? "Finish" : "Next"}
-                      </Button>
-                    </div>
+                    <Button
+                      disabled={activeStep === 0}
+                      onClick={this.handleBack}
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={this.handleNext}
+                    >
+                      {activeStep === steps.length - 1 ? "Finish" : "Next"}
+                    </Button>
                   </div>
                 </StepContent>
               </Step>

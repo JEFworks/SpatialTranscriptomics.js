@@ -49,9 +49,9 @@ export const performDGE = (
     dgeSolution.push({ name: geneName, p: p, fc: fc });
   });
 
-  let maxP = 0;
-  let maxFC = 0;
-  let minFC = dgeSolution[0].fc;
+  let maxP = Number.NEGATIVE_INFINITY;
+  let maxFC = Number.NEGATIVE_INFINITY;
+  let minFC = Number.POSITIVE_INFINITY;
   dgeSolution.forEach((gene) => {
     if (isFinite(gene.p) && gene.p > maxP) {
       maxP = gene.p;

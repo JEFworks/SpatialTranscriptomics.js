@@ -15,7 +15,7 @@ const blue = "#80d8ff";
 const red = "#ff80ab";
 
 const Plot = (data, getColor) => {
-  const obj = [{ data: [] }];
+  const obj = [{ id: "", data: [] }];
 
   if (data && data.length > 0) {
     data.forEach((gene) => {

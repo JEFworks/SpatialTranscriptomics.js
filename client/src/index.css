@@ -17,6 +17,7 @@ code {
   margin: 0 auto;
   width: 90%;
   padding-top: 70px;
+  padding-bottom: 70px;
 }
 
 .QC-flex {
@@ -43,8 +44,8 @@ code {
 }
 
 .tsne-plot {
-  height: 450px;
-  width: 490px;
+  height: 480px;
+  width: 525px;
 }
 
 .icon-404 {
@@ -72,7 +73,7 @@ code {
   }
 }
 
-@media only screen and (max-width: 950px) {
+@media only screen and (max-width: 900px) {
   .QC-flex {
     display: grid;
   }
