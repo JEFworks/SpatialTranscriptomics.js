@@ -114,6 +114,21 @@ class DGEWrapper extends Component {
     this.setState({ x: num });
   }
 
+  download(data) {
+    const results = ["feature,log2(p-value),log2(fold-change)"];
+    data.forEach((gene) => {
+      results.push(`${gene.name},${gene.p},${gene.fc}`);
+    });
+    const CSV = results.join("\n");
+
+    const element = document.createElement("a");
+    const file = new Blob([CSV], { type: "text/csv" });
+    element.href = URL.createObjectURL(file);
+    element.download = "dgeResults.csv";
+    document.body.appendChild(element);
+    element.click();
+  }
+
   setY(event) {
     const num = Number.parseInt(event.target.value);
     this.setState({ y: num });
@@ -161,6 +176,15 @@ class DGEWrapper extends Component {
           onClick={() => this.run()}
         >
           Run DGE
+        </Button>
+        <Button
+          variant="contained"
+          size="small"
+          color="primary"
+          style={{ backgroundColor: primary, marginLeft: "10px" }}
+          onClick={() => this.download(dgeSolution)}
+        >
+          Download Results
         </Button>
 
         <div style={{ paddingTop: "20px" }}></div>
