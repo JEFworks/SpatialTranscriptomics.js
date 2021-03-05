@@ -15,12 +15,15 @@ import PCAWrapper from "./PCAWrapper.jsx";
 import TSNEWrapper from "./TSNEWrapper.jsx";
 import SpatialVis from "./SpatialVis.jsx";
 import DGEWrapper from "./DGEWrapper.jsx";
+import GSEAWrapper from "./GSEAWrapper.jsx";
 
 import Worker_FILTER from "workerize-loader!../workers/worker-filter.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
 import Worker_PCA from "workerize-loader!../workers/worker-pca.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
 import Worker_TSNE from "workerize-loader!../workers/worker-tsne.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
 import Worker_KMEANS from "workerize-loader!../workers/worker-kmeans.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
 import Worker_DGE from "workerize-loader!../workers/worker-dge.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
+
+import MHG from "../functions/mhg.js";
 
 let filter_WorkerInstance = Worker_FILTER();
 let pca_WorkerInstance = Worker_PCA();
@@ -592,7 +595,7 @@ class Homepage extends Component {
       loading,
     } = this.state;
 
-    if (clusterIndices == null || clusterIndices.length < 2) {
+    if (!clusterIndices[0] || clusterIndices.length < 2) {
       alert("Please perform clustering with k >= 2 first.");
       return;
     }
@@ -773,6 +776,9 @@ class Homepage extends Component {
             dgeSolution={this.state.dgeSolution}
             loading={this.state.loading.dge}
           />
+
+          <div style={{ paddingTop: "40px" }}></div>
+          <GSEAWrapper />
         </div>
       </>
     );

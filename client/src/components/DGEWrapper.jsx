@@ -115,7 +115,12 @@ class DGEWrapper extends Component {
   }
 
   download(data) {
-    const results = ["feature,log2(p-value),log2(fold-change)"];
+    if (!data[0]) {
+      alert("Please run DGE first.");
+      return;
+    }
+
+    const results = ["feature,-log10(p-value),log2(fold-change)"];
     data.forEach((gene) => {
       results.push(`${gene.name},${gene.p},${gene.fc}`);
     });
@@ -124,7 +129,7 @@ class DGEWrapper extends Component {
     const element = document.createElement("a");
     const file = new Blob([CSV], { type: "text/csv" });
     element.href = URL.createObjectURL(file);
-    element.download = "dgeResults.csv";
+    element.download = "dge_results.csv";
     document.body.appendChild(element);
     element.click();
   }
