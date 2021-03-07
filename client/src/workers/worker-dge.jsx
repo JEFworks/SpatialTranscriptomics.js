@@ -2,7 +2,7 @@
 import mannwhitneyu from "../functions/mannwhitneyu.js";
 
 export const performDGE = (
-  clusterIndices,
+  clusters,
   filteredMatrix,
   filteredFeatures,
   xNum,
@@ -15,10 +15,8 @@ export const performDGE = (
 
     // let's compare between cluster X and cluster Y
     // x = reference group, y = non-reference group
-    const clusterX =
-      clusterIndices[Math.min(xNum - 1, clusterIndices.length - 1)];
-    const clusterY =
-      clusterIndices[Math.min(yNum - 1, clusterIndices.length - 1)];
+    const clusterX = clusters[Math.min(xNum - 1, clusters.length - 1)];
+    const clusterY = clusters[Math.min(yNum - 1, clusters.length - 1)];
 
     // x will store the reads of this gene in cells of cluster X
     const x = [];
@@ -66,13 +64,16 @@ export const performDGE = (
 
   for (let i = 0; i < dgeSolution.length; i++) {
     if (dgeSolution[i].p === Number.POSITIVE_INFINITY) {
-      dgeSolution[i].p = maxP + 1;
+      dgeSolution[i].p = maxP + 5;
+      dgeSolution[i].capped_p = maxP + 1;
     }
 
     if (dgeSolution[i].fc === Number.POSITIVE_INFINITY) {
-      dgeSolution[i].fc = maxFC + 1;
+      dgeSolution[i].fc = maxFC + 5;
+      dgeSolution[i].capped_fc = maxFC + 1;
     } else if (dgeSolution[i].fc === Number.NEGATIVE_INFINITY) {
-      dgeSolution[i].fc = minFC - 1;
+      dgeSolution[i].fc = minFC - 5;
+      dgeSolution[i].capped_fc = minFC - 1;
     }
   }
 

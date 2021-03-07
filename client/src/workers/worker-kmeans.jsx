@@ -46,5 +46,5 @@ export const performKMeans = (pcs, k) => {
   );
   const colors = [...sorted.values()];
 
-  self.postMessage({ colors: colors, clusterIndices: clusterIndices });
+  self.postMessage({ colors: colors, clusters: clusterIndices });
 };

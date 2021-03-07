@@ -20,7 +20,11 @@ const Plot = (data, getColor) => {
   if (data && data.length > 0) {
     data.forEach((gene) => {
       const { fc, p, name } = gene;
-      obj[0].data.push({ x: fc, y: p, name: name });
+      obj[0].data.push({
+        x: gene.capped_fc ? gene.capped_fc : fc,
+        y: gene.capped_p ? gene.capped_p : p,
+        name: name,
+      });
     });
   }
 

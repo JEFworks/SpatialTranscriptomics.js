@@ -23,8 +23,6 @@ import Worker_TSNE from "workerize-loader!../workers/worker-tsne.jsx"; // eslint
 import Worker_KMEANS from "workerize-loader!../workers/worker-kmeans.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
 import Worker_DGE from "workerize-loader!../workers/worker-dge.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
 
-import MHG from "../functions/mhg.js";
-
 let filter_WorkerInstance = Worker_FILTER();
 let pca_WorkerInstance = Worker_PCA();
 let tsne_WorkerInstance = Worker_TSNE();
@@ -57,7 +55,7 @@ class Homepage extends Component {
     tsneSolution: [],
     feature: "camk2n1",
     k: 10,
-    clusterIndices: [],
+    clusters: [],
     colors: [],
     colorOption: "gene",
     dgeSolution: [],
@@ -157,7 +155,7 @@ class Homepage extends Component {
       pcs: [],
       filteredPCs: [],
       tsneSolution: [],
-      clusterIndices: [],
+      clusters: [],
       colors: [],
       colorOption: "gene",
       loading: {
@@ -419,7 +417,7 @@ class Homepage extends Component {
       eigenvalues: [],
       filteredPCs: [],
       tsneSolution: [],
-      clusterIndices: [],
+      clusters: [],
       colors: [],
       colorOption: "gene",
       dgeSolution: [],
@@ -485,7 +483,7 @@ class Homepage extends Component {
         loading,
         filteredPCs: [],
         tsneSolution: [],
-        clusterIndices: [],
+        clusters: [],
         dgeSolution: [],
       },
       () => {
@@ -534,7 +532,7 @@ class Homepage extends Component {
       loading,
       filteredPCs: [],
       tsneSolution: [],
-      clusterIndices: [],
+      clusters: [],
       dgeSolution: [],
     });
 
@@ -588,14 +586,9 @@ class Homepage extends Component {
   }
 
   computeDGE(x, y) {
-    const {
-      clusterIndices,
-      filteredMatrix,
-      filteredFeatures,
-      loading,
-    } = this.state;
+    const { clusters, filteredMatrix, filteredFeatures, loading } = this.state;
 
-    if (!clusterIndices[0] || clusterIndices.length < 2) {
+    if (!clusters[0] || clusters.length < 2) {
       alert("Please perform clustering with k >= 2 first.");
       return;
     }
@@ -606,7 +599,7 @@ class Homepage extends Component {
 
     dge_WorkerInstance = Worker_DGE();
     dge_WorkerInstance.performDGE(
-      clusterIndices,
+      clusters,
       filteredMatrix,
       filteredFeatures,
       x,
@@ -675,7 +668,7 @@ class Homepage extends Component {
     this.setState({
       k,
       colorOption: "cluster",
-      clusterIndices: [],
+      clusters: [],
       dgeSolution: [],
     });
     this.setColorsByClusters(filteredPCs, k);
@@ -690,17 +683,49 @@ class Homepage extends Component {
     kmeans_WorkerInstance = Worker_KMEANS();
     kmeans_WorkerInstance.performKMeans(pcs, k);
     kmeans_WorkerInstance.addEventListener("message", (message) => {
-      if (message.data.colors && message.data.clusterIndices) {
-        const { colors, clusterIndices } = message.data;
+      if (message.data.colors && message.data.clusters) {
+        const { colors, clusters } = message.data;
         loading.kmeans = false;
         this.setState({
           loading,
           colors,
-          clusterIndices,
+          clusters,
         });
         kmeans_WorkerInstance.terminate();
       }
     });
+  }
+
+  // Javascript implementation of LIGER
+  clickGSEA() {
+    const { dgeSolution } = this.state;
+    const rankedValues = dgeSolution.sort((a, b) => b.p - a.p);
+
+    const geneSet = new Set(["nptxr", "camk2n1", "sparc"]);
+    let hits = 0;
+    let misses = 0;
+
+    rankedValues.forEach((gene) => {
+      gene.es = Math.abs(gene.p);
+      if (geneSet.has(gene.name)) {
+        gene.hit = true;
+        hits += gene.es;
+      } else {
+        gene.hit = false;
+        misses += gene.es;
+      }
+    });
+
+    rankedValues.forEach((gene) => {
+      if (gene.hit) {
+        gene.es /= hits;
+      } else {
+        gene.es = (-1 * gene.es) / misses;
+      }
+      gene.es *= rankedValues.length;
+    });
+
+    console.log(rankedValues);
   }
 
   render() {
@@ -779,6 +804,7 @@ class Homepage extends Component {
 
           <div style={{ paddingTop: "40px" }}></div>
           <GSEAWrapper />
+          <button onClick={() => this.clickGSEA()}>Click gsea</button>
         </div>
       </>
     );
