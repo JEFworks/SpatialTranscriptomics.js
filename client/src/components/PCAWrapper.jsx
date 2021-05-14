@@ -157,9 +157,18 @@ class PCAWrapper extends Component {
     return node.index ? this.props.colors[node.index] : "blue";
   }
 
+  // x = pcX, y = pcY, z = numPCs
   alertParams(x, y, z) {
     if (isNaN(x) || isNaN(x) || isNaN(y) || x < 1 || y < 1 || z < 1) {
       alert("Please specify a positive integer value for each parameter.");
+      return true;
+    }
+
+    if (
+      this.props.eigenvalues[0] &&
+      (x > this.props.eigenvalues.length || y > this.props.eigenvalues.length)
+    ) {
+      alert("Please specify PCs that exist.");
       return true;
     }
     return false;

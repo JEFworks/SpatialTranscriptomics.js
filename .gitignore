@@ -5,7 +5,7 @@ temp/Rplots.pdf
 *.mtx
 *.csv
 backend/data/
-st_key.pem
+*.pem
 client/src/api.jsx
 *.lock
 

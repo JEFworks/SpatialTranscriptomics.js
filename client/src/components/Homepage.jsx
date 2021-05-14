@@ -1,3 +1,5 @@
+import MHG from "../functions/mhg.js";
+
 import React, { Component } from "react";
 import axios from "axios";
 import api from "../api.jsx";
@@ -615,6 +617,80 @@ class Homepage extends Component {
     });
   }
 
+  // helper function for GSEA
+  intersect(a, b) {
+    if (a.length > b.length) {
+      return a.filter((e) => b.indexOf(e) !== -1);
+    }
+    return b.filter((e) => a.indexOf(e) !== -1);
+  }
+
+  // trying to implement gene set enrichment
+  clickGSEA() {
+    const { clusters, filteredMatrix, filteredFeatures } = this.state;
+    const cluster = clusters[0]; // let's assume we're interested in the first Cluster.
+
+    if (!clusters[0]) {
+      alert("Please perform clustering first.");
+      return;
+    }
+
+    // FIXME: modify sets so that the gene names are lowercase
+    const sets = [
+      { Name: "Sparky", List: ["clca1", "foxd3", "arpan", "sparc", "camk2n1"] },
+      { Name: "Alice", List: ["arpy", "nptxr", "agt", "camk2n1", "sparc"] },
+    ];
+    const genesHave = [];
+
+    // FIXME: for now, just use all DE genes. later, maybe also also give user option for ONLY upregulated or ONLY downreg
+    filteredMatrix.forEach((gene, index) => {
+      for (let i = 0; i < gene.length; i++) {
+        if (cluster.includes(i) && gene[i] > 0) {
+          genesHave.push(filteredFeatures[index]);
+          break;
+        }
+      }
+    });
+
+    const results = [];
+
+    for (let i = 0; i < sets.length; i++) {
+      const set = sets[i];
+      const geneSet = this.intersect(set.List, genesHave);
+      const N = genesHave.length;
+      const K = geneSet.length;
+      const L = N;
+      const X = 1;
+
+      // geneset should contain >= 2 genes from the genes we have
+      if (K < 2) {
+        continue;
+      }
+
+      const indices = [];
+      const v = genesHave.map((name, index) => {
+        if (geneSet.indexOf(name) >= 0) {
+          indices.push({ Name: name, Index: index });
+          return 1;
+        }
+        return 0;
+      });
+
+      const mhg = new MHG();
+      const res = mhg.mhg_test(v, N, K, L, X);
+
+      // no enrichment, skip
+      if (res.mhg[0] == null) {
+        continue;
+      }
+
+      results.push({ Set: { Name: set.Name, List: geneSet }, MHG: res });
+    }
+
+    const sortedResults = results.sort((a, b) => a.MHG.pvalue - b.MHG.pvalue);
+    console.log(sortedResults);
+  }
+
   // set gene name and compute colors based on expression of this gene
   setFeature(name) {
     const { filteredMatrix, filteredFeatures, loading } = this.state;
@@ -696,38 +772,6 @@ class Homepage extends Component {
     });
   }
 
-  // Javascript implementation of LIGER
-  clickGSEA() {
-    const { dgeSolution } = this.state;
-    const rankedValues = dgeSolution.sort((a, b) => b.p - a.p);
-
-    const geneSet = new Set(["nptxr", "camk2n1", "sparc"]);
-    let hits = 0;
-    let misses = 0;
-
-    rankedValues.forEach((gene) => {
-      gene.es = Math.abs(gene.p);
-      if (geneSet.has(gene.name)) {
-        gene.hit = true;
-        hits += gene.es;
-      } else {
-        gene.hit = false;
-        misses += gene.es;
-      }
-    });
-
-    rankedValues.forEach((gene) => {
-      if (gene.hit) {
-        gene.es /= hits;
-      } else {
-        gene.es = (-1 * gene.es) / misses;
-      }
-      gene.es *= rankedValues.length;
-    });
-
-    console.log(rankedValues);
-  }
-
   render() {
     // produce error message
     const { errors } = this.state;
@@ -799,6 +843,7 @@ class Homepage extends Component {
           <DGEWrapper
             computeDGE={this.computeDGE}
             dgeSolution={this.state.dgeSolution}
+            numClusters={this.state.clusters.length}
             loading={this.state.loading.dge}
           />
 

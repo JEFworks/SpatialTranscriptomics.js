@@ -104,10 +104,18 @@ class DGEWrapper extends Component {
   }
 
   run() {
-    const { computeDGE } = this.props;
+    const { computeDGE, numClusters, dgeSolution } = this.props;
     const { x, y } = this.state;
     if (isNaN(x) || isNaN(y) || x < 1 || y < 1) {
       alert("Please specify a positive integer value for each group number.");
+      return;
+    }
+    if (x == y) {
+      alert("Please compare different clusters.");
+      return;
+    }
+    if (dgeSolution[0] && (x > numClusters || y > numClusters)) {
+      alert("Please specify clusters that exist.");
       return;
     }
     computeDGE(x, y);
