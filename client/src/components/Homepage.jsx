@@ -626,7 +626,14 @@ class Homepage extends Component {
 
     // FIXME: modify sets so that the gene names are lowercase
     const geneSets = new Map();
-    geneSets.set("Sparky", ["clca1", "foxd3", "arpan", "sparc", "camk2n1"]);
+    geneSets.set("Sparky", [
+      "clca1",
+      "foxd3",
+      "arpan",
+      "sparc",
+      "camk2n1",
+      "atp1a1",
+    ]);
     geneSets.set("Alice", ["arpy", "nptxr", "agt", "camk2n1", "sparc"]);
 
     gse_WorkerInstance = Worker_GSE();

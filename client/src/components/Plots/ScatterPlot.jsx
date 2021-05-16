@@ -37,7 +37,7 @@ class Scatter extends Component {
 
     let axisBottom = null;
     if (type === "pca" || type === "dge") {
-      let legend = !visible ? "" : `pc${pcX}`;
+      let legend = !visible ? "" : `PC ${pcX}`;
       if (type === "dge") {
         legend = "log2(fold-change)";
       }
@@ -55,7 +55,7 @@ class Scatter extends Component {
 
     let axisLeft = null;
     if (type === "pca" || type === "dge") {
-      let legend = !visible ? "" : `pc${pcY}`;
+      let legend = !visible ? "" : `PC ${pcY}`;
       if (type === "dge") {
         legend = "-log10(p-value)";
       }

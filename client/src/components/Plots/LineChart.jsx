@@ -3,13 +3,17 @@ import { ResponsiveLine } from "@nivo/line";
 
 const red = "#ff80ab";
 
-const markers = (max, limit) => [
+const markers = (redLineLabel, redLine, max) => [
   {
     axis: "x",
-    value: max >= limit ? limit : max,
+    value: redLine >= max ? max : redLine,
+    legend: redLineLabel,
     lineStyle: {
       stroke: red,
       strokeWidth: 1,
+    },
+    textStyle: {
+      fill: red,
     },
   },
 ];
@@ -17,13 +21,27 @@ const markers = (max, limit) => [
 class LineChart extends Component {
   render() {
     const { props } = this;
-    const { data, max, totalNumPCs } = props;
+    const {
+      data,
+      redLine,
+      redLineLabel,
+      max,
+      xLabel,
+      yLabel,
+      tickValues,
+      type,
+    } = props;
 
     return (
       <>
         <ResponsiveLine
           data={data}
-          margin={{ top: 10, right: 10, bottom: 50, left: 50 }}
+          margin={{
+            top: 10,
+            right: type === "gse" ? 20 : 10,
+            bottom: type === "gse" ? 70 : 50,
+            left: 50,
+          }}
           xScale={{ type: "point" }}
           yScale={{
             type: "linear",
@@ -37,28 +55,29 @@ class LineChart extends Component {
           axisRight={null}
           axisBottom={{
             orient: "bottom",
-            tickSize: 5,
+            tickSize: type === "gse" ? 15 : 5,
             tickPadding: 5,
-            tickRotation: 0,
-            legend: "component #",
+            tickRotation: type === "gse" ? 90 : 0,
+            legend: xLabel,
             legendOffset: 40,
             legendPosition: "middle",
+            tickValues: tickValues,
           }}
           axisLeft={{
             orient: "left",
             tickSize: 5,
             tickPadding: 5,
             tickRotation: 0,
-            legend: "eigenvalue",
+            legend: yLabel,
             legendOffset: -40,
             legendPosition: "middle",
           }}
-          pointSize={10}
+          pointSize={type === "gse" ? 0 : 7}
           pointBorderWidth={0.5}
           markers={
             data[0].data.length < 1
               ? null
-              : markers(max, Math.min(20, totalNumPCs))
+              : markers(redLineLabel, redLine, max ? max : Infinity)
           }
           colors={["black"]}
           animate={false}

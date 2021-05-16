@@ -89,8 +89,10 @@ const ScreePlot = (eigenvalues, numPCs) => {
     <div style={{ width: "100%", height: "100%" }}>
       <LineChart
         data={obj}
-        max={numPCs}
-        totalNumPCs={eigenvalues[0] ? eigenvalues.length : 0}
+        redLine={numPCs}
+        max={eigenvalues[0] ? Math.min(eigenvalues.length, 20) : 0}
+        xLabel="component #"
+        yLabel="eigenvalue"
       />
     </div>
   );

@@ -8,38 +8,78 @@ import {
   MenuItem,
   Select,
   FormHelperText,
+  Paper,
 } from "@material-ui/core";
+import LineChart from "./Plots/LineChart.jsx";
 
 const primary = "#094067";
 const paragraph = "#5f6c7b";
 const blue = "#80d8ff";
-const red = "#ff80ab";
+// const red = "#ff80ab";
 
 const Plot = (gseResult, genesHave) => {
   const { geneSet, mhg, pvalue, threshold } = gseResult;
-  console.log(mhg);
-  console.log(geneSet);
-  // return (
-  //   <p>
-  //     {data.pvalue}
-  //   </p>
-  // )
+
+  const obj = [{ id: "", data: [] }];
+  if (mhg) {
+    mhg.forEach((enrichment, i) => {
+      obj[0].data.push({ x: genesHave[i], y: enrichment });
+    });
+  }
+
+  const Title = (
+    <Typography
+      variant="body1"
+      align="center"
+      style={{ paddingBottom: "5px", fontWeight: 500, color: primary }}
+    >
+      Enrichment Plot
+    </Typography>
+  );
+
+  const Linechart = (
+    <div style={{ width: "100%", height: "100%" }}>
+      <LineChart
+        data={obj}
+        redLine={genesHave[threshold]}
+        redLineLabel={pvalue == null ? null : `P = ${pvalue.toFixed(3)}`}
+        yLabel="enrichment"
+        tickValues={geneSet}
+        type={"gse"}
+      />
+    </div>
+  );
+
+  return (
+    <div style={{ marginRight: "20px" }}>
+      <Paper
+        className="gse-plot"
+        style={{
+          padding: "15px 15px 40px 15px",
+          backgroundColor: "transparent",
+        }}
+        variant="outlined"
+        elevation={3}
+      >
+        {Title}
+        {Linechart}
+      </Paper>
+    </div>
+  );
 };
 
-const Dropdown = (GSE, handleSelect, currSetID) => {
+const Dropdown = (sets, setIndex, handleSelect) => {
   return (
     <FormControl>
-      <InputLabel>Age</InputLabel>
-      <Select
-        value={GSE.includes(currSetID) ? currSetID : ""}
-        onChange={handleSelect}
-      >
-        <MenuItem value="">
-          <em>None</em>
-        </MenuItem>
-        {GSE.map((setID, i) => {
+      <Select value={setIndex} onChange={handleSelect}>
+        {sets.length === 0 && (
+          <MenuItem value={-1}>
+            <em>None</em>
+          </MenuItem>
+        )}
+        {sets.map((setID, i) => {
           return (
-            <MenuItem value={setID} key={i}>
+            <MenuItem value={i} key={i}>
               {setID}
             </MenuItem>
           );
@@ -52,22 +92,26 @@ const Dropdown = (GSE, handleSelect, currSetID) => {
 
 class GSEWrapper extends Component {
   state = {
-    setID: "",
+    setIndex: -1,
   };
 
   handleSelect(event) {
-    this.setState({ setID: event.target.value });
+    this.setState({ setIndex: event.target.value });
   }
 
   run() {
     const { computeGSE } = this.props;
     computeGSE();
+    this.setState({ setIndex: 0 });
   }
 
   render() {
-    const { setID } = this.state;
+    const { setIndex } = this.state;
     const { gseSolution, loading } = this.props;
     const { Genes, GSE } = gseSolution;
+
+    const sets = GSE ? [...GSE.keys()] : [];
+    const currSetIndex = sets.length > 0 ? setIndex : -1;
 
     return (
       <>
@@ -88,11 +132,7 @@ class GSEWrapper extends Component {
         </Typography>
 
         <div style={{ display: "flex" }}>
-          {Dropdown(
-            GSE ? [...GSE.keys()] : [],
-            this.handleSelect.bind(this),
-            setID
-          )}
+          {Dropdown(sets, currSetIndex, this.handleSelect.bind(this))}
           {loading && (
             <CircularProgress
               disableShrink
@@ -117,7 +157,12 @@ class GSEWrapper extends Component {
         <div style={{ paddingTop: "20px" }}></div>
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>
-          {Plot(GSE && GSE.has(setID) ? GSE.get(setID) : {}, Genes)}
+          {Plot(
+            GSE && GSE.has(sets[currSetIndex])
+              ? GSE.get(sets[currSetIndex])
+              : {},
+            Genes ? Genes : []
+          )}
           <div style={{ width: "50%" }}></div>
         </div>
       </>
