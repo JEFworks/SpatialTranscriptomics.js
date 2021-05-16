@@ -10,6 +10,10 @@ export const performDGE = (
 ) => {
   const dgeSolution = [];
 
+  let maxP = Number.NEGATIVE_INFINITY;
+  let maxFC = Number.NEGATIVE_INFINITY;
+  let minFC = Number.POSITIVE_INFINITY;
+
   filteredMatrix.forEach((gene, index) => {
     const geneName = filteredFeatures[index];
 
@@ -44,21 +48,23 @@ export const performDGE = (
     }, 0);
     const fc = Math.log2(yReads / xReads);
 
-    dgeSolution.push({ name: geneName, p: p, fc: fc });
-  });
+    const obj = { name: geneName, p: p, fc: fc, type: "neutral" };
+    if (fc >= 1 && p >= 1.5) {
+      obj.type = "upregulated";
+    } else if (fc <= -1 && p >= 1.5) {
+      obj.type = "downregulated";
+    }
 
-  let maxP = Number.NEGATIVE_INFINITY;
-  let maxFC = Number.NEGATIVE_INFINITY;
-  let minFC = Number.POSITIVE_INFINITY;
-  dgeSolution.forEach((gene) => {
-    if (isFinite(gene.p) && gene.p > maxP) {
-      maxP = gene.p;
+    dgeSolution.push(obj);
+
+    if (isFinite(p) && p > maxP) {
+      maxP = p;
     }
-    if (isFinite(gene.fc) && gene.fc > maxFC) {
-      maxFC = gene.fc;
+    if (isFinite(fc) && fc > maxFC) {
+      maxFC = fc;
     }
-    if (isFinite(gene.fc) && gene.fc < minFC) {
-      minFC = gene.fc;
+    if (isFinite(fc) && fc < minFC) {
+      minFC = fc;
     }
   });
 

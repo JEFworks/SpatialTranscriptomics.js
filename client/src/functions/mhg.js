@@ -1,5 +1,3 @@
-import { range } from "d3";
-
 /**
  * Minimum-hypergeometric test for enrichment in ranked binary lists.
  * Copyright (C) 2015  Kamil Slowikowski <kslowikowski@fas.harvard.edu>
@@ -19,212 +17,210 @@ import { range } from "d3";
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var MHG = function () {
-  this.mhg_test = mhg_test;
-
-  function is_equal(a, b, tol) {
-    if (a === b) {
-      return true;
-    } else if (Math.abs(a - b) / Math.max(Math.abs(a), Math.abs(b)) < tol) {
-      return true;
-    }
-    return false;
+function is_equal(a, b, tol) {
+  if (a === b) {
+    return true;
+  } else if (Math.abs(a - b) / Math.max(Math.abs(a), Math.abs(b)) < tol) {
+    return true;
   }
+  return false;
+}
 
-  /**
-   * Starting with the tail probability of finding some particular number of
-   * successes less than k, update it to the tail probability of finding k
-   * or more successes.
-   *
-   * This is function is only useful in the context of this package, where
-   * we have split the probability computation across several functions.
-   *
-   * @param {Number} p Probability of exactly k successes.
-   * @param {Number} k Number of successes after n draws.
-   * @param {Number} N Size of the population.
-   * @param {Number} K Number of successes in the population.
-   * @param {Number} n Number of draws, without replacement.
-   * @return {Number} Number between 0 and 1.
-   */
-  function get_hypergeometric_pvalue(p, k, N, K, n) {
-    var pval = p;
-    for (var i = k; i < Math.min(K, n); i++) {
-      p = (p * ((n - i) * (K - i))) / ((i + 1) * (N - K - n + i + 1));
-      pval = pval + p;
-    }
-    if (pval < 0) {
-      console.log("Float overflow", pval);
-      pval = 0;
-    }
-    return pval;
+/**
+ * Starting with the tail probability of finding some particular number of
+ * successes less than k, update it to the tail probability of finding k
+ * or more successes.
+ *
+ * This is function is only useful in the context of this package, where
+ * we have split the probability computation across several functions.
+ *
+ * @param {Number} p Probability of exactly k successes.
+ * @param {Number} k Number of successes after n draws.
+ * @param {Number} N Size of the population.
+ * @param {Number} K Number of successes in the population.
+ * @param {Number} n Number of draws, without replacement.
+ * @return {Number} Number between 0 and 1.
+ */
+function get_hypergeometric_pvalue(p, k, N, K, n) {
+  var pval = p;
+  for (var i = k; i < Math.min(K, n); i++) {
+    p = (p * ((n - i) * (K - i))) / ((i + 1) * (N - K - n + i + 1));
+    pval = pval + p;
   }
+  if (pval < 0) {
+    console.log("Float overflow", pval);
+    pval = 0;
+  }
+  return pval;
+}
 
-  /**
-   * Compute the minimum hypergeometric score (mHG).
-   *
-   * The mHG is the hypergeometric probability computed using the first
-   * n elements of a binary vector. The optimal choice of n is discovered by
-   * starting at n = 1 and iteratively increasing the size until we minimize
-   * the mHG.
-   *
-   * @param {Number[]} x Binary vector ordered by some statistic.
-   * @param {Number} N Size of the population.
-   * @param {Number} K Number of successes in the population.
-   * @param {Number} L Only consider the first L elements of the vector.
-   * @param {Number} X Require at least X successes for a score less than 1.
-   * @param {Object} scores A vector of mHG scores.
-   * @return {Number} An integer between 0 and L.
-   */
-  function get_mHG(x, N, K, L, X, scores, tol) {
-    var p = 1.0;
-    var pval;
-    var mHG = 1.1;
-    var k = 0;
-    var threshold = 0;
+/**
+ * Compute the minimum hypergeometric score (mHG).
+ *
+ * The mHG is the hypergeometric probability computed using the first
+ * n elements of a binary vector. The optimal choice of n is discovered by
+ * starting at n = 1 and iteratively increasing the size until we minimize
+ * the mHG.
+ *
+ * @param {Number[]} x Binary vector ordered by some statistic.
+ * @param {Number} N Size of the population.
+ * @param {Number} K Number of successes in the population.
+ * @param {Number} L Only consider the first L elements of the vector.
+ * @param {Number} X Require at least X successes for a score less than 1.
+ * @param {Object} scores A vector of mHG scores.
+ * @return {Number} An integer between 0 and L.
+ */
+function get_mHG(x, N, K, L, X, scores, tol) {
+  var p = 1.0;
+  var pval;
+  var mHG = 1.1;
+  var k = 0;
+  var threshold = 0;
 
-    if (K === 0 || K === N || K < X) {
-      scores.value[0] = 1.0;
-      return threshold;
-    }
-
-    for (var n = 0; n < L; n++) {
-      // We see a zero in the presence vector.
-      if (x[n] === 0) {
-        // Compute P(k | N,K,n+1) from P(k | N,K,n)
-        p = (p * ((n + 1) * (N - K - n + k))) / ((N - n) * (n - k + 1));
-      }
-      // We see a one in the presence vector.
-      else {
-        // Compute P(k+1 | N,K,n+1) from P(k | N,K,n)
-        p = (p * ((n + 1) * (K - k))) / ((N - n) * (k + 1));
-        k = k + 1;
-      }
-
-      // Get the probability for k or more successes after n + 1 trials.
-      pval = get_hypergeometric_pvalue(p, k, N, K, n + 1);
-      scores.value[n] = pval;
-
-      // Update the best score and threshold we have seen.
-      if (x[n] !== 0 && k >= X) {
-        if (pval < mHG && !is_equal(pval, mHG, tol)) {
-          mHG = pval;
-          threshold = n;
-        }
-      }
-    }
-
-    // We did not see enough ones in the first L elements of x.
-    if (threshold === 0) {
-      scores.value[0] = 1.0;
-    }
-
+  if (K === 0 || K === N || K < X) {
+    scores.value[0] = 1.0;
     return threshold;
   }
 
-  /**
-   * Create a matrix filled with zeros.
-   *
-   * @param {Number} nrow The number of rows in the matrix.
-   * @param {Number} ncol The number of columns in the matrix.
-   * @return {Number[][]} A matrix (an array of rows).
-   */
-  function zeros(nrow, ncol) {
-    var array = [];
-    for (var i = 0; i < nrow; i++) {
-      array[i] = [];
-      for (var j = 0; j < nrow; j++) {
-        array[i][j] = 0.0;
+  for (var n = 0; n < L; n++) {
+    // We see a zero in the presence vector.
+    if (x[n] === 0) {
+      // Compute P(k | N,K,n+1) from P(k | N,K,n)
+      p = (p * ((n + 1) * (N - K - n + k))) / ((N - n) * (n - k + 1));
+    }
+    // We see a one in the presence vector.
+    else {
+      // Compute P(k+1 | N,K,n+1) from P(k | N,K,n)
+      p = (p * ((n + 1) * (K - k))) / ((N - n) * (k + 1));
+      k = k + 1;
+    }
+
+    // Get the probability for k or more successes after n + 1 trials.
+    pval = get_hypergeometric_pvalue(p, k, N, K, n + 1);
+    scores.value[n] = pval;
+
+    // Update the best score and threshold we have seen.
+    if (x[n] !== 0 && k >= X) {
+      if (pval < mHG && !is_equal(pval, mHG, tol)) {
+        mHG = pval;
+        threshold = n;
       }
     }
-    return array;
   }
 
-  /**
-   * Compute a minimum hypergeometric (mHG) p-value by dynamic programming.
-   *
-   * @param {Number} N Size of the population.
-   * @param {Number} K Number of successes in the population.
-   * @param {Number} L Only consider scores for the first L observations.
-   * @param {Number} X Require at least X ones to get a score less than 1.
-   * @param {Number} mHG Find how many mHG scores are lower than this.
-   * @return {Number} A p-value between 0 and 1.
-   */
-  function get_mHG_pvalue(N, K, L, X, mHG, tol) {
-    if (mHG > 1.0 || is_equal(mHG, 1.0, tol)) {
-      return 1.0;
-    } else if (mHG === 0) {
-      return 0;
-    } else if (K === 0 || K >= N || K < X) {
-      return 0;
-    } else if (L > N) {
-      return 0;
+  // We did not see enough ones in the first L elements of x.
+  if (threshold === 0) {
+    scores.value[0] = 1.0;
+  }
+
+  return threshold;
+}
+
+/**
+ * Create a matrix filled with zeros.
+ *
+ * @param {Number} nrow The number of rows in the matrix.
+ * @param {Number} ncol The number of columns in the matrix.
+ * @return {Number[][]} A matrix (an array of rows).
+ */
+function zeros(nrow, ncol) {
+  var array = [];
+  for (var i = 0; i < nrow; i++) {
+    array[i] = [];
+    for (var j = 0; j < nrow; j++) {
+      array[i][j] = 0.0;
+    }
+  }
+  return array;
+}
+
+/**
+ * Compute a minimum hypergeometric (mHG) p-value by dynamic programming.
+ *
+ * @param {Number} N Size of the population.
+ * @param {Number} K Number of successes in the population.
+ * @param {Number} L Only consider scores for the first L observations.
+ * @param {Number} X Require at least X ones to get a score less than 1.
+ * @param {Number} mHG Find how many mHG scores are lower than this.
+ * @return {Number} A p-value between 0 and 1.
+ */
+function get_mHG_pvalue(N, K, L, X, mHG, tol) {
+  if (mHG > 1.0 || is_equal(mHG, 1.0, tol)) {
+    return 1.0;
+  } else if (mHG === 0) {
+    return 0;
+  } else if (K === 0 || K >= N || K < X) {
+    return 0;
+  } else if (L > N) {
+    return 0;
+  }
+
+  // Number of failures in the population.
+  var W = N - K;
+  // Number of: trials, successes, failures.
+  var n, k, w;
+
+  var p_start = 1.0;
+  var p;
+  var pval;
+
+  var matrix = zeros(K + 1, W + 1);
+  matrix[0][0] = 1;
+
+  for (n = 1; n < N; n++) {
+    // Sucesses in the population is at least number of trials.
+    if (K >= n) {
+      k = n;
+      p_start = (p_start * (K - n + 1)) / (N - n + 1);
+    } else {
+      k = K;
+      p_start = (p_start * n) / (n - K);
     }
 
-    // Number of failures in the population.
-    var W = N - K;
-    // Number of: trials, successes, failures.
-    var n, k, w;
+    // We lack enough floating point precision to compute the p-value.
+    if (p_start <= 0) {
+      console.log("Float overflow", p_start);
+      return Number.MIN_VALUE;
+    }
 
-    var p_start = 1.0;
-    var p;
-    var pval;
+    p = p_start;
+    pval = p_start;
+    // Number of failures.
+    w = n - k;
 
-    var matrix = zeros(K + 1, W + 1);
-    matrix[0][0] = 1;
-
-    for (n = 1; n < N; n++) {
-      // Sucesses in the population is at least number of trials.
-      if (K >= n) {
-        k = n;
-        p_start = (p_start * (K - n + 1)) / (N - n + 1);
-      } else {
-        k = K;
-        p_start = (p_start * n) / (n - K);
-      }
-
-      // We lack enough floating point precision to compute the p-value.
-      if (p_start <= 0) {
-        console.log("Float overflow", p_start);
-        return Number.MIN_VALUE;
-      }
-
-      p = p_start;
-      pval = p_start;
-      // Number of failures.
-      w = n - k;
-
-      // This trial is within the first L elements, and is at least X.
-      if (n <= L && n >= X) {
-        while (k >= X && w < W && (is_equal(pval, mHG, tol) || pval < mHG)) {
-          matrix[k][w] = 0;
-          p = (p * (k * (N - K - n + k))) / ((n - k + 1) * (K - k + 1));
-          pval = pval + p;
-          w = w + 1;
-          k = k - 1;
-        }
-      }
-
-      while (k >= 0 && w <= W) {
-        if (w > 0 && k > 0) {
-          matrix[k][w] =
-            (matrix[k][w - 1] * (W - w + 1)) / (N - n + 1) +
-            (matrix[k - 1][w] * (K - k + 1)) / (N - n + 1);
-        } else if (w > 0) {
-          matrix[k][w] = (matrix[k][w - 1] * (W - w + 1)) / (N - n + 1);
-        } else if (k > 0) {
-          matrix[k][w] = (matrix[k - 1][w] * (K - k + 1)) / (N - n + 1);
-        }
+    // This trial is within the first L elements, and is at least X.
+    if (n <= L && n >= X) {
+      while (k >= X && w < W && (is_equal(pval, mHG, tol) || pval < mHG)) {
+        matrix[k][w] = 0;
+        p = (p * (k * (N - K - n + k))) / ((n - k + 1) * (K - k + 1));
+        pval = pval + p;
         w = w + 1;
         k = k - 1;
       }
     }
 
-    return {
-      pvalue: 1.0 - (matrix[K][W - 1] + matrix[K - 1][W]),
-      matrix: matrix,
-    };
+    while (k >= 0 && w <= W) {
+      if (w > 0 && k > 0) {
+        matrix[k][w] =
+          (matrix[k][w - 1] * (W - w + 1)) / (N - n + 1) +
+          (matrix[k - 1][w] * (K - k + 1)) / (N - n + 1);
+      } else if (w > 0) {
+        matrix[k][w] = (matrix[k][w - 1] * (W - w + 1)) / (N - n + 1);
+      } else if (k > 0) {
+        matrix[k][w] = (matrix[k - 1][w] * (K - k + 1)) / (N - n + 1);
+      }
+      w = w + 1;
+      k = k - 1;
+    }
   }
 
+  return {
+    pvalue: 1.0 - (matrix[K][W - 1] + matrix[K - 1][W]),
+    matrix: matrix,
+  };
+}
+
+(function (exports) {
   /**
    * @summary Test for enrichment in a ranked binary list.
    *
@@ -303,7 +299,7 @@ var MHG = function () {
    * // 1.81e-5
    * res.pvalue;
    */
-  function mhg_test(x, N, K, L, X, upper_bound, tol) {
+  exports.mhg_test = function (x, N, K, L, X, upper_bound, tol) {
     console.assert(N >= 0, "Condition not met: N >= 0");
     console.assert(0 <= K && K <= N, "Condition not met: 0 <= K <= N");
     console.assert(0 <= L && L <= N, "Condition not met: 0 <= L <= N");
@@ -327,9 +323,7 @@ var MHG = function () {
 
     // Get XL-mHG scores and the threshold for the best score.
     var scores = {
-      value: range(L).map(function () {
-        return 0;
-      }),
+      value: new Array(L).fill(0),
     };
 
     threshold = get_mHG(x, N, K, L, X, scores, tol);
@@ -367,7 +361,5 @@ var MHG = function () {
       pvalue: mHG_pvalue,
       matrix: matrix,
     };
-  }
-};
-
-export default MHG;
+  };
+})(typeof exports === "undefined" ? (this["MHG"] = {}) : exports);

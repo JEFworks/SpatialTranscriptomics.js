@@ -1,5 +1,3 @@
-import MHG from "../functions/mhg.js";
-
 import React, { Component } from "react";
 import axios from "axios";
 import api from "../api.jsx";
@@ -17,19 +15,21 @@ import PCAWrapper from "./PCAWrapper.jsx";
 import TSNEWrapper from "./TSNEWrapper.jsx";
 import SpatialVis from "./SpatialVis.jsx";
 import DGEWrapper from "./DGEWrapper.jsx";
-import GSEAWrapper from "./GSEAWrapper.jsx";
+import GSEWrapper from "./GSEWrapper.jsx";
 
 import Worker_FILTER from "workerize-loader!../workers/worker-filter.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
 import Worker_PCA from "workerize-loader!../workers/worker-pca.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
 import Worker_TSNE from "workerize-loader!../workers/worker-tsne.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
 import Worker_KMEANS from "workerize-loader!../workers/worker-kmeans.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
 import Worker_DGE from "workerize-loader!../workers/worker-dge.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
+import Worker_GSE from "workerize-loader!../workers/worker-gse.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
 
 let filter_WorkerInstance = Worker_FILTER();
 let pca_WorkerInstance = Worker_PCA();
 let tsne_WorkerInstance = Worker_TSNE();
 let kmeans_WorkerInstance = Worker_KMEANS();
 let dge_WorkerInstance = Worker_DGE();
+let gse_WorkerInstance = Worker_GSE();
 
 class Homepage extends Component {
   state = {
@@ -61,12 +61,14 @@ class Homepage extends Component {
     colors: [],
     colorOption: "gene",
     dgeSolution: [],
+    gseSolution: [],
     loading: {
       upload: true,
       pca: false,
       tsne: false,
       kmeans: false,
       dge: false,
+      gse: false,
       image: true,
     },
     errors: [],
@@ -93,6 +95,7 @@ class Homepage extends Component {
   computePCA = this.computePCA.bind(this);
   computeTSNE = this.computeTSNE.bind(this);
   computeDGE = this.computeDGE.bind(this);
+  computeGSE = this.computeGSE.bind(this);
 
   componentDidMount() {
     // get uuid from URL parameters
@@ -119,6 +122,7 @@ class Homepage extends Component {
     tsne_WorkerInstance.terminate();
     kmeans_WorkerInstance.terminate();
     dge_WorkerInstance.terminate();
+    gse_WorkerInstance.terminate();
   }
 
   // load data
@@ -160,12 +164,15 @@ class Homepage extends Component {
       clusters: [],
       colors: [],
       colorOption: "gene",
+      dgeSolution: [],
+      gseSolution: [],
       loading: {
         upload: true,
         pca: false,
         tsne: false,
         kmeans: false,
         dge: false,
+        gse: false,
         image: true,
       },
       errors: [],
@@ -410,6 +417,7 @@ class Homepage extends Component {
     loading.tsne = false;
     loading.kmeans = false;
     loading.dge = false;
+    loading.gse = false;
     this.setState({
       loading,
       filteredMatrix: [],
@@ -423,6 +431,7 @@ class Homepage extends Component {
       colors: [],
       colorOption: "gene",
       dgeSolution: [],
+      gseSolution: [],
     });
 
     // worker filters the data
@@ -479,6 +488,7 @@ class Homepage extends Component {
     loading.tsne = false;
     loading.kmeans = false;
     loading.dge = false;
+    loading.gse = false;
 
     this.setState(
       {
@@ -487,6 +497,7 @@ class Homepage extends Component {
         tsneSolution: [],
         clusters: [],
         dgeSolution: [],
+        gseSolution: [],
       },
       () => {
         this.filterPCs(num);
@@ -529,6 +540,7 @@ class Homepage extends Component {
     loading.tsne = false;
     loading.kmeans = false;
     loading.dge = false;
+    loading.gse = false;
 
     this.setState({
       loading,
@@ -536,6 +548,7 @@ class Homepage extends Component {
       tsneSolution: [],
       clusters: [],
       dgeSolution: [],
+      gseSolution: [],
     });
 
     pca_WorkerInstance = Worker_PCA();
@@ -587,6 +600,7 @@ class Homepage extends Component {
     });
   }
 
+  // x is index of reference cluster, y is index of non-reference cluster
   computeDGE(x, y) {
     const { clusters, filteredMatrix, filteredFeatures, loading } = this.state;
 
@@ -596,7 +610,9 @@ class Homepage extends Component {
     }
 
     dge_WorkerInstance.terminate();
+    gse_WorkerInstance.terminate();
     loading.dge = true;
+    loading.gse = false;
     this.setState({ loading });
 
     dge_WorkerInstance = Worker_DGE();
@@ -617,78 +633,36 @@ class Homepage extends Component {
     });
   }
 
-  // helper function for GSEA
-  intersect(a, b) {
-    if (a.length > b.length) {
-      return a.filter((e) => b.indexOf(e) !== -1);
-    }
-    return b.filter((e) => a.indexOf(e) !== -1);
-  }
-
   // trying to implement gene set enrichment
-  clickGSEA() {
-    const { clusters, filteredMatrix, filteredFeatures } = this.state;
-    const cluster = clusters[0]; // let's assume we're interested in the first Cluster.
+  computeGSE() {
+    const { dgeSolution, loading } = this.state;
 
-    if (!clusters[0]) {
-      alert("Please perform clustering first.");
+    if (!dgeSolution[0]) {
+      alert("Please perform differential gene expression analysis first.");
       return;
     }
 
-    // FIXME: modify sets so that the gene names are lowercase
-    const sets = [
-      { Name: "Sparky", List: ["clca1", "foxd3", "arpan", "sparc", "camk2n1"] },
-      { Name: "Alice", List: ["arpy", "nptxr", "agt", "camk2n1", "sparc"] },
-    ];
-    const genesHave = [];
+    gse_WorkerInstance.terminate();
+    loading.gse = true;
+    this.setState({ loading });
 
-    // FIXME: for now, just use all DE genes. later, maybe also also give user option for ONLY upregulated or ONLY downreg
-    filteredMatrix.forEach((gene, index) => {
-      for (let i = 0; i < gene.length; i++) {
-        if (cluster.includes(i) && gene[i] > 0) {
-          genesHave.push(filteredFeatures[index]);
-          break;
-        }
+    // FIXME: modify sets so that the gene names are lowercase
+    const geneSets = new Map();
+    geneSets.set("Sparky", ["clca1", "foxd3", "arpan", "sparc", "camk2n1"]);
+    geneSets.set("Alice", ["arpy", "nptxr", "agt", "camk2n1", "sparc"]);
+
+    gse_WorkerInstance = Worker_GSE();
+    gse_WorkerInstance.performGSE(geneSets, dgeSolution);
+
+    gse_WorkerInstance.addEventListener("message", (message) => {
+      if (message.data.solution) {
+        const { solution } = message.data;
+        loading.gse = false;
+        this.setState({ gseSolution: solution, loading });
+        console.log(solution);
+        gse_WorkerInstance.terminate();
       }
     });
-
-    const results = [];
-
-    for (let i = 0; i < sets.length; i++) {
-      const set = sets[i];
-      const geneSet = this.intersect(set.List, genesHave);
-      const N = genesHave.length;
-      const K = geneSet.length;
-      const L = N;
-      const X = 1;
-
-      // geneset should contain >= 2 genes from the genes we have
-      if (K < 2) {
-        continue;
-      }
-
-      const indices = [];
-      const v = genesHave.map((name, index) => {
-        if (geneSet.indexOf(name) >= 0) {
-          indices.push({ Name: name, Index: index });
-          return 1;
-        }
-        return 0;
-      });
-
-      const mhg = new MHG();
-      const res = mhg.mhg_test(v, N, K, L, X);
-
-      // no enrichment, skip
-      if (res.mhg[0] == null) {
-        continue;
-      }
-
-      results.push({ Set: { Name: set.Name, List: geneSet }, MHG: res });
-    }
-
-    const sortedResults = results.sort((a, b) => a.MHG.pvalue - b.MHG.pvalue);
-    console.log(sortedResults);
   }
 
   // set gene name and compute colors based on expression of this gene
@@ -740,12 +714,14 @@ class Homepage extends Component {
 
     kmeans_WorkerInstance.terminate();
     dge_WorkerInstance.terminate();
+    gse_WorkerInstance.terminate();
 
     this.setState({
       k,
       colorOption: "cluster",
       clusters: [],
       dgeSolution: [],
+      gseSolution: [],
     });
     this.setColorsByClusters(filteredPCs, k);
   }
@@ -754,6 +730,7 @@ class Homepage extends Component {
     const { loading } = this.state;
     loading.kmeans = true;
     loading.dge = false;
+    loading.gse = false;
     this.setState({ loading });
 
     kmeans_WorkerInstance = Worker_KMEANS();
@@ -843,13 +820,12 @@ class Homepage extends Component {
           <DGEWrapper
             computeDGE={this.computeDGE}
             dgeSolution={this.state.dgeSolution}
-            numClusters={this.state.clusters.length}
+            numClusters={this.state.k}
             loading={this.state.loading.dge}
           />
 
           <div style={{ paddingTop: "40px" }}></div>
-          <GSEAWrapper />
-          <button onClick={() => this.clickGSEA()}>Click gsea</button>
+          <GSEWrapper computeGSE={this.computeGSE} />
         </div>
       </>
     );

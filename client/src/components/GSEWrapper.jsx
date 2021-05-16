@@ -4,7 +4,7 @@ import { Typography } from "@material-ui/core";
 const primary = "#094067";
 const paragraph = "#5f6c7b";
 
-class GSEAWrapper extends Component {
+class GSEWrapper extends Component {
   render() {
     return (
       <>
@@ -12,7 +12,7 @@ class GSEAWrapper extends Component {
           style={{ marginBottom: "10px", fontWeight: 500, color: primary }}
           variant="h5"
         >
-          Gene Set Enrichment Analysis (GSEA)
+          Gene Set Enrichment (GSE) Analysis
         </Typography>
 
         <Typography
@@ -23,9 +23,11 @@ class GSEAWrapper extends Component {
           <br></br>
           Second line of description...
         </Typography>
+
+        <button onClick={() => this.props.computeGSE()}>Click GSE</button>
       </>
     );
   }
 }
 
-export default GSEAWrapper;
+export default GSEWrapper;

@@ -19,11 +19,12 @@ const Plot = (data, getColor) => {
 
   if (data && data.length > 0) {
     data.forEach((gene) => {
-      const { fc, p, name } = gene;
+      const { fc, p, name, type } = gene;
       obj[0].data.push({
         x: gene.capped_fc ? gene.capped_fc : fc,
         y: gene.capped_p ? gene.capped_p : p,
         name: name,
+        type: type,
       });
     });
   }
@@ -93,28 +94,29 @@ class DGEWrapper extends Component {
 
   getColor(node) {
     if (node) {
-      const { x, y } = node;
-      if (x >= 1 && y >= 1.5) {
-        return red;
-      } else if (x <= -1 && y >= 1.5) {
-        return blue;
-      }
+      const { type } = node;
+      return type === "upregulated"
+        ? red
+        : type === "downregulated"
+        ? blue
+        : "black";
     }
     return "black";
   }
 
   run() {
-    const { computeDGE, numClusters, dgeSolution } = this.props;
+    const { computeDGE, numClusters } = this.props;
     const { x, y } = this.state;
     if (isNaN(x) || isNaN(y) || x < 1 || y < 1) {
       alert("Please specify a positive integer value for each group number.");
       return;
     }
-    if (x == y) {
+    if (x === y) {
       alert("Please compare different clusters.");
       return;
     }
-    if (dgeSolution[0] && (x > numClusters || y > numClusters)) {
+
+    if (x > numClusters || y > numClusters) {
       alert("Please specify clusters that exist.");
       return;
     }
