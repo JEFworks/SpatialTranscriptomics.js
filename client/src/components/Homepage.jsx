@@ -61,7 +61,7 @@ class Homepage extends Component {
     colors: [],
     colorOption: "gene",
     dgeSolution: [],
-    gseSolution: [],
+    gseSolution: {},
     loading: {
       upload: true,
       pca: false,
@@ -74,28 +74,6 @@ class Homepage extends Component {
     errors: [],
     imageLink: "",
   }; // remember to update in resetState() too
-
-  // file handlers
-  matrixFileHandler = this.matrixFileHandler.bind(this);
-  barcodesFileHandler = this.barcodesFileHandler.bind(this);
-  pixelsFileHandler = this.pixelsFileHandler.bind(this);
-  featuresFileHandler = this.featuresFileHandler.bind(this);
-  imageFileHandler = this.imageFileHandler.bind(this);
-  uploadFiles = this.uploadFiles.bind(this);
-
-  // quality control functions
-  setNumPCs = this.setNumPCs.bind(this);
-  handleFilter = this.handleFilter.bind(this);
-
-  // for coloring
-  setFeature = this.setFeature.bind(this);
-  setK = this.setK.bind(this);
-
-  // analysis functions
-  computePCA = this.computePCA.bind(this);
-  computeTSNE = this.computeTSNE.bind(this);
-  computeDGE = this.computeDGE.bind(this);
-  computeGSE = this.computeGSE.bind(this);
 
   componentDidMount() {
     // get uuid from URL parameters
@@ -165,7 +143,7 @@ class Homepage extends Component {
       colors: [],
       colorOption: "gene",
       dgeSolution: [],
-      gseSolution: [],
+      gseSolution: {},
       loading: {
         upload: true,
         pca: false,
@@ -431,7 +409,7 @@ class Homepage extends Component {
       colors: [],
       colorOption: "gene",
       dgeSolution: [],
-      gseSolution: [],
+      gseSolution: {},
     });
 
     // worker filters the data
@@ -497,7 +475,7 @@ class Homepage extends Component {
         tsneSolution: [],
         clusters: [],
         dgeSolution: [],
-        gseSolution: [],
+        gseSolution: {},
       },
       () => {
         this.filterPCs(num);
@@ -548,7 +526,7 @@ class Homepage extends Component {
       tsneSolution: [],
       clusters: [],
       dgeSolution: [],
-      gseSolution: [],
+      gseSolution: {},
     });
 
     pca_WorkerInstance = Worker_PCA();
@@ -613,7 +591,7 @@ class Homepage extends Component {
     gse_WorkerInstance.terminate();
     loading.dge = true;
     loading.gse = false;
-    this.setState({ loading });
+    this.setState({ loading, gseSolution: {} });
 
     dge_WorkerInstance = Worker_DGE();
     dge_WorkerInstance.performDGE(
@@ -659,7 +637,6 @@ class Homepage extends Component {
         const { solution } = message.data;
         loading.gse = false;
         this.setState({ gseSolution: solution, loading });
-        console.log(solution);
         gse_WorkerInstance.terminate();
       }
     });
@@ -721,7 +698,7 @@ class Homepage extends Component {
       colorOption: "cluster",
       clusters: [],
       dgeSolution: [],
-      gseSolution: [],
+      gseSolution: {},
     });
     this.setColorsByClusters(filteredPCs, k);
   }
@@ -764,19 +741,19 @@ class Homepage extends Component {
     return (
       <>
         <Header
-          setFeature={this.setFeature}
-          setK={this.setK}
+          setFeature={this.setFeature.bind(this)}
+          setK={this.setK.bind(this)}
           loading={this.state.loading.kmeans}
         />
 
         <div className="site-container">
           <DataUpload
-            matrixFileHandler={this.matrixFileHandler}
-            barcodesFileHandler={this.barcodesFileHandler}
-            featuresFileHandler={this.featuresFileHandler}
-            pixelsFileHandler={this.pixelsFileHandler}
-            imageFileHandler={this.imageFileHandler}
-            uploadFiles={this.uploadFiles}
+            matrixFileHandler={this.matrixFileHandler.bind(this)}
+            barcodesFileHandler={this.barcodesFileHandler.bind(this)}
+            featuresFileHandler={this.featuresFileHandler.bind(this)}
+            pixelsFileHandler={this.pixelsFileHandler.bind(this)}
+            imageFileHandler={this.imageFileHandler.bind(this)}
+            uploadFiles={this.uploadFiles.bind(this)}
             files={this.state.files}
             error={errorMsg}
           />
@@ -786,23 +763,23 @@ class Homepage extends Component {
             thresholds={this.state.thresholds}
             rowsums={this.state.rowsums.sums}
             colsums={this.state.colsums.sums}
-            handleFilter={this.handleFilter}
+            handleFilter={this.handleFilter.bind(this)}
             loading={this.state.loading.upload}
           />
 
           <div style={{ paddingTop: "40px" }}></div>
           <PCAWrapper
-            computePCA={this.computePCA}
+            computePCA={this.computePCA.bind(this)}
             eigenvectors={this.state.pcs}
             eigenvalues={this.state.eigenvalues}
-            setNumPCs={this.setNumPCs}
+            setNumPCs={this.setNumPCs.bind(this)}
             colors={this.state.colors}
             loading={this.state.loading.pca}
           />
 
           <div style={{ paddingTop: "40px" }}></div>
           <TSNEWrapper
-            computeTSNE={this.computeTSNE}
+            computeTSNE={this.computeTSNE.bind(this)}
             tsneSolution={this.state.tsneSolution}
             colors={this.state.colors}
             loading={this.state.loading.tsne}
@@ -818,14 +795,18 @@ class Homepage extends Component {
 
           <div style={{ paddingTop: "40px" }}></div>
           <DGEWrapper
-            computeDGE={this.computeDGE}
+            computeDGE={this.computeDGE.bind(this)}
             dgeSolution={this.state.dgeSolution}
             numClusters={this.state.k}
             loading={this.state.loading.dge}
           />
 
           <div style={{ paddingTop: "40px" }}></div>
-          <GSEWrapper computeGSE={this.computeGSE} />
+          <GSEWrapper
+            computeGSE={this.computeGSE.bind(this)}
+            gseSolution={this.state.gseSolution}
+            loading={this.state.loading.gse}
+          />
         </div>
       </>
     );

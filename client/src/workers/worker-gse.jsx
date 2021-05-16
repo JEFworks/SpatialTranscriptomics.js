@@ -20,7 +20,7 @@ export const performGSE = (geneSets, dgeSolution) => {
   });
 
   const sets = [...geneSets.entries()];
-  const results = [];
+  const results = new Map();
 
   for (let i = 0; i < sets.length; i++) {
     const setID = sets[i][0];
@@ -54,10 +54,13 @@ export const performGSE = (geneSets, dgeSolution) => {
       continue;
     }
 
-    results.push({ setID: setID, MHG: res });
+    res.geneSet = geneSet;
+    results.set(setID, res);
   }
 
-  const sortedResults = results.sort((a, b) => a.MHG.pvalue - b.MHG.pvalue);
+  const sortedResults = new Map(
+    [...results.entries()].sort((a, b) => a[1].pvalue - b[1].pvalue)
+  );
   const gseSolution = { Genes: genesHave, GSE: sortedResults };
 
   self.postMessage({ solution: gseSolution });
