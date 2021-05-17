@@ -4,9 +4,9 @@ import MHG from "../functions/mhg.js";
 // helper function for GSEA
 const intersect = (a, b) => {
   if (a.length > b.length) {
-    return a.filter((e) => b.indexOf(e) !== -1);
+    return a.filter((e) => b.includes(e));
   }
-  return b.filter((e) => a.indexOf(e) !== -1);
+  return b.filter((e) => a.includes(e));
 };
 
 export const performGSE = (geneSets, dgeSolution) => {
@@ -19,7 +19,7 @@ export const performGSE = (geneSets, dgeSolution) => {
     }
   });
 
-  const sets = [...geneSets.entries()];
+  const sets = [...Object.entries(geneSets)];
   const results = new Map();
 
   for (let i = 0; i < sets.length; i++) {
@@ -38,15 +38,7 @@ export const performGSE = (geneSets, dgeSolution) => {
       continue;
     }
 
-    const indices = [];
-    const v = genesHave.map((name, index) => {
-      if (geneSet.indexOf(name) >= 0) {
-        indices.push({ Name: name, Index: index });
-        return 1;
-      }
-      return 0;
-    });
-
+    const v = genesHave.map((name) => (geneSet.includes(name) ? 1 : 0));
     const res = MHG.mhg_test(v, N, K, L, X);
 
     // no enrichment, skip

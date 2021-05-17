@@ -33,7 +33,7 @@ const markers = (markerLine) => [
 const xAxis = (label) => ({
   tickSize: 5,
   tickPadding: 5,
-  tickRotation: 0,
+  tickRotation: 90,
   legend: label,
   legendPosition: "middle",
   legendOffset: 40,

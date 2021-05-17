@@ -44,8 +44,8 @@ code {
 }
 
 .gse-plot {
-  height: 450px;
-  width: 550px;
+  height: 70vh;
+  width: 70vw;
 }
 
 .tsne-plot {

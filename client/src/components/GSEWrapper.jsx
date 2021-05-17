@@ -4,7 +4,6 @@ import {
   Button,
   CircularProgress,
   FormControl,
-  InputLabel,
   MenuItem,
   Select,
   FormHelperText,
@@ -15,7 +14,6 @@ import LineChart from "./Plots/LineChart.jsx";
 const primary = "#094067";
 const paragraph = "#5f6c7b";
 const blue = "#80d8ff";
-// const red = "#ff80ab";
 
 const Plot = (gseResult, genesHave) => {
   const { geneSet, mhg, pvalue, threshold } = gseResult;
@@ -51,7 +49,7 @@ const Plot = (gseResult, genesHave) => {
   );
 
   return (
-    <div style={{ marginRight: "20px" }}>
+    <div>
       <Paper
         className="gse-plot"
         style={{
@@ -110,7 +108,7 @@ class GSEWrapper extends Component {
     const { gseSolution, loading } = this.props;
     const { Genes, GSE } = gseSolution;
 
-    const sets = GSE ? [...GSE.keys()] : [];
+    const sets = GSE ? [...GSE.keys()].slice(0, 100) : [];
     const currSetIndex = sets.length > 0 ? setIndex : -1;
 
     return (

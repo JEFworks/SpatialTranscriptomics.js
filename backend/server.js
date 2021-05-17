@@ -11,7 +11,7 @@ const isGzip = require("is-gzip");
 
 // delete localhost from this list when deploying
 const corsOptions = {
-  origin: ["https://stjs.me"],
+  origin: ["https://stjs.me", "https://www.stjs.me"],
   optionsSuccessStatus: 200, // For legacy browser support
 };
 
@@ -47,6 +47,16 @@ const upload = multer({ storage: storage }).array("file");
 
 app.get("/api/", (_req, res) => {
   res.send("Welcome to the ST.js backend :).\n");
+});
+
+app.get("/api/genesets", function (_req, res) {
+  try {
+    const data = fs.readFileSync(`${dir}/go/gene_sets.json`);
+    const jsonData = JSON.parse(data);
+    res.status(200).json(JSON.stringify(jsonData));
+  } catch (err) {
+    res.status(400).json("Gene sets failed to load.");
+  }
 });
 
 app.post("/api/upload/:uuid", function (req, res) {

@@ -16,8 +16,7 @@ const blue = "#80d8ff";
 
 const Biplot = (eigenvectors, getColor, pcX, pcY) => {
   const obj = [{ id: "", data: [] }];
-  const visible = !isNaN(pcX) && !isNaN(pcY) && pcX > 0 && pcY > 0;
-  if (eigenvectors[0] && visible) {
+  if (eigenvectors[0]) {
     eigenvectors.forEach((vector, index) => {
       // plot pc2 against pc1
       const x = vector[Math.min(pcX - 1, eigenvectors[0].length - 1)];
@@ -43,7 +42,6 @@ const Biplot = (eigenvectors, getColor, pcX, pcY) => {
         getColor={getColor}
         pcX={pcX}
         pcY={pcY}
-        visible={visible}
         type={"pca"}
       />
     </div>

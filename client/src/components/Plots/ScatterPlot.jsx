@@ -33,14 +33,11 @@ const markers = [
 class Scatter extends Component {
   render() {
     const { props } = this;
-    const { data, getColor, pcX, pcY, visible, type } = props;
+    const { data, getColor, pcX, pcY, type } = props;
 
     let axisBottom = null;
     if (type === "pca" || type === "dge") {
-      let legend = !visible ? "" : `PC ${pcX}`;
-      if (type === "dge") {
-        legend = "log2(fold-change)";
-      }
+      const legend = type === "dge" ? "log2(fold-change)" : `PC ${pcX}`;
 
       axisBottom = {
         orient: "bottom",
@@ -49,13 +46,17 @@ class Scatter extends Component {
         tickRotation: 0,
         legend: legend,
         legendPosition: "middle",
-        legendOffset: 40,
+        legendOffset: type === "dge" ? 40 : 20,
       };
+
+      if (type === "pca") {
+        axisBottom.tickValues = [];
+      }
     }
 
     let axisLeft = null;
     if (type === "pca" || type === "dge") {
-      let legend = !visible ? "" : `PC ${pcY}`;
+      let legend = `PC ${pcY}`;
       if (type === "dge") {
         legend = "-log10(p-value)";
       }
@@ -67,27 +68,28 @@ class Scatter extends Component {
         tickRotation: 0,
         legend: legend,
         legendPosition: "middle",
-        legendOffset: type === "dge" ? -40 : -50,
+        legendOffset: type === "dge" ? -40 : -20,
       };
+
+      if (type === "pca") {
+        axisLeft.tickValues = [];
+      }
     }
 
-    let marginLeft = 10;
-    if (type === "pca") {
-      marginLeft = 55;
-    } else if (type === "dge") {
-      marginLeft = 45;
-    }
-
-    let nodeSize = 3;
-    if (type === "dge") {
-      nodeSize = 5;
-    }
+    const marginLeft = type === "pca" ? 30 : type === "dge" ? 45 : 10;
+    const marginBottom = type === "pca" ? 30 : 50;
+    const nodeSize = type === "dge" ? 5 : 3;
 
     return (
       <>
         <ResponsiveScatterPlot
           data={data}
-          margin={{ top: 10, right: 10, bottom: 50, left: marginLeft }}
+          margin={{
+            top: 10,
+            right: 10,
+            bottom: marginBottom,
+            left: marginLeft,
+          }}
           xScale={{ type: "linear", min: "auto", max: "auto" }}
           yScale={{ type: "linear", min: "auto", max: "auto" }}
           blendMode="normal"
@@ -105,6 +107,7 @@ class Scatter extends Component {
           tooltip={({ node }) => {
             const { data } = node;
             if (
+              type === "dge" &&
               data &&
               data.name &&
               data.y >= 1.5 &&

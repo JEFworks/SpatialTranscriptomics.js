@@ -61,9 +61,11 @@ class Homepage extends Component {
     colors: [],
     colorOption: "gene",
     dgeSolution: [],
+    geneSets: {},
     gseSolution: {},
     loading: {
       upload: true,
+      geneSets: true,
       pca: false,
       tsne: false,
       kmeans: false,
@@ -81,7 +83,8 @@ class Homepage extends Component {
     const uuid = urlParams.get("session");
 
     this.setState({ uuid }, () => {
-      this.loadEverything();
+      this.loadDataset();
+      this.loadGeneSets();
     });
   }
 
@@ -104,7 +107,7 @@ class Homepage extends Component {
   }
 
   // load data
-  async loadEverything() {
+  async loadDataset() {
     this.loadImage();
     await this.loadFeatures();
     await this.loadBarcodes();
@@ -114,6 +117,22 @@ class Homepage extends Component {
       loading.upload = false;
       this.setState({ loading });
     });
+  }
+
+  // load genesets
+  async loadGeneSets() {
+    const { loading } = this.state;
+
+    axios
+      .get(`${api}/genesets`)
+      .then((response) => {
+        const geneSets = JSON.parse(response.data);
+        loading.geneSets = false;
+        this.setState({ geneSets, loading });
+      })
+      .catch((error) => {
+        this.reportError(error);
+      });
   }
 
   resetState() {
@@ -146,6 +165,7 @@ class Homepage extends Component {
       gseSolution: {},
       loading: {
         upload: true,
+        geneSets: false,
         pca: false,
         tsne: false,
         kmeans: false,
@@ -256,7 +276,7 @@ class Homepage extends Component {
       axios
         .post(`${api}/upload/${uuid}`, data, {})
         .then((_response) => {
-          this.loadEverything();
+          this.loadDataset();
         })
         .catch((error) => {
           this.reportError(error);
@@ -613,7 +633,7 @@ class Homepage extends Component {
 
   // trying to implement gene set enrichment
   computeGSE() {
-    const { dgeSolution, loading } = this.state;
+    const { dgeSolution, geneSets, loading } = this.state;
 
     if (!dgeSolution[0]) {
       alert("Please perform differential gene expression analysis first.");
@@ -623,18 +643,6 @@ class Homepage extends Component {
     gse_WorkerInstance.terminate();
     loading.gse = true;
     this.setState({ loading });
-
-    // FIXME: modify sets so that the gene names are lowercase
-    const geneSets = new Map();
-    geneSets.set("Sparky", [
-      "clca1",
-      "foxd3",
-      "arpan",
-      "sparc",
-      "camk2n1",
-      "atp1a1",
-    ]);
-    geneSets.set("Alice", ["arpy", "nptxr", "agt", "camk2n1", "sparc"]);
 
     gse_WorkerInstance = Worker_GSE();
     gse_WorkerInstance.performGSE(geneSets, dgeSolution);
@@ -812,7 +820,7 @@ class Homepage extends Component {
           <GSEWrapper
             computeGSE={this.computeGSE.bind(this)}
             gseSolution={this.state.gseSolution}
-            loading={this.state.loading.gse}
+            loading={this.state.loading.gse || this.state.loading.geneSets}
           />
         </div>
       </>
