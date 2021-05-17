@@ -359,7 +359,7 @@ function get_mHG_pvalue(N, K, L, X, mHG, tol) {
         return -Math.log10(x);
       }),
       pvalue: mHG_pvalue,
-      matrix: matrix,
+      // matrix: matrix,
     };
   };
 })(typeof exports === "undefined" ? (this["MHG"] = {}) : exports);

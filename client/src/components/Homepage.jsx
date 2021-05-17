@@ -635,6 +635,12 @@ class Homepage extends Component {
   computeGSE() {
     const { dgeSolution, geneSets, loading } = this.state;
 
+    if (Object.keys(geneSets).length === 0) {
+      alert(
+        "Gene sets are still loading or failed to load. Please wait a few minutes."
+      );
+      return;
+    }
     if (!dgeSolution[0]) {
       alert("Please perform differential gene expression analysis first.");
       return;

@@ -15,13 +15,14 @@ const primary = "#094067";
 const paragraph = "#5f6c7b";
 const blue = "#80d8ff";
 
-const Plot = (gseResult, genesHave) => {
-  const { geneSet, mhg, pvalue, threshold } = gseResult;
+const Plot = (setResult, genesHave) => {
+  const result = setResult == null ? {} : setResult;
+  const { geneSet, mhg, pvalue, threshold } = result;
 
   const obj = [{ id: "", data: [] }];
   if (mhg) {
-    mhg.forEach((enrichment, i) => {
-      obj[0].data.push({ x: genesHave[i], y: enrichment });
+    mhg.forEach((enrichmentScore, i) => {
+      obj[0].data.push({ x: genesHave[i], y: enrichmentScore });
     });
   }
 
@@ -66,16 +67,16 @@ const Plot = (gseResult, genesHave) => {
   );
 };
 
-const Dropdown = (sets, setIndex, handleSelect) => {
+const Dropdown = (setIDs, setIndex, handleSelect) => {
   return (
     <FormControl>
       <Select value={setIndex} onChange={handleSelect}>
-        {sets.length === 0 && (
+        {setIDs.length === 0 && (
           <MenuItem value={-1}>
             <em>None</em>
           </MenuItem>
         )}
-        {sets.map((setID, i) => {
+        {setIDs.map((setID, i) => {
           return (
             <MenuItem value={i} key={i}>
               {setID}
@@ -103,13 +104,52 @@ class GSEWrapper extends Component {
     this.setState({ setIndex: 0 });
   }
 
+  download(GSE, Genes) {
+    if (GSE == null || Genes == null) {
+      alert("Please run GSE first.");
+      return;
+    }
+
+    const table = [
+      ["GO term ID", "GO term name", "p-value", "genes", "enrichment score"],
+    ];
+    GSE.forEach((setResult, setID) => {
+      const { geneSet, mhg, pvalue } = setResult;
+      const goTerm = setID.replaceAll(",", "").split(" ");
+
+      geneSet.forEach((geneName, i) => {
+        const enrichmentScore = mhg[Genes.indexOf(geneName)];
+
+        if (i === 0) {
+          table.push([
+            goTerm[0],
+            goTerm.slice(1).join(" "),
+            pvalue,
+            geneName,
+            enrichmentScore,
+          ]);
+        } else {
+          table.push(["", "", "", geneName, enrichmentScore]);
+        }
+      });
+    });
+
+    const CSV = table.join("\n");
+    const element = document.createElement("a");
+    const file = new Blob([CSV], { type: "text/csv" });
+    element.href = URL.createObjectURL(file);
+    element.download = "gse_results.csv";
+    document.body.appendChild(element);
+    element.click();
+  }
+
   render() {
     const { setIndex } = this.state;
     const { gseSolution, loading } = this.props;
     const { Genes, GSE } = gseSolution;
 
-    const sets = GSE ? [...GSE.keys()].slice(0, 100) : [];
-    const currSetIndex = sets.length > 0 ? setIndex : -1;
+    const setIDs = GSE ? [...GSE.keys()].slice(0, 100) : [];
+    const currSetIndex = setIDs.length > 0 ? setIndex : -1;
 
     return (
       <>
@@ -130,7 +170,7 @@ class GSEWrapper extends Component {
         </Typography>
 
         <div style={{ display: "flex" }}>
-          {Dropdown(sets, currSetIndex, this.handleSelect.bind(this))}
+          {Dropdown(setIDs, currSetIndex, this.handleSelect.bind(this))}
           {loading && (
             <CircularProgress
               disableShrink
@@ -152,15 +192,20 @@ class GSEWrapper extends Component {
           Run GSE
         </Button>
 
+        <Button
+          variant="contained"
+          size="small"
+          color="primary"
+          style={{ backgroundColor: primary, marginLeft: "10px" }}
+          onClick={() => this.download(GSE, Genes)}
+        >
+          Download Results
+        </Button>
+
         <div style={{ paddingTop: "20px" }}></div>
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>
-          {Plot(
-            GSE && GSE.has(sets[currSetIndex])
-              ? GSE.get(sets[currSetIndex])
-              : {},
-            Genes ? Genes : []
-          )}
+          {Plot(GSE ? GSE.get(setIDs[currSetIndex]) : {}, Genes ? Genes : [])}
           <div style={{ width: "50%" }}></div>
         </div>
       </>

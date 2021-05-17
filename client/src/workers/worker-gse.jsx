@@ -19,7 +19,7 @@ export const performGSE = (geneSets, dgeSolution) => {
     }
   });
 
-  const sets = [...Object.entries(geneSets)];
+  const sets = Object.entries(geneSets);
   const results = new Map();
 
   for (let i = 0; i < sets.length; i++) {

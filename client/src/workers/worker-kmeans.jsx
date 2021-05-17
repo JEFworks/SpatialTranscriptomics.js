@@ -15,10 +15,10 @@ const kmeansAlgo = (pcs, k) => {
 export const performKMeans = (pcs, k) => {
   const clusters = kmeansAlgo(pcs, k);
 
-  const hashmap = new Map();
+  const cellsMap = new Map();
   pcs.forEach((cell, index) => {
     // keep a record of the cell's indices (e.g. first cell has index 1, second cell has index 2, ...)
-    hashmap.set(cell, index);
+    cellsMap.set(cell, index);
   });
 
   const clusterIndices = [];
@@ -31,7 +31,7 @@ export const performKMeans = (pcs, k) => {
       const indices = [];
       cluster.forEach((cell) => {
         // get the index of this cell and give the cell the color of this cluster
-        const index = hashmap.get(cell);
+        const index = cellsMap.get(cell);
         colorsMap.set(index, palette[i % palette.length]);
         indices.push(index);
       });
@@ -41,10 +41,10 @@ export const performKMeans = (pcs, k) => {
   }
 
   // sort the map so colors[i] is the color of cells[i]
-  const sorted = new Map(
+  const sortedColorsMap = new Map(
     [...colorsMap].sort((a, b) => parseInt(a) - parseInt(b))
   );
-  const colors = [...sorted.values()];
+  const colors = [...sortedColorsMap.values()];
 
   self.postMessage({ colors: colors, clusters: clusterIndices });
 };
