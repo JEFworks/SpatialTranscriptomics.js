@@ -21,9 +21,8 @@ def main():
         continue
 
       for entry in json_data["associations"]:
-        if entry["object"]["id"] == term.id:
-          gene_name = entry["subject"]["label"]
-          curr_set.add(gene_name.lower())
+        gene_name = entry["subject"]["label"]
+        curr_set.add(gene_name.lower())
 
       if len(curr_set) >= 2:
         gene_sets[term.id + " " + term.name] = list(curr_set)
