@@ -148,7 +148,7 @@ class GSEWrapper extends Component {
     const { gseSolution, loading } = this.props;
     const { Genes, GSE } = gseSolution;
 
-    const setIDs = GSE ? [...GSE.keys()].slice(0, 100) : [];
+    const setIDs = GSE ? [...GSE.keys()] : [];
     const currSetIndex = setIDs.length > 0 ? setIndex : -1;
 
     return (

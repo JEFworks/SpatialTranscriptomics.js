@@ -27,6 +27,7 @@ export const performDGE = (
 
     // let's compare between cluster X and cluster Y
     // x = reference group, y = non-reference group
+    // if xNum is -1, then let cluster X be all clusters except cluster Y
     const clusterX =
       xNum === -1
         ? getReferenceGroup(clusters, yNum - 1)

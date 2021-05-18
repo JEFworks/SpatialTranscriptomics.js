@@ -1,7 +1,7 @@
 /* eslint-disable */
 import MHG from "../functions/mhg.js";
 
-// helper function for GSEA
+// compute intersection of two sets
 const intersect = (a, b) => {
   if (a.length > b.length) {
     return a.filter((e) => b.includes(e));
@@ -10,7 +10,7 @@ const intersect = (a, b) => {
 };
 
 export const performGSE = (geneSets, dgeSolution) => {
-  // the genes we have are the DE genes
+  // the genes we have are the differentially expressed genes
   const genesHave = [];
   dgeSolution.forEach((gene) => {
     const { name, type } = gene;
@@ -23,8 +23,8 @@ export const performGSE = (geneSets, dgeSolution) => {
   const results = new Map();
 
   for (let i = 0; i < sets.length; i++) {
-    const setID = sets[i][0];
-    const setList = sets[i][1];
+    const setID = sets[i][0]; // GO term
+    const setList = sets[i][1]; // actual gene set
 
     const geneSet = intersect(setList, genesHave);
     const N = genesHave.length;
@@ -32,12 +32,13 @@ export const performGSE = (geneSets, dgeSolution) => {
     const L = N;
     const X = 1;
 
-    // geneset should contain >= 2 genes from the genes we have
+    // gene set should contain >= 2 genes from the genes we have
     // otherwise, skip
     if (K < 2) {
       continue;
     }
 
+    // compute binary vector and do MHG
     const v = genesHave.map((name) => (geneSet.includes(name) ? 1 : 0));
     const res = MHG.mhg_test(v, N, K, L, X);
 
@@ -50,8 +51,11 @@ export const performGSE = (geneSets, dgeSolution) => {
     results.set(setID, res);
   }
 
+  // sort GSE results by p-value
   const sortedResults = new Map(
-    [...results.entries()].sort((a, b) => a[1].pvalue - b[1].pvalue)
+    [...results.entries()]
+      .sort((a, b) => a[1].pvalue - b[1].pvalue)
+      .slice(0, 50)
   );
   const gseSolution = { Genes: genesHave, GSE: sortedResults };
 

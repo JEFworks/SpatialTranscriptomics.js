@@ -9,6 +9,7 @@ import MinMaxNormalize from "../functions/MinMaxNormalize.jsx";
 import MinMaxStats from "../functions/MinMaxStats.jsx";
 
 import Header from "./Header.jsx";
+import AlertBanner from "./AlertBanner.jsx";
 import DataUpload from "./DataUpload.jsx";
 import QualityControl from "./QualityControl.jsx";
 import PCAWrapper from "./PCAWrapper.jsx";
@@ -122,7 +123,6 @@ class Homepage extends Component {
   // load genesets
   async loadGeneSets() {
     const { loading } = this.state;
-
     axios
       .get(`${api}/genesets`)
       .then((response) => {
@@ -748,17 +748,6 @@ class Homepage extends Component {
   }
 
   render() {
-    // produce error message
-    const { errors } = this.state;
-    let errorMsg = "";
-    if (errors.includes("Server not responding.\n")) {
-      errorMsg = "Server not responding.\n";
-    } else {
-      for (let i = 0; i < errors.length; i++) {
-        errorMsg += errors[i];
-      }
-    }
-
     return (
       <>
         <Header
@@ -768,6 +757,8 @@ class Homepage extends Component {
         />
 
         <div className="site-container">
+          <AlertBanner key={this.state.uuid} errors={this.state.errors} />
+
           <DataUpload
             matrixFileHandler={this.matrixFileHandler.bind(this)}
             barcodesFileHandler={this.barcodesFileHandler.bind(this)}
@@ -776,7 +767,6 @@ class Homepage extends Component {
             imageFileHandler={this.imageFileHandler.bind(this)}
             uploadFiles={this.uploadFiles.bind(this)}
             files={this.state.files}
-            error={errorMsg}
           />
 
           <div style={{ paddingTop: "5px" }}></div>

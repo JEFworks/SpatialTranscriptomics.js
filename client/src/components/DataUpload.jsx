@@ -9,9 +9,7 @@ import {
   StepLabel,
   StepContent,
   Paper,
-  Fade,
 } from "@material-ui/core";
-import { Alert } from "@material-ui/lab";
 
 const primary = "#094067";
 const paragraph = "#5f6c7b";
@@ -244,7 +242,6 @@ class DataUpload extends Component {
       imageFileHandler,
       uploadFiles,
       files,
-      error,
     } = this.props;
 
     return (
@@ -262,32 +259,6 @@ class DataUpload extends Component {
           >
             Data Upload
           </Typography>
-
-          {error.length > 0 && (
-            <Fade
-              style={{
-                marginLeft: "20px",
-                marginTop: "17px",
-                width: "400px",
-                paddingTop: "0px",
-                paddingLeft: "10px",
-                height: "30px",
-              }}
-              in
-              timeout={1500}
-            >
-              <Alert
-                severity="error"
-                style={{
-                  textOverflow: "ellipsis",
-                  overflowY: "hidden",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {error}
-              </Alert>
-            </Fade>
-          )}
         </div>
 
         <Typography
