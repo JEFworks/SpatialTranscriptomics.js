@@ -1,3 +1,5 @@
+import { randomColor } from "randomcolor";
+
 const palette = [
   `#EF70A4`,
   `#BDC7E6`,
@@ -31,4 +33,16 @@ const palette = [
   `#ADA9A5`,
 ];
 
-export default palette;
+const getPalette = (numColors) => {
+  if (numColors <= palette.length) {
+    return palette;
+  }
+
+  const extraColors = [];
+  for (let i = palette.length; i < numColors; i++) {
+    extraColors.push(randomColor({ seed: i }));
+  }
+  return palette.concat(extraColors);
+};
+
+export default getPalette;

@@ -23,6 +23,7 @@
     "machinelearn": "^2.1.5",
     "ml-pca": "^4.0.1",
     "ml-sparse-matrix": "^2.0.0",
+    "randomcolor": "^0.6.2",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "react-leaflet": "^2.8.0",

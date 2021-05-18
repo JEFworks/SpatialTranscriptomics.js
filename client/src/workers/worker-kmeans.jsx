@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { KMeans } from "machinelearn/cluster";
-import palette from "../functions/palette.jsx";
+import getPalette from "../functions/palette.jsx";
 
 const kmeansAlgo = (pcs, k) => {
   const kmean = new KMeans({ k: k });
@@ -14,6 +14,7 @@ const kmeansAlgo = (pcs, k) => {
 
 export const performKMeans = (pcs, k) => {
   const clusters = kmeansAlgo(pcs, k);
+  const palette = getPalette(k);
 
   const cellsMap = new Map();
   pcs.forEach((cell, index) => {
@@ -32,7 +33,7 @@ export const performKMeans = (pcs, k) => {
       cluster.forEach((cell) => {
         // get the index of this cell and give the cell the color of this cluster
         const index = cellsMap.get(cell);
-        colorsMap.set(index, palette[i % palette.length]);
+        colorsMap.set(index, palette[i]);
         indices.push(index);
       });
       clusterIndices.push(indices);
