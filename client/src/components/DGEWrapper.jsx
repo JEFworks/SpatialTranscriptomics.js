@@ -9,8 +9,7 @@ import {
 } from "@material-ui/core";
 import ScatterPlot from "./Plots/ScatterPlot.jsx";
 
-const primary = "#094067";
-const paragraph = "#5f6c7b";
+const paragraph = "rgba(0, 0, 0, 0.54)";
 const blue = "#80d8ff";
 const red = "#ff80ab";
 
@@ -33,7 +32,8 @@ const Plot = (data, getColor) => {
     <Typography
       variant="body1"
       align="center"
-      style={{ paddingBottom: "5px", fontWeight: 500, color: primary }}
+      color="primary"
+      style={{ paddingBottom: "5px", fontWeight: 500 }}
     >
       {"Volcano Plot"}
     </Typography>
@@ -68,12 +68,14 @@ const TypedInput = (setX, setY) => {
     <FormGroup row style={{ marginTop: "7px" }} className="dgeFlex">
       <TextField
         style={{ width: "100px", marginRight: "15px" }}
+        color="secondary"
         helperText="Reference Cluster #"
         defaultValue="1"
         onChange={(event) => setX(event)}
       />
       <TextField
         style={{ width: "100px", marginRight: "15px" }}
+        color="secondary"
         helperText="Non-Reference Cluster #"
         defaultValue="2"
         onChange={(event) => setY(event)}
@@ -159,7 +161,8 @@ class DGEWrapper extends Component {
     return (
       <>
         <Typography
-          style={{ marginBottom: "10px", fontWeight: 500, color: primary }}
+          style={{ marginBottom: "10px", fontWeight: 500 }}
+          color="primary"
           variant="h5"
         >
           Differential Gene Expression (DGE) Analysis
@@ -192,7 +195,7 @@ class DGEWrapper extends Component {
           variant="contained"
           size="small"
           color="primary"
-          style={{ backgroundColor: primary }}
+          style={{ marginRight: "10px" }}
           onClick={() => this.run()}
         >
           Run DGE
@@ -201,7 +204,6 @@ class DGEWrapper extends Component {
           variant="contained"
           size="small"
           color="primary"
-          style={{ backgroundColor: primary, marginLeft: "10px" }}
           onClick={() => this.download(dgeSolution)}
         >
           Download Results

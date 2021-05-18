@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 
 import {
   Button,
@@ -11,16 +10,7 @@ import {
   Paper,
 } from "@material-ui/core";
 
-const primary = "#094067";
-const paragraph = "#5f6c7b";
-
-const theme = createMuiTheme({
-  palette: {
-    primary: {
-      main: primary,
-    },
-  },
-});
+const paragraph = "rgba(0, 0, 0, 0.54)";
 
 const getSteps = () => {
   return [
@@ -174,40 +164,35 @@ class VerticalLinearStepper extends Component {
 
     return (
       <div>
-        <MuiThemeProvider theme={theme}>
-          <Stepper activeStep={activeStep} orientation="vertical">
-            {steps.map((label, index) => (
-              <Step key={label}>
-                <StepLabel style={{ color: primary }}>{label}</StepLabel>
-                <StepContent>
-                  {getStepContent(
-                    index,
-                    matrixFileHandler,
-                    featuresFileHandler,
-                    barcodesFileHandler,
-                    pixelsFileHandler,
-                    imageFileHandler
-                  )}
-                  <div>
-                    <Button
-                      disabled={activeStep === 0}
-                      onClick={this.handleBack}
-                    >
-                      Back
-                    </Button>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={this.handleNext}
-                    >
-                      {activeStep === steps.length - 1 ? "Finish" : "Next"}
-                    </Button>
-                  </div>
-                </StepContent>
-              </Step>
-            ))}
-          </Stepper>
-        </MuiThemeProvider>
+        <Stepper activeStep={activeStep} orientation="vertical">
+          {steps.map((label, index) => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+              <StepContent>
+                {getStepContent(
+                  index,
+                  matrixFileHandler,
+                  featuresFileHandler,
+                  barcodesFileHandler,
+                  pixelsFileHandler,
+                  imageFileHandler
+                )}
+                <div>
+                  <Button disabled={activeStep === 0} onClick={this.handleBack}>
+                    Back
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={this.handleNext}
+                  >
+                    {activeStep === steps.length - 1 ? "Finish" : "Next"}
+                  </Button>
+                </div>
+              </StepContent>
+            </Step>
+          ))}
+        </Stepper>
 
         {activeStep === steps.length && (
           <Paper square elevation={0} style={{ marginBottom: "30px" }}>
@@ -216,12 +201,10 @@ class VerticalLinearStepper extends Component {
               control statistics to appear
             </Typography>
             <Button
+              variant="contained"
+              color="primary"
               onClick={this.handleReset}
-              style={{
-                backgroundColor: primary,
-                marginTop: "10px",
-                color: "white",
-              }}
+              style={{ marginTop: "10px" }}
             >
               Reset
             </Button>
@@ -248,12 +231,11 @@ class DataUpload extends Component {
       <>
         <div style={{ display: "flex" }}>
           <Typography
+            color="primary"
             style={{
               marginTop: "20px",
               marginBottom: "10px",
               fontWeight: 500,
-              color: primary,
-              minWidth: "140px",
             }}
             variant="h5"
           >

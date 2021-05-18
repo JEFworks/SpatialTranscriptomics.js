@@ -11,9 +11,8 @@ import {
   CircularProgress,
 } from "@material-ui/core";
 
-const primary = "#094067";
-const paragraph = "#5f6c7b";
-const tertiary = "#90b4ce";
+const paragraph = "rgba(0, 0, 0, 0.54)";
+const secondary = "#90b4ce";
 const blue = "#80d8ff";
 
 const LeafletWrapper = (pixels, colors, opacity, pixelSize, imageLink) => {
@@ -58,30 +57,35 @@ const TypedInput = (
     <FormGroup row style={{ marginTop: "7px" }}>
       <TextField
         style={{ width: "50px", marginRight: "15px" }}
+        color="secondary"
         helperText="ΔX"
         defaultValue="0"
         onChange={changeDeltaX}
       />
       <TextField
         style={{ width: "50px", marginRight: "15px" }}
+        color="secondary"
         helperText="ΔY"
         defaultValue="1965"
         onChange={changeDeltaY}
       />
       <TextField
         style={{ width: "250px", marginRight: "15px" }}
+        color="secondary"
         helperText="Scale (< 1 to downscale or > 1 to upscale)"
         defaultValue="0.176"
         onChange={changeScale}
       />
       <TextField
         style={{ width: "90px", marginRight: "15px" }}
+        color="secondary"
         helperText="Opacity (0 - 1)"
         defaultValue="1"
         onChange={changeOpacity}
       />
       <TextField
         style={{ width: "60px" }}
+        color="secondary"
         helperText="Pixel Size"
         defaultValue="8"
         onChange={changePixelSize}
@@ -104,7 +108,7 @@ const CheckboxInput = (
         control={
           <Checkbox
             disableRipple
-            style={{ backgroundColor: "transparent", color: tertiary }}
+            style={{ color: secondary }}
             checked={horizontalFlipped === -1}
             onChange={flipHorizontal}
           />
@@ -115,7 +119,7 @@ const CheckboxInput = (
         control={
           <Checkbox
             disableRipple
-            style={{ backgroundColor: "transparent", color: tertiary }}
+            style={{ color: secondary }}
             checked={verticalFlipped === -1}
             onChange={flipVertical}
           />
@@ -126,7 +130,7 @@ const CheckboxInput = (
         control={
           <Checkbox
             disableRipple
-            style={{ backgroundColor: "transparent", color: tertiary }}
+            style={{ color: secondary }}
             checked={xyFlipped}
             onChange={flipXY}
           />
@@ -284,7 +288,8 @@ class SpatialVis extends Component {
     return (
       <>
         <Typography
-          style={{ marginBottom: "10px", fontWeight: 500, color: primary }}
+          style={{ marginBottom: "10px", fontWeight: 500 }}
+          color="primary"
           variant="h5"
         >
           Spatial Visualization
@@ -331,7 +336,6 @@ class SpatialVis extends Component {
           variant="contained"
           size="small"
           color="primary"
-          style={{ backgroundColor: primary }}
           onClick={() => this.run()}
         >
           Run Visualization

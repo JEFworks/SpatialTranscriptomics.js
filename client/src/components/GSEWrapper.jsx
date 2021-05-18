@@ -11,8 +11,7 @@ import {
 } from "@material-ui/core";
 import LineChart from "./Plots/LineChart.jsx";
 
-const primary = "#094067";
-const paragraph = "#5f6c7b";
+const paragraph = "rgba(0, 0, 0, 0.54)";
 const blue = "#80d8ff";
 
 const Plot = (setResult, genesHave) => {
@@ -30,7 +29,8 @@ const Plot = (setResult, genesHave) => {
     <Typography
       variant="body1"
       align="center"
-      style={{ paddingBottom: "5px", fontWeight: 500, color: primary }}
+      color="primary"
+      style={{ paddingBottom: "5px", fontWeight: 500 }}
     >
       Enrichment Plot
     </Typography>
@@ -70,7 +70,7 @@ const Plot = (setResult, genesHave) => {
 const Dropdown = (setIDs, setIndex, handleSelect) => {
   return (
     <FormControl>
-      <Select value={setIndex} onChange={handleSelect}>
+      <Select color="secondary" value={setIndex} onChange={handleSelect}>
         {setIDs.length === 0 && (
           <MenuItem value={-1}>
             <em>None</em>
@@ -154,7 +154,8 @@ class GSEWrapper extends Component {
     return (
       <>
         <Typography
-          style={{ marginBottom: "10px", fontWeight: 500, color: primary }}
+          style={{ marginBottom: "10px", fontWeight: 500 }}
+          color="primary"
           variant="h5"
         >
           Gene Set Enrichment (GSE) Analysis
@@ -174,7 +175,7 @@ class GSEWrapper extends Component {
           variant="contained"
           size="small"
           color="primary"
-          style={{ backgroundColor: primary }}
+          style={{ marginRight: "10px" }}
           onClick={() => this.run()}
         >
           Run GSE
@@ -184,7 +185,6 @@ class GSEWrapper extends Component {
           variant="contained"
           size="small"
           color="primary"
-          style={{ backgroundColor: primary, marginLeft: "10px" }}
           onClick={() => this.download(GSE, Genes)}
         >
           Download Results

@@ -39,9 +39,11 @@ export const performDGE = (
     // y will store the reads of this gene in cells of cluster Y
     const y = [];
 
+    let clusterX_len = 0;
     clusterX.forEach((cluster) => {
       cluster.forEach((cellIndex) => {
         x.push(gene[cellIndex]);
+        clusterX_len++;
       });
     });
 
@@ -60,7 +62,7 @@ export const performDGE = (
     const yReads = y.reduce((a, b) => {
       return a + b;
     }, 0);
-    const fc = Math.log2(yReads / (xReads / clusterX.length));
+    const fc = Math.log2(yReads / clusterY.length / (xReads / clusterX_len));
 
     const obj = { name: geneName, p: p, fc: fc, type: "neutral" };
     if (fc >= 1 && p >= 1.5) {

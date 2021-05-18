@@ -8,9 +8,7 @@ import {
 } from "@material-ui/core";
 import Histogram from "./Plots/Histogram.jsx";
 
-const primary = "#094067";
-const paragraph = "#5f6c7b";
-const tertiary = "#90b4ce";
+const paragraph = "rgba(0, 0, 0, 0.54)";
 const blue = "#80d8ff";
 
 const Figure = (rowsums, colsums, thresholds, changeThreshold, type) => {
@@ -27,7 +25,8 @@ const Figure = (rowsums, colsums, thresholds, changeThreshold, type) => {
     <Typography
       variant="body1"
       align="center"
-      style={{ paddingBottom: "5px", fontWeight: 500, color: primary }}
+      color="primary"
+      style={{ paddingBottom: "5px", fontWeight: 500 }}
     >
       {type === "rowsum"
         ? "# of Reads of a Gene"
@@ -51,7 +50,8 @@ const Figure = (rowsums, colsums, thresholds, changeThreshold, type) => {
 
   const Toggle = (
     <Slider
-      style={{ marginLeft: "20px", width: "90%", color: tertiary }}
+      style={{ marginLeft: "20px", width: "90%" }}
+      color="secondary"
       onChange={(_event, value) =>
         changeThreshold(
           type === "rowsum" ? value : null,
@@ -134,7 +134,8 @@ class QualityControl extends Component {
       <>
         <div style={{ display: "flex" }}>
           <Typography
-            style={{ marginBottom: "10px", fontWeight: 500, color: primary }}
+            color="primary"
+            style={{ marginBottom: "10px", fontWeight: 500 }}
             variant="h5"
           >
             Quality Control (QC)
@@ -186,7 +187,6 @@ class QualityControl extends Component {
           variant="contained"
           size="small"
           color="primary"
-          style={{ backgroundColor: primary }}
           onClick={() => this.run()}
         >
           Apply QC Filters

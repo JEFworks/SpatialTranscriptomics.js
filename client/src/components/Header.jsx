@@ -11,8 +11,6 @@ import {
 } from "@material-ui/core";
 import GitHubIcon from "@material-ui/icons/GitHub";
 
-const background = "#fffffe";
-const primary = "#094067";
 const blue = "#80d8ff";
 
 const TitleContents = (
@@ -40,7 +38,7 @@ const TitleContents = (
           marginBottom: isMobile ? "10px" : "0px",
         }}
       >
-        <Link style={{ color: primary }} underline="none" href="/">
+        <Link underline="none" href="/">
           SpatialTranscriptomics.js
         </Link>
       </Typography>
@@ -55,6 +53,7 @@ const TitleContents = (
           >
             <TextField
               style={{ width: "90px", fontWeight: 500, marginRight: "10px" }}
+              color="secondary"
               helperText="Gene name"
               defaultValue="Camk2n1"
               onChange={selectFeature}
@@ -63,11 +62,7 @@ const TitleContents = (
               variant="contained"
               size="small"
               color="primary"
-              style={{
-                backgroundColor: primary,
-                marginTop: "15px",
-                marginBottom: "15px",
-              }}
+              style={{ marginTop: "15px", marginBottom: "15px" }}
               onClick={() => setFeature(feature)}
             >
               Color by Gene
@@ -78,6 +73,7 @@ const TitleContents = (
             <div style={{ display: isMobile ? "" : "flex" }}>
               <TextField
                 style={{ width: "100px", marginRight: "10px" }}
+                color="secondary"
                 helperText="# of Clusters (k)"
                 defaultValue="10"
                 onChange={selectK}
@@ -86,11 +82,7 @@ const TitleContents = (
                 variant="contained"
                 size="small"
                 color="primary"
-                style={{
-                  backgroundColor: primary,
-                  marginTop: "15px",
-                  marginBottom: "15px",
-                }}
+                style={{ marginTop: "15px", marginBottom: "15px" }}
                 onClick={() => setK(k)}
               >
                 Color by Clusters
@@ -156,7 +148,7 @@ const About = (
   <Typography
     style={{ fontSize: "1.1em", fontWeight: 500, marginRight: "5px" }}
   >
-    <Link style={{ color: primary }} underline="none" href="/about">
+    <Link underline="none" href="/about">
       about
     </Link>
   </Typography>
@@ -166,10 +158,10 @@ const Github = (
   <IconButton
     disableRipple
     edge="end"
+    color="primary"
     style={{
       marginRight: "-10px",
       marginBottom: "-4px",
-      color: primary,
       backgroundColor: "transparent",
     }}
     aria-label="menu"
@@ -220,7 +212,7 @@ class Header extends Component {
       <>
         <AppBar
           style={{
-            backgroundColor: background,
+            backgroundColor: "#fff",
             boxShadow: "rgba(0, 0, 0, 0.1) 0px 0px 12px",
           }}
         >

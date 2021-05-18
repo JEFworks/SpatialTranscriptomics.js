@@ -10,8 +10,7 @@ import {
 import LineChart from "./Plots/LineChart.jsx";
 import ScatterPlot from "./Plots/ScatterPlot.jsx";
 
-const primary = "#094067";
-const paragraph = "#5f6c7b";
+const paragraph = "rgba(0, 0, 0, 0.54)";
 const blue = "#80d8ff";
 
 const Biplot = (eigenvectors, getColor, pcX, pcY) => {
@@ -29,7 +28,8 @@ const Biplot = (eigenvectors, getColor, pcX, pcY) => {
     <Typography
       variant="body1"
       align="center"
-      style={{ paddingBottom: "5px", fontWeight: 500, color: primary }}
+      color="primary"
+      style={{ paddingBottom: "5px", fontWeight: 500 }}
     >
       {"Biplot"}
     </Typography>
@@ -77,7 +77,8 @@ const ScreePlot = (eigenvalues, numPCs) => {
     <Typography
       variant="body1"
       align="center"
-      style={{ paddingBottom: "5px", fontWeight: 500, color: primary }}
+      color="primary"
+      style={{ paddingBottom: "5px", fontWeight: 500 }}
     >
       {"Scree Plot"}
     </Typography>
@@ -118,18 +119,21 @@ const TypedInput = (selectNumPCs, set_pcX, set_pcY) => {
     <FormGroup row style={{ marginTop: "7px" }}>
       <TextField
         style={{ width: "60px", marginRight: "15px" }}
+        color="secondary"
         helperText="# of PCs"
         defaultValue="10"
         onChange={selectNumPCs}
       />
       <TextField
         style={{ width: "80px", marginRight: "15px" }}
+        color="secondary"
         helperText="PC on x-axis"
         defaultValue="1"
         onChange={set_pcX}
       />
       <TextField
         style={{ width: "80px" }}
+        color="secondary"
         helperText="PC on y-axis"
         defaultValue="2"
         onChange={set_pcY}
@@ -220,7 +224,8 @@ class PCAWrapper extends Component {
     return (
       <>
         <Typography
-          style={{ marginBottom: "10px", fontWeight: 500, color: primary }}
+          color="primary"
+          style={{ marginBottom: "10px", fontWeight: 500 }}
           variant="h5"
         >
           Principal Component Analysis (PCA)
@@ -259,7 +264,6 @@ class PCAWrapper extends Component {
           variant="contained"
           size="small"
           color="primary"
-          style={{ backgroundColor: primary }}
           onClick={() => this.run()}
         >
           Run PCA
@@ -268,7 +272,7 @@ class PCAWrapper extends Component {
           variant="contained"
           size="small"
           color="primary"
-          style={{ backgroundColor: primary, marginLeft: "10px" }}
+          style={{ marginLeft: "10px" }}
           onClick={() => this.applySettings()}
         >
           Apply Settings

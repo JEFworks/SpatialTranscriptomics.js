@@ -9,8 +9,7 @@ import {
 } from "@material-ui/core";
 import ScatterPlot from "./Plots/ScatterPlot.jsx";
 
-const primary = "#094067";
-const paragraph = "#5f6c7b";
+const paragraph = "rgba(0, 0, 0, 0.54)";
 const blue = "#80d8ff";
 
 const Plot = (data, getColor) => {
@@ -28,7 +27,8 @@ const Plot = (data, getColor) => {
     <Typography
       variant="body1"
       align="center"
-      style={{ paddingBottom: "5px", fontWeight: 500, color: primary }}
+      color="primary"
+      style={{ paddingBottom: "5px", fontWeight: 500 }}
     >
       {"tSNE"}
     </Typography>
@@ -63,18 +63,21 @@ const TypedInput = (changeSettings) => {
     <FormGroup row style={{ marginTop: "7px" }}>
       <TextField
         style={{ width: "50px", marginRight: "15px" }}
+        color="secondary"
         helperText="Epsilon"
         defaultValue="10"
         onChange={(event) => changeSettings(event, "epsilon")}
       />
       <TextField
         style={{ width: "60px", marginRight: "15px" }}
+        color="secondary"
         helperText="Perplexity"
         defaultValue="30"
         onChange={(event) => changeSettings(event, "perplexity")}
       />
       <TextField
         style={{ width: "60px" }}
+        color="secondary"
         helperText="Iterations"
         defaultValue="500"
         onChange={(event) => changeSettings(event, "iterations")}
@@ -142,7 +145,8 @@ class TSNEWrapper extends Component {
     return (
       <>
         <Typography
-          style={{ marginBottom: "10px", fontWeight: 500, color: primary }}
+          color="primary"
+          style={{ marginBottom: "10px", fontWeight: 500 }}
           variant="h5"
         >
           t-distributed Stochastic Neighbor Embedding (tSNE)
@@ -177,7 +181,6 @@ class TSNEWrapper extends Component {
           variant="contained"
           size="small"
           color="primary"
-          style={{ backgroundColor: primary }}
           onClick={() => this.run()}
         >
           Run tSNE
