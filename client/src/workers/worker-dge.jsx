@@ -1,6 +1,14 @@
 /* eslint-disable */
 import mannwhitneyu from "../functions/mannwhitneyu.js";
 
+const getReferenceGroup = (clusters, indexToExclude) => {
+  const ret = [];
+  clusters.forEach((cluster, i) => {
+    if (i !== indexToExclude) ret.push(cluster);
+  });
+  return ret;
+};
+
 export const performDGE = (
   clusters,
   filteredMatrix,
@@ -19,7 +27,10 @@ export const performDGE = (
 
     // let's compare between cluster X and cluster Y
     // x = reference group, y = non-reference group
-    const clusterX = clusters[xNum - 1];
+    const clusterX =
+      xNum === -1
+        ? getReferenceGroup(clusters, yNum - 1)
+        : [clusters[xNum - 1]];
     const clusterY = clusters[yNum - 1];
 
     // x will store the reads of this gene in cells of cluster X
@@ -27,8 +38,10 @@ export const performDGE = (
     // y will store the reads of this gene in cells of cluster Y
     const y = [];
 
-    clusterX.forEach((cellIndex) => {
-      x.push(gene[cellIndex]);
+    clusterX.forEach((cluster) => {
+      cluster.forEach((cellIndex) => {
+        x.push(gene[cellIndex]);
+      });
     });
 
     clusterY.forEach((cellIndex) => {
@@ -46,7 +59,7 @@ export const performDGE = (
     const yReads = y.reduce((a, b) => {
       return a + b;
     }, 0);
-    const fc = Math.log2(yReads / xReads);
+    const fc = Math.log2(yReads / (xReads / clusterX.length));
 
     const obj = { name: geneName, p: p, fc: fc, type: "neutral" };
     if (fc >= 1 && p >= 1.5) {

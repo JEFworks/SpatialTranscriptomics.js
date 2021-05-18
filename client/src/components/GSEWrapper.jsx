@@ -84,7 +84,7 @@ const Dropdown = (setIDs, setIndex, handleSelect) => {
           );
         })}
       </Select>
-      <FormHelperText>Some important helper text</FormHelperText>
+      <FormHelperText>Select a GO term to visualize enrichment</FormHelperText>
     </FormControl>
   );
 };
@@ -169,18 +169,6 @@ class GSEWrapper extends Component {
           Second line of description...
         </Typography>
 
-        <div style={{ display: "flex" }}>
-          {Dropdown(setIDs, currSetIndex, this.handleSelect.bind(this))}
-          {loading && (
-            <CircularProgress
-              disableShrink
-              size={40}
-              thickness={5}
-              style={{ color: blue, marginTop: "15px", marginLeft: "30px" }}
-            />
-          )}
-        </div>
-
         <div style={{ paddingTop: "15px" }}></div>
         <Button
           variant="contained"
@@ -201,6 +189,18 @@ class GSEWrapper extends Component {
         >
           Download Results
         </Button>
+
+        <div style={{ paddingTop: "15px", display: "flex" }}>
+          {Dropdown(setIDs, currSetIndex, this.handleSelect.bind(this))}
+          {loading && (
+            <CircularProgress
+              disableShrink
+              size={40}
+              thickness={5}
+              style={{ color: blue, marginTop: "10px", marginLeft: "30px" }}
+            />
+          )}
+        </div>
 
         <div style={{ paddingTop: "20px" }}></div>
         <div style={{ width: "100%", display: "flex" }}>

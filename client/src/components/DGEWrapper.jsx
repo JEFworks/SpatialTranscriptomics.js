@@ -107,7 +107,7 @@ class DGEWrapper extends Component {
   run() {
     const { computeDGE, numClusters } = this.props;
     const { x, y } = this.state;
-    if (isNaN(x) || isNaN(y) || x < 1 || y < 1) {
+    if (isNaN(x) || isNaN(y) || (x < 1 && x !== -1) || y < 1) {
       alert("Please specify a positive integer value for each group number.");
       return;
     }
@@ -171,7 +171,8 @@ class DGEWrapper extends Component {
         >
           First line of description...
           <br></br>
-          Second line of description...
+          Second line of description... (-1 for comparison against all other
+          clusters)
         </Typography>
 
         <div style={{ display: "flex" }}>
