@@ -3,15 +3,9 @@ import { Snackbar } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
 
 class AlertBanner extends Component {
-  state = { open: true };
-
-  handleClose() {
-    this.setState({ open: false });
-  }
-
   render() {
     // produce error message
-    const { errors } = this.props;
+    const { errors, open } = this.props;
     let errorMsg = "";
     if (errors.includes("Server not responding.\n")) {
       errorMsg = "Server not responding.\n";
@@ -22,8 +16,8 @@ class AlertBanner extends Component {
     }
 
     return (
-      <Snackbar open={errorMsg.length > 0 && this.state.open}>
-        <Alert onClose={() => this.handleClose()} severity="error">
+      <Snackbar open={open}>
+        <Alert onClose={() => this.props.handleClose()} severity="error">
           {errorMsg}
         </Alert>
       </Snackbar>

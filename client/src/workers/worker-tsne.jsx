@@ -13,5 +13,14 @@ export const performTSNE = (filteredPCs, opt, iterations) => {
     tsne.step(); // default 500 iterations
   }
   const Y = tsne.getSolution(); // Y is an array of 2-D points that you can plot
-  self.postMessage({ solution: Y });
+
+  const embedding = [];
+  // 2D embedding
+  Y.forEach((point, index) => {
+    const x = point[0] * 7 + 450;
+    const y = point[1] * 7 + 300;
+    embedding.push({ x: x, y: y, index: index });
+  });
+
+  self.postMessage({ solution: embedding });
 };

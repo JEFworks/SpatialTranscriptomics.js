@@ -299,7 +299,7 @@ function get_mHG_pvalue(N, K, L, X, mHG, tol) {
    * // 1.81e-5
    * res.pvalue;
    */
-  exports.mhg_test = function (x, N, K, L, X, upper_bound, tol) {
+  exports.mhg_test = function (x, N, K, L, X, genesHave, upper_bound, tol) {
     console.assert(N >= 0, "Condition not met: N >= 0");
     console.assert(0 <= K && K <= N, "Condition not met: 0 <= K <= N");
     console.assert(0 <= L && L <= N, "Condition not met: 0 <= L <= N");
@@ -355,8 +355,8 @@ function get_mHG_pvalue(N, K, L, X, mHG, tol) {
 
     return {
       threshold: threshold,
-      mhg: scores.value.map(function (x) {
-        return -Math.log10(x);
+      mhg: scores.value.map(function (x, i) {
+        return { x: genesHave[i], y: -Math.log10(x) };
       }),
       pvalue: mHG_pvalue,
       // matrix: matrix,

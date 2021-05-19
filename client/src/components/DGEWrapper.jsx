@@ -14,19 +14,7 @@ const blue = "#80d8ff";
 const red = "#ff80ab";
 
 const Plot = (data, getColor) => {
-  const obj = [{ id: "", data: [] }];
-
-  if (data && data.length > 0) {
-    data.forEach((gene) => {
-      const { fc, p, name, type } = gene;
-      obj[0].data.push({
-        x: gene.capped_fc ? gene.capped_fc : fc,
-        y: gene.capped_p ? gene.capped_p : p,
-        name: name,
-        type: type,
-      });
-    });
-  }
+  const obj = [{ id: "", data: data && data.length > 0 ? data : [] }];
 
   const Title = (
     <Typography

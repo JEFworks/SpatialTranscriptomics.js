@@ -64,7 +64,7 @@ export const performDGE = (
     }, 0);
     const fc = Math.log2(yReads / clusterY.length / (xReads / clusterX_len));
 
-    const obj = { name: geneName, p: p, fc: fc, type: "neutral" };
+    const obj = { name: geneName, p: p, fc: fc, type: "neutral", x: fc, y: p };
     if (fc >= 1 && p >= 1.5) {
       obj.type = "upregulated";
     } else if (fc <= -1 && p >= 1.5) {
@@ -86,12 +86,12 @@ export const performDGE = (
 
   for (let i = 0; i < dgeSolution.length; i++) {
     if (dgeSolution[i].p === Number.POSITIVE_INFINITY) {
-      dgeSolution[i].capped_p = maxP + 1;
+      dgeSolution[i].y = maxP + 1;
     }
     if (dgeSolution[i].fc === Number.POSITIVE_INFINITY) {
-      dgeSolution[i].capped_fc = maxFC + 1;
+      dgeSolution[i].x = maxFC + 1;
     } else if (dgeSolution[i].fc === Number.NEGATIVE_INFINITY) {
-      dgeSolution[i].capped_fc = minFC - 1;
+      dgeSolution[i].x = minFC - 1;
     }
   }
 

@@ -13,15 +13,7 @@ const paragraph = "rgba(0, 0, 0, 0.54)";
 const blue = "#80d8ff";
 
 const Plot = (data, getColor) => {
-  const obj = [{ id: "", data: [] }];
-  if (data && data.length > 0) {
-    // 2D embedding
-    data.forEach((point, index) => {
-      const x = point[0] * 7 + 450;
-      const y = point[1] * 7 + 300;
-      obj[0].data.push({ x: x, y: y, index: index });
-    });
-  }
+  const obj = [{ id: "", data: data }];
 
   const Title = (
     <Typography

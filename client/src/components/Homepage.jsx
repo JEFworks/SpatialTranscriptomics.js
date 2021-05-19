@@ -18,6 +18,7 @@ import TSNEWrapper from "./TSNEWrapper.jsx";
 import SpatialVis from "./SpatialVis.jsx";
 import DGEWrapper from "./DGEWrapper.jsx";
 import GSEWrapper from "./GSEWrapper.jsx";
+import GeneInfo from "./GeneInfo.jsx";
 
 import Worker_FILTER from "workerize-loader!../workers/worker-filter.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
 import Worker_PCA from "workerize-loader!../workers/worker-pca.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
@@ -77,6 +78,7 @@ class Homepage extends Component {
       image: true,
     },
     errors: [],
+    alertOpen: false,
     imageLink: "",
   }; // remember to update in resetState() too
 
@@ -91,6 +93,10 @@ class Homepage extends Component {
     });
   }
 
+  handleAlertClose() {
+    this.setState({ alertOpen: false, errors: [] });
+  }
+
   reportError(error) {
     const { errors } = this.state;
     if (error.response) {
@@ -98,7 +104,7 @@ class Homepage extends Component {
     } else if (error.message === "Network Error") {
       errors.push("Server not responding.\n");
     }
-    this.setState({ errors });
+    this.setState({ errors, alertOpen: true });
   }
 
   terminateWorkers() {
@@ -177,6 +183,7 @@ class Homepage extends Component {
         image: true,
       },
       errors: [],
+      alertOpen: false,
       imageLink: "",
     });
   }
@@ -767,7 +774,11 @@ class Homepage extends Component {
         <div className="site-container">
           <Legend colors={this.state.clusterLegend} />
 
-          <AlertBanner key={this.state.uuid} errors={this.state.errors} />
+          <AlertBanner
+            open={this.state.alertOpen}
+            handleClose={this.handleAlertClose.bind(this)}
+            errors={this.state.errors}
+          />
 
           <DataUpload
             matrixFileHandler={this.matrixFileHandler.bind(this)}
@@ -827,6 +838,13 @@ class Homepage extends Component {
             computeGSE={this.computeGSE.bind(this)}
             gseSolution={this.state.gseSolution}
             loading={this.state.loading.gse || this.state.loading.geneSets}
+          />
+
+          <div style={{ paddingTop: "40px" }}></div>
+          <GeneInfo
+            reportError={this.reportError.bind(this)}
+            getGene={this.getGene.bind(this)}
+            clusters={this.state.clusters}
           />
         </div>
       </>

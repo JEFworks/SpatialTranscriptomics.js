@@ -40,7 +40,7 @@ export const performGSE = (geneSets, dgeSolution) => {
 
     // compute binary vector and do MHG
     const v = genesHave.map((name) => (geneSet.includes(name) ? 1 : 0));
-    const res = MHG.mhg_test(v, N, K, L, X);
+    const res = MHG.mhg_test(v, N, K, L, X, genesHave);
 
     // no enrichment, skip
     if (res.mhg[0] == null) {

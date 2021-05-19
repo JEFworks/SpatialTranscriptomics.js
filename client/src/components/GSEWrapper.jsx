@@ -18,12 +18,7 @@ const Plot = (setResult, genesHave) => {
   const result = setResult == null ? {} : setResult;
   const { geneSet, mhg, pvalue, threshold } = result;
 
-  const obj = [{ id: "", data: [] }];
-  if (mhg) {
-    mhg.forEach((enrichmentScore, i) => {
-      obj[0].data.push({ x: genesHave[i], y: enrichmentScore });
-    });
-  }
+  const obj = [{ id: "", data: mhg ? mhg : [] }];
 
   const Title = (
     <Typography
@@ -118,7 +113,7 @@ class GSEWrapper extends Component {
       const goTerm = setID.replaceAll(",", "").split(" ");
 
       geneSet.forEach((geneName, i) => {
-        const enrichmentScore = mhg[Genes.indexOf(geneName)];
+        const enrichmentScore = mhg[Genes.indexOf(geneName)].y;
 
         if (i === 0) {
           table.push([
