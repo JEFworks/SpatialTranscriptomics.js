@@ -47,5 +47,9 @@ export const performKMeans = (pcs, k) => {
   );
   const colors = [...sortedColorsMap.values()];
 
-  self.postMessage({ colors: colors, clusters: clusterIndices });
+  self.postMessage({
+    colors: colors,
+    clusters: clusterIndices,
+    clusterLegend: palette.slice(0, k),
+  });
 };

@@ -9,6 +9,7 @@ import MinMaxNormalize from "../functions/MinMaxNormalize.jsx";
 import MinMaxStats from "../functions/MinMaxStats.jsx";
 
 import Header from "./Header.jsx";
+import Legend from "./Legend.jsx";
 import AlertBanner from "./AlertBanner.jsx";
 import DataUpload from "./DataUpload.jsx";
 import QualityControl from "./QualityControl.jsx";
@@ -59,6 +60,7 @@ class Homepage extends Component {
     feature: "camk2n1",
     k: 10,
     clusters: [],
+    clusterLegend: [],
     colors: [],
     colorOption: "gene",
     dgeSolution: [],
@@ -159,6 +161,7 @@ class Homepage extends Component {
       filteredPCs: [],
       tsneSolution: [],
       clusters: [],
+      clusterLegend: [],
       colors: [],
       colorOption: "gene",
       dgeSolution: [],
@@ -426,6 +429,7 @@ class Homepage extends Component {
       filteredPCs: [],
       tsneSolution: [],
       clusters: [],
+      clusterLegend: [],
       colors: [],
       colorOption: "gene",
       dgeSolution: [],
@@ -494,6 +498,7 @@ class Homepage extends Component {
         filteredPCs: [],
         tsneSolution: [],
         clusters: [],
+        clusterLegend: [],
         dgeSolution: [],
         gseSolution: {},
       },
@@ -545,6 +550,7 @@ class Homepage extends Component {
       filteredPCs: [],
       tsneSolution: [],
       clusters: [],
+      clusterLegend: [],
       dgeSolution: [],
       gseSolution: {},
     });
@@ -718,6 +724,7 @@ class Homepage extends Component {
       k,
       colorOption: "cluster",
       clusters: [],
+      clusterLegend: [],
       dgeSolution: [],
       gseSolution: {},
     });
@@ -735,12 +742,13 @@ class Homepage extends Component {
     kmeans_WorkerInstance.performKMeans(pcs, k);
     kmeans_WorkerInstance.addEventListener("message", (message) => {
       if (message.data.colors && message.data.clusters) {
-        const { colors, clusters } = message.data;
+        const { colors, clusters, clusterLegend } = message.data;
         loading.kmeans = false;
         this.setState({
           loading,
           colors,
           clusters,
+          clusterLegend,
         });
         kmeans_WorkerInstance.terminate();
       }
@@ -757,6 +765,8 @@ class Homepage extends Component {
         />
 
         <div className="site-container">
+          <Legend colors={this.state.clusterLegend} />
+
           <AlertBanner key={this.state.uuid} errors={this.state.errors} />
 
           <DataUpload

@@ -20,6 +20,27 @@ code {
   padding-bottom: 70px;
 }
 
+.legend {
+  z-index: 100000;
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  padding: 20px 13px 20px 25px;
+  font: 14px "Roboto", sans-serif;
+  margin: 30px;
+  max-height: 150px;
+  overflow: scroll;
+  background: rgba(255, 255, 255, 0.8);
+  /* opacity: 1; */
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+}
+
+.legend::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+}
+
 .QC-flex {
   display: inline-flex;
 }

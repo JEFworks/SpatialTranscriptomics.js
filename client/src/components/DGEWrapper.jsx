@@ -70,14 +70,14 @@ const TypedInput = (setX, setY) => {
         style={{ width: "100px", marginRight: "15px" }}
         color="secondary"
         helperText="Reference Cluster #"
-        defaultValue="1"
+        defaultValue="-1"
         onChange={(event) => setX(event)}
       />
       <TextField
         style={{ width: "100px", marginRight: "15px" }}
         color="secondary"
         helperText="Non-Reference Cluster #"
-        defaultValue="2"
+        defaultValue="1"
         onChange={(event) => setY(event)}
       />
     </FormGroup>
@@ -86,8 +86,8 @@ const TypedInput = (setX, setY) => {
 
 class DGEWrapper extends Component {
   state = {
-    x: 1,
-    y: 2,
+    x: -1,
+    y: 1,
   };
 
   getColor = this.getColor.bind(this);
