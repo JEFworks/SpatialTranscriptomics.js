@@ -53,8 +53,8 @@ class Homepage extends Component {
     barcodes: [],
     filteredBarcodes: [],
     thresholds: { minRowSum: 2, minColSum: 1 },
-    rowsums: [],
-    colsums: [],
+    rowsums: {},
+    colsums: {},
     eigenvalues: [],
     pcs: [],
     filteredPCs: [],
@@ -167,8 +167,8 @@ class Homepage extends Component {
       filteredFeatures: [],
       barcodes: [],
       filteredBarcodes: [],
-      rowsums: [],
-      colsums: [],
+      rowsums: {},
+      colsums: {},
       eigenvalues: [],
       pcs: [],
       filteredPCs: [],
@@ -685,7 +685,8 @@ class Homepage extends Component {
       if (message.data.solution) {
         const { solution } = message.data;
         loading.gse = false;
-        if (!solution[0]) {
+
+        if (solution.GSE == null || solution.GSE.size === 0) {
           this.reportError("No enriched gene sets were found.\n");
         }
         this.setState({ gseSolution: solution, loading });

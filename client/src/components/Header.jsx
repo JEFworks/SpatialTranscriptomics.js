@@ -164,9 +164,6 @@ class Header extends Component {
     k: 10,
   };
 
-  selectFeature = this.selectFeature.bind(this);
-  selectK = this.selectK.bind(this);
-
   componentDidMount() {
     this.updateDimensions();
     window.addEventListener("resize", this.updateDimensions.bind(this));
@@ -199,10 +196,10 @@ class Header extends Component {
         >
           <Toolbar>
             <Title
-              selectFeature={this.selectFeature}
+              selectFeature={this.selectFeature.bind(this)}
               setFeature={setFeature}
               feature={feature}
-              selectK={this.selectK}
+              selectK={this.selectK.bind(this)}
               setK={setK}
               k={k}
               loading={loading}

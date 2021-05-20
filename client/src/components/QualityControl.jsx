@@ -11,8 +11,9 @@ import Histogram from "./Plots/Histogram.jsx";
 const paragraph = "rgba(0, 0, 0, 0.54)";
 const blue = "#80d8ff";
 
-const Figure = (rowsums, colsums, thresholds, changeThreshold, type) => {
-  const sums = !rowsums ? [] : type === "rowsum" ? rowsums : colsums;
+const Figure = (props) => {
+  const { data, threshold, changeThreshold, type } = props;
+  const sums = !data ? [] : data;
 
   let leftBound = 0;
   let rightBound = 0;
@@ -43,7 +44,7 @@ const Figure = (rowsums, colsums, thresholds, changeThreshold, type) => {
             : "log10(# of genes detected in a cell + 1)"
         }
         data={sums}
-        min={type === "rowsum" ? thresholds.minRowSum : thresholds.minColSum}
+        min={threshold}
       />
     </div>
   );
@@ -101,9 +102,6 @@ class QualityControl extends Component {
     status1: false,
   };
 
-  changeThreshold = this.changeThreshold.bind(this);
-  run = this.run.bind(this);
-
   changeThreshold(minRowSum, minColSum) {
     if (minRowSum != null) {
       this.setState({ minRowSum, status0: true });
@@ -128,7 +126,6 @@ class QualityControl extends Component {
   render() {
     const { rowsums, colsums, loading } = this.props;
     const { minRowSum, minColSum } = this.state;
-    const thresholds = { minRowSum: minRowSum, minColSum: minColSum };
 
     return (
       <>
@@ -165,20 +162,18 @@ class QualityControl extends Component {
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>
           <div className="QC-flex">
-            {Figure(
-              rowsums,
-              colsums,
-              thresholds,
-              this.changeThreshold,
-              "rowsum"
-            )}
-            {Figure(
-              rowsums,
-              colsums,
-              thresholds,
-              this.changeThreshold,
-              "colsum"
-            )}
+            <Figure
+              data={rowsums}
+              threshold={minRowSum}
+              changeThreshold={this.changeThreshold.bind(this)}
+              type={"rowsum"}
+            />
+            <Figure
+              data={colsums}
+              threshold={minColSum}
+              changeThreshold={this.changeThreshold.bind(this)}
+              type={"colsum"}
+            />
           </div>
           <div style={{ width: "50%" }}></div>
         </div>

@@ -12,15 +12,13 @@ import {
 
 const paragraph = "rgba(0, 0, 0, 0.54)";
 
-const getSteps = () => {
-  return [
-    "Select matrix file",
-    "Select features file",
-    "Select barcodes file",
-    "Select tissue spatial positions file",
-    "Select tissue image file",
-  ];
-};
+const steps = [
+  "Select matrix file",
+  "Select features file",
+  "Select barcodes file",
+  "Select tissue spatial positions file",
+  "Select tissue image file",
+];
 
 const getStepDescription = (step) => {
   switch (step) {
@@ -73,14 +71,16 @@ const getStepDescription = (step) => {
   }
 };
 
-const getStepContent = (
-  step,
-  matrixFileHandler,
-  featuresFileHandler,
-  barcodesFileHandler,
-  pixelsFileHandler,
-  imageFileHandler
-) => {
+const GetStepContent = (props) => {
+  const { step, properties } = props;
+  const {
+    matrixFileHandler,
+    featuresFileHandler,
+    barcodesFileHandler,
+    pixelsFileHandler,
+    imageFileHandler,
+  } = properties;
+
   return (
     <div style={{ marginBottom: "15px" }}>
       <Typography
@@ -115,11 +115,6 @@ class VerticalLinearStepper extends Component {
     activeStep: 0,
   };
 
-  setActiveStep = this.setActiveStep.bind(this);
-  handleNext = this.handleNext.bind(this);
-  handleBack = this.handleBack.bind(this);
-  handleReset = this.handleReset.bind(this);
-
   setActiveStep(activeStep) {
     this.setState({ activeStep });
   }
@@ -147,16 +142,7 @@ class VerticalLinearStepper extends Component {
   }
 
   render() {
-    const steps = getSteps();
     const { activeStep } = this.state;
-
-    const {
-      matrixFileHandler,
-      barcodesFileHandler,
-      featuresFileHandler,
-      pixelsFileHandler,
-      imageFileHandler,
-    } = this.props;
 
     return (
       <div>
@@ -165,22 +151,18 @@ class VerticalLinearStepper extends Component {
             <Step key={label}>
               <StepLabel>{label}</StepLabel>
               <StepContent>
-                {getStepContent(
-                  index,
-                  matrixFileHandler,
-                  featuresFileHandler,
-                  barcodesFileHandler,
-                  pixelsFileHandler,
-                  imageFileHandler
-                )}
+                <GetStepContent step={index} properties={this.props} />
                 <div>
-                  <Button disabled={activeStep === 0} onClick={this.handleBack}>
+                  <Button
+                    disabled={activeStep === 0}
+                    onClick={this.handleBack.bind(this)}
+                  >
                     Back
                   </Button>
                   <Button
                     variant="contained"
                     color="primary"
-                    onClick={this.handleNext}
+                    onClick={this.handleNext.bind(this)}
                   >
                     {activeStep === steps.length - 1 ? "Finish" : "Next"}
                   </Button>
@@ -199,7 +181,7 @@ class VerticalLinearStepper extends Component {
             <Button
               variant="contained"
               color="primary"
-              onClick={this.handleReset}
+              onClick={this.handleReset.bind(this)}
               style={{ marginTop: "10px" }}
             >
               Reset

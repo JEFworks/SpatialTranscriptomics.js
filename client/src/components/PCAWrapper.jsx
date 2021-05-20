@@ -13,7 +13,8 @@ import ScatterPlot from "./Plots/ScatterPlot.jsx";
 const paragraph = "rgba(0, 0, 0, 0.54)";
 const blue = "#80d8ff";
 
-const Biplot = (eigenvectors, getColor, pcX, pcY) => {
+const Biplot = (props) => {
+  const { eigenvectors, getColor, pcX, pcY } = props;
   const obj = [{ id: "", data: [] }];
   if (eigenvectors[0]) {
     eigenvectors.forEach((vector, index) => {
@@ -65,7 +66,8 @@ const Biplot = (eigenvectors, getColor, pcX, pcY) => {
   );
 };
 
-const ScreePlot = (eigenvalues, numPCs) => {
+const ScreePlot = (props) => {
+  const { eigenvalues, numPCs } = props;
   const obj = [{ id: "", data: [] }];
   if (eigenvalues[0]) {
     eigenvalues.slice(0, 20).forEach((eigenvalue, index) => {
@@ -114,7 +116,8 @@ const ScreePlot = (eigenvalues, numPCs) => {
   );
 };
 
-const TypedInput = (selectNumPCs, set_pcX, set_pcY) => {
+const TypedInput = (props) => {
+  const { selectNumPCs, set_pcX, set_pcY } = props;
   return (
     <FormGroup row style={{ marginTop: "7px" }}>
       <TextField
@@ -151,11 +154,6 @@ class PCAWrapper extends Component {
     new_pcX: 1,
     new_pcY: 2,
   };
-
-  getColor = this.getColor.bind(this);
-  selectNumPCs = this.selectNumPCs.bind(this);
-  set_pcX = this.set_pcX.bind(this);
-  set_pcY = this.set_pcY.bind(this);
 
   getColor(node) {
     return node.index ? this.props.colors[node.index] : "blue";
@@ -252,7 +250,11 @@ class PCAWrapper extends Component {
         </Typography>
 
         <div style={{ display: "flex" }}>
-          {TypedInput(this.selectNumPCs, this.set_pcX, this.set_pcY)}
+          <TypedInput
+            selectNumPCs={this.selectNumPCs.bind(this)}
+            set_pcX={this.set_pcX.bind(this)}
+            set_pcY={this.set_pcY.bind(this)}
+          />
           {loading && (
             <CircularProgress
               disableShrink
@@ -286,8 +288,13 @@ class PCAWrapper extends Component {
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>
           <div className="PC-flex">
-            {ScreePlot(eigenvalues, numPCs)}
-            {Biplot(eigenvectors, this.getColor, pcX, pcY)}
+            <ScreePlot eigenvalues={eigenvalues} numPCs={numPCs} />
+            <Biplot
+              eigenvectors={eigenvectors}
+              getColor={this.getColor.bind(this)}
+              pcX={pcX}
+              pcY={pcY}
+            />
           </div>
           <div style={{ width: "50%" }}></div>
         </div>

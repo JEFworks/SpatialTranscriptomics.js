@@ -15,7 +15,8 @@ const paragraph = "rgba(0, 0, 0, 0.54)";
 const secondary = "#90b4ce";
 const blue = "#80d8ff";
 
-const LeafletWrapper = (pixels, colors, opacity, pixelSize, imageLink) => {
+const LeafletWrapper = (props) => {
+  const { pixels, colors, opacity, pixelSize, imageLink } = props;
   const bounds = [
     [0, 0],
     [1921, 2000],
@@ -46,13 +47,15 @@ const LeafletWrapper = (pixels, colors, opacity, pixelSize, imageLink) => {
   );
 };
 
-const TypedInput = (
-  changeDeltaX,
-  changeDeltaY,
-  changeScale,
-  changeOpacity,
-  changePixelSize
-) => {
+const TypedInput = (props) => {
+  const {
+    changeDeltaX,
+    changeDeltaY,
+    changeScale,
+    changeOpacity,
+    changePixelSize,
+  } = props;
+
   return (
     <FormGroup row style={{ marginTop: "7px" }}>
       <TextField
@@ -94,14 +97,16 @@ const TypedInput = (
   );
 };
 
-const CheckboxInput = (
-  horizontalFlipped,
-  flipHorizontal,
-  verticalFlipped,
-  flipVertical,
-  xyFlipped,
-  flipXY
-) => {
+const CheckboxInput = (props) => {
+  const {
+    horizontalFlipped,
+    flipHorizontal,
+    verticalFlipped,
+    flipVertical,
+    xyFlipped,
+    flipXY,
+  } = props;
+
   return (
     <FormGroup row style={{ marginTop: "5px" }}>
       <FormControlLabel
@@ -155,16 +160,6 @@ class SpatialVis extends Component {
     pixelSize: 8,
     updatedPixelSize: 8,
   };
-
-  getPixels = this.getPixels.bind(this);
-  changeDeltaX = this.changeDeltaX.bind(this);
-  changeDeltaY = this.changeDeltaY.bind(this);
-  changeScale = this.changeScale.bind(this);
-  changeOpacity = this.changeOpacity.bind(this);
-  changePixelSize = this.changePixelSize.bind(this);
-  flipHorizontal = this.flipHorizontal.bind(this);
-  flipVertical = this.flipVertical.bind(this);
-  flipXY = this.flipXY.bind(this);
 
   componentDidMount() {
     this.updateDimensions();
@@ -316,21 +311,21 @@ class SpatialVis extends Component {
 
         <div style={{ display: "flex" }}>
           <div>
-            {TypedInput(
-              this.changeDeltaX,
-              this.changeDeltaY,
-              this.changeScale,
-              this.changeOpacity,
-              this.changePixelSize
-            )}
-            {CheckboxInput(
-              horizontalFlipped,
-              this.flipHorizontal,
-              verticalFlipped,
-              this.flipVertical,
-              xyFlipped,
-              this.flipXY
-            )}
+            <TypedInput
+              changeDeltaX={this.changeDeltaX.bind(this)}
+              changeDeltaY={this.changeDeltaY.bind(this)}
+              changeScale={this.changeScale.bind(this)}
+              changeOpacity={this.changeOpacity.bind(this)}
+              changePixelSize={this.changePixelSize.bind(this)}
+            />
+            <CheckboxInput
+              horizontalFlipped={horizontalFlipped}
+              verticalFlipped={verticalFlipped}
+              xyFlipped={xyFlipped}
+              flipHorizontal={this.flipHorizontal.bind(this)}
+              flipVertical={this.flipVertical.bind(this)}
+              flipXY={this.flipXY.bind(this)}
+            />
           </div>
 
           {!isMobile && this.props.loading && (
@@ -354,7 +349,13 @@ class SpatialVis extends Component {
         </Button>
 
         <div style={{ paddingTop: "20px" }}></div>
-        {LeafletWrapper(pixels, colors, opacity, pixelSize, imageLink)}
+        <LeafletWrapper
+          pixels={pixels}
+          colors={colors}
+          opacity={opacity}
+          pixelSize={pixelSize}
+          imageLink={imageLink}
+        />
       </>
     );
   }

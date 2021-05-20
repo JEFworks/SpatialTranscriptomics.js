@@ -14,8 +14,9 @@ import LineChart from "./Plots/LineChart.jsx";
 const paragraph = "rgba(0, 0, 0, 0.54)";
 const blue = "#80d8ff";
 
-const Plot = (setResult, genesHave) => {
-  const result = setResult == null ? {} : setResult;
+const Plot = (props) => {
+  const { currResult, genesHave } = props;
+  const result = currResult == null ? {} : currResult;
   const { geneSet, mhg, pvalue, threshold } = result;
 
   const obj = [{ id: "", data: mhg ? mhg : [] }];
@@ -62,19 +63,20 @@ const Plot = (setResult, genesHave) => {
   );
 };
 
-const Dropdown = (setIDs, setIndex, handleSelect) => {
+const Dropdown = (props) => {
+  const { list, index, handleSelect } = props;
   return (
     <FormControl>
-      <Select color="secondary" value={setIndex} onChange={handleSelect}>
-        {setIDs.length === 0 && (
+      <Select color="secondary" value={index} onChange={handleSelect}>
+        {list.length === 0 && (
           <MenuItem value={-1}>
             <em>None</em>
           </MenuItem>
         )}
-        {setIDs.map((setID, i) => {
+        {list.map((item, i) => {
           return (
             <MenuItem value={i} key={i}>
-              {setID}
+              {item}
             </MenuItem>
           );
         })}
@@ -108,8 +110,8 @@ class GSEWrapper extends Component {
     const table = [
       ["GO term ID", "GO term name", "p-value", "genes", "enrichment score"],
     ];
-    GSE.forEach((setResult, setID) => {
-      const { geneSet, mhg, pvalue } = setResult;
+    GSE.forEach((currResult, setID) => {
+      const { geneSet, mhg, pvalue } = currResult;
       const goTerm = setID.replaceAll(",", "").split(" ");
 
       geneSet.forEach((geneName, i) => {
@@ -186,7 +188,11 @@ class GSEWrapper extends Component {
         </Button>
 
         <div style={{ paddingTop: "15px", display: "flex" }}>
-          {Dropdown(setIDs, currSetIndex, this.handleSelect.bind(this))}
+          <Dropdown
+            list={setIDs}
+            index={currSetIndex}
+            handleSelect={this.handleSelect.bind(this)}
+          />
           {loading && (
             <CircularProgress
               disableShrink
@@ -200,7 +206,10 @@ class GSEWrapper extends Component {
         <div style={{ paddingTop: "20px" }}></div>
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>
-          {Plot(GSE ? GSE.get(setIDs[currSetIndex]) : {}, Genes ? Genes : [])}
+          <Plot
+            currResult={GSE ? GSE.get(setIDs[currSetIndex]) : {}}
+            genesHave={Genes ? Genes : []}
+          />
           <div style={{ width: "50%" }}></div>
         </div>
       </>

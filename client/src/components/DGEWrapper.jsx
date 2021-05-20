@@ -13,7 +13,8 @@ const paragraph = "rgba(0, 0, 0, 0.54)";
 const blue = "#80d8ff";
 const red = "#ff80ab";
 
-const Plot = (data, getColor) => {
+const Plot = (props) => {
+  const { data, getColor } = props;
   const obj = [{ id: "", data: data && data.length > 0 ? data : [] }];
 
   const Title = (
@@ -51,7 +52,8 @@ const Plot = (data, getColor) => {
   );
 };
 
-const TypedInput = (setX, setY) => {
+const TypedInput = (props) => {
+  const { setX, setY } = props;
   return (
     <FormGroup row style={{ marginTop: "7px" }} className="dgeFlex">
       <TextField
@@ -77,10 +79,6 @@ class DGEWrapper extends Component {
     x: -1,
     y: 1,
   };
-
-  getColor = this.getColor.bind(this);
-  setX = this.setX.bind(this);
-  setY = this.setY.bind(this);
 
   getColor(node) {
     if (node) {
@@ -169,7 +167,7 @@ class DGEWrapper extends Component {
         </Typography>
 
         <div style={{ display: "flex" }}>
-          {TypedInput(this.setX, this.setY)}
+          <TypedInput setX={this.setX.bind(this)} setY={this.setY.bind(this)} />
           {this.props.loading && (
             <CircularProgress
               disableShrink
@@ -202,7 +200,7 @@ class DGEWrapper extends Component {
         <div style={{ paddingTop: "20px" }}></div>
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>
-          {Plot(dgeSolution, this.getColor)}
+          <Plot data={dgeSolution} getColor={this.getColor.bind(this)} />
           <div style={{ width: "50%" }}></div>
         </div>
       </>

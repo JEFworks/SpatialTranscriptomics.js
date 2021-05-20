@@ -103,7 +103,7 @@ class GeneInfo extends Component {
 
   run() {
     const { feature } = this.state;
-    this.props.computeBoxplot(this.state.feature);
+    this.props.computeBoxplot(feature);
 
     axios
       .get(
@@ -166,8 +166,7 @@ class GeneInfo extends Component {
               <div>{textSectionContent}</div>
             </div>
           );
-        })}
- */}
+        })} */}
 
         <div style={{ paddingTop: "20px" }}></div>
         <div style={{ width: "100%", display: "flex" }}>

@@ -12,7 +12,8 @@ import ScatterPlot from "./Plots/ScatterPlot.jsx";
 const paragraph = "rgba(0, 0, 0, 0.54)";
 const blue = "#80d8ff";
 
-const Plot = (data, getColor) => {
+const Plot = (props) => {
+  const { data, getColor } = props;
   const obj = [{ id: "", data: data }];
 
   const Title = (
@@ -50,7 +51,8 @@ const Plot = (data, getColor) => {
   );
 };
 
-const TypedInput = (changeSettings) => {
+const TypedInput = (props) => {
+  const { changeSettings } = props;
   return (
     <FormGroup row style={{ marginTop: "7px" }}>
       <TextField
@@ -86,9 +88,6 @@ class TSNEWrapper extends Component {
       iterations: 500,
     },
   };
-
-  getColor = this.getColor.bind(this);
-  changeSettings = this.changeSettings.bind(this);
 
   getColor(node) {
     return node.index ? this.props.colors[node.index] : "blue";
@@ -157,7 +156,7 @@ class TSNEWrapper extends Component {
         </Typography>
 
         <div style={{ display: "flex" }}>
-          {TypedInput(this.changeSettings)}
+          <TypedInput changeSettings={this.changeSettings.bind(this)} />
           {this.props.loading && (
             <CircularProgress
               disableShrink
@@ -181,7 +180,7 @@ class TSNEWrapper extends Component {
         <div style={{ paddingTop: "20px" }}></div>
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>
-          {Plot(tsneSolution, this.getColor)}
+          <Plot data={tsneSolution} getColor={this.getColor.bind(this)} />
           <div style={{ width: "50%" }}></div>
         </div>
       </>
