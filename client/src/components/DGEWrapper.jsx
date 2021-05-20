@@ -95,19 +95,21 @@ class DGEWrapper extends Component {
   }
 
   run() {
-    const { computeDGE, numClusters } = this.props;
+    const { computeDGE, numClusters, reportError } = this.props;
     const { x, y } = this.state;
     if (isNaN(x) || isNaN(y) || (x < 1 && x !== -1) || y < 1) {
-      alert("Please specify a positive integer value for each group number.");
+      reportError(
+        "Please specify a positive integer value for each cluster number.\n"
+      );
       return;
     }
     if (x === y) {
-      alert("Please compare different clusters.");
+      reportError("Please compare different clusters.\n");
       return;
     }
 
     if (x > numClusters || y > numClusters) {
-      alert("Please specify clusters that exist.");
+      reportError("Please specify clusters that exist.\n");
       return;
     }
     computeDGE(x, y);
@@ -120,7 +122,7 @@ class DGEWrapper extends Component {
 
   download(data) {
     if (!data[0]) {
-      alert("Please run DGE first.");
+      this.props.reportError("Please run DGE first.\n");
       return;
     }
 

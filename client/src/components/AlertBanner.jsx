@@ -7,7 +7,7 @@ class AlertBanner extends Component {
     // produce error message
     const { errors, open } = this.props;
     let errorMsg = "";
-    if (errors.includes("Server not responding.\n")) {
+    if (errors.includes("Network Error")) {
       errorMsg = "Server not responding.\n";
     } else {
       for (let i = 0; i < errors.length; i++) {

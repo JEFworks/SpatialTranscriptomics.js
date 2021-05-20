@@ -101,7 +101,7 @@ class GSEWrapper extends Component {
 
   download(GSE, Genes) {
     if (GSE == null || Genes == null) {
-      alert("Please run GSE first.");
+      this.props.reportError("Please run GSE first.\n");
       return;
     }
 

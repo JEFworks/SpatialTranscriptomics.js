@@ -13,17 +13,18 @@ import GitHubIcon from "@material-ui/icons/GitHub";
 
 const blue = "#80d8ff";
 
-const TitleContents = (
-  selectFeature,
-  setFeature,
-  feature,
-  selectK,
-  setK,
-  k,
-  loading,
-  noshow,
-  windowWidth
-) => {
+const TitleContents = (props) => {
+  const {
+    selectFeature,
+    setFeature,
+    feature,
+    selectK,
+    setK,
+    k,
+    loading,
+    noshow,
+    windowWidth,
+  } = props.properties;
   const isMobile = windowWidth < 980;
   const isMobile2 = windowWidth < 650;
 
@@ -55,7 +56,7 @@ const TitleContents = (
               style={{ width: "90px", fontWeight: 500, marginRight: "10px" }}
               color="secondary"
               helperText="Gene name"
-              defaultValue="Camk2n1"
+              defaultValue="Nptxr"
               onChange={selectFeature}
             />
             <Button
@@ -107,44 +108,24 @@ const TitleContents = (
 
       {!isMobile && (
         <>
-          {About}
-          {Github}
+          {aboutButton}
+          {gitButton}
         </>
       )}
     </>
   );
 };
 
-const Title = (
-  selectFeature,
-  setFeature,
-  feature,
-  selectK,
-  setK,
-  k,
-  loading,
-  noshow,
-  windowWidth
-) => {
-  const contents = TitleContents(
-    selectFeature,
-    setFeature,
-    feature,
-    selectK,
-    setK,
-    k,
-    loading,
-    noshow,
-    windowWidth
-  );
+const Title = (props) => {
+  const contents = <TitleContents properties={props} />;
 
-  if (windowWidth < 980) {
+  if (props.windowWidth < 980) {
     return <div>{contents}</div>;
   }
   return <>{contents}</>;
 };
 
-const About = (
+const aboutButton = (
   <Typography
     style={{ fontSize: "1.1em", fontWeight: 500, marginRight: "5px" }}
   >
@@ -154,7 +135,7 @@ const About = (
   </Typography>
 );
 
-const Github = (
+const gitButton = (
   <IconButton
     disableRipple
     edge="end"
@@ -179,7 +160,7 @@ const Github = (
 
 class Header extends Component {
   state = {
-    feature: "camk2n1",
+    feature: "nptxr",
     k: 10,
   };
 
@@ -217,17 +198,17 @@ class Header extends Component {
           }}
         >
           <Toolbar>
-            {Title(
-              this.selectFeature,
-              setFeature,
-              feature,
-              this.selectK,
-              setK,
-              k,
-              loading,
-              noshow,
-              window.innerWidth
-            )}
+            <Title
+              selectFeature={this.selectFeature}
+              setFeature={setFeature}
+              feature={feature}
+              selectK={this.selectK}
+              setK={setK}
+              k={k}
+              loading={loading}
+              noshow={noshow}
+              windowWidth={window.innerWidth}
+            />
           </Toolbar>
         </AppBar>
       </>

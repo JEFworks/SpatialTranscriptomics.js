@@ -64,6 +64,11 @@ code {
   width: 550px;
 }
 
+.boxplot {
+  height: 450px;
+  width: 550px;
+}
+
 .gse-plot {
   height: 450px;
   width: 70vw;

@@ -50,6 +50,6 @@ export const performKMeans = (pcs, k) => {
   self.postMessage({
     colors: colors,
     clusters: clusterIndices,
-    clusterLegend: palette.slice(0, k),
+    clusterLegend: palette,
   });
 };

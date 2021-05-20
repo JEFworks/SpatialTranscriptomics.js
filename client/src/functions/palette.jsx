@@ -35,7 +35,7 @@ const palette = [
 
 const getPalette = (numColors) => {
   if (numColors <= palette.length) {
-    return palette;
+    return palette.slice(0, numColors);
   }
 
   const extraColors = [];

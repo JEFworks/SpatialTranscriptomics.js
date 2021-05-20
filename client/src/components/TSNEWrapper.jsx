@@ -110,7 +110,7 @@ class TSNEWrapper extends Component {
   }
 
   run() {
-    const { computeTSNE } = this.props;
+    const { computeTSNE, reportError } = this.props;
     const { tsneSettings } = this.state;
 
     const { epsilon, perplexity, iterations } = tsneSettings;
@@ -122,8 +122,8 @@ class TSNEWrapper extends Component {
       perplexity < 1 ||
       iterations < 1
     ) {
-      alert(
-        "Please specify positive integer values for epsilon, perplexity, and iterations."
+      reportError(
+        "Please specify positive integer values for epsilon, perplexity, and iterations.\n"
       );
       return;
     }

@@ -124,15 +124,11 @@ class VerticalLinearStepper extends Component {
     this.setState({ activeStep });
   }
 
-  alertUser() {
-    alert("Please select file first.");
-  }
-
   handleNext() {
     const step = this.state.activeStep;
-    const { files, uploadFiles } = this.props;
+    const { files, uploadFiles, reportError } = this.props;
     if (step === 0 && files.matrix == null) {
-      this.alertUser();
+      reportError("Please select a file first.\n");
       return;
     }
 
@@ -262,6 +258,7 @@ class DataUpload extends Component {
           pixelsFileHandler={pixelsFileHandler}
           imageFileHandler={imageFileHandler}
           uploadFiles={uploadFiles}
+          reportError={this.props.reportError}
         />
       </>
     );

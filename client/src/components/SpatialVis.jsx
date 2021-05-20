@@ -228,7 +228,9 @@ class SpatialVis extends Component {
       isNaN(updatedOpacity) ||
       isNaN(updatedPixelSize)
     ) {
-      alert("Please specify a number value for each parameter.");
+      this.props.reportError(
+        "Please specify a number value for each parameter.\n"
+      );
       return;
     }
 
@@ -241,11 +243,19 @@ class SpatialVis extends Component {
   }
 
   getPixels() {
-    const { barcodes } = this.props;
+    const { barcodes, reportError, colors } = this.props;
     const pixels = [];
+
+    if (colors.length === 0) {
+      reportError("Matrix is empty and/or has not loaded.\n");
+      return pixels;
+    }
 
     if (barcodes[0] != null) {
       if (barcodes[0].x == null || barcodes[0].y == null) {
+        reportError(
+          "Pixel location information is empty and/or has not loaded.\n"
+        );
         return [];
       }
 
@@ -267,8 +277,10 @@ class SpatialVis extends Component {
           pixels.push({
             center: !xyFlipped ? [centerX, centerY] : [centerY, centerX],
           });
-        } catch (error) {}
+        } catch (_error) {}
       }
+    } else {
+      reportError("Barcodes information is empty and/or has not loaded.\n");
     }
     return pixels;
   }

@@ -7,6 +7,7 @@ import { SparseMatrix } from "ml-sparse-matrix";
 import GetRGB from "../functions/GetRGB.jsx";
 import MinMaxNormalize from "../functions/MinMaxNormalize.jsx";
 import MinMaxStats from "../functions/MinMaxStats.jsx";
+import QuartileStats from "../functions/QuartileStats.jsx";
 
 import Header from "./Header.jsx";
 import Legend from "./Legend.jsx";
@@ -58,7 +59,7 @@ class Homepage extends Component {
     pcs: [],
     filteredPCs: [],
     tsneSolution: [],
-    feature: "camk2n1",
+    feature: "nptxr",
     k: 10,
     clusters: [],
     clusterLegend: [],
@@ -67,6 +68,7 @@ class Homepage extends Component {
     dgeSolution: [],
     geneSets: {},
     gseSolution: {},
+    boxplotData: [],
     loading: {
       upload: true,
       geneSets: true,
@@ -99,10 +101,15 @@ class Homepage extends Component {
 
   reportError(error) {
     const { errors } = this.state;
-    if (error.response) {
+    if (error.response && !errors.includes(error.response.data)) {
       errors.push(error.response.data);
-    } else if (error.message === "Network Error") {
-      errors.push("Server not responding.\n");
+    } else if (
+      error.message === "Network Error" &&
+      !errors.includes(error.message)
+    ) {
+      errors.push(error.message);
+    } else if (!errors.includes(error)) {
+      errors.push(error);
     }
     this.setState({ errors, alertOpen: true });
   }
@@ -248,10 +255,7 @@ class Homepage extends Component {
     axios
       .get(imageLink)
       .catch(() => {
-        const error = {
-          response: { data: "Tissue image file was not found.\n" },
-        };
-        this.reportError(error);
+        this.reportError("Tissue image file was not found.\n");
       })
       .finally(() => {
         loading.image = false;
@@ -412,6 +416,7 @@ class Homepage extends Component {
       rowsums,
       colsums,
     } = this.state;
+
     if (!matrix[0]) {
       return;
     }
@@ -441,6 +446,7 @@ class Homepage extends Component {
       colorOption: "gene",
       dgeSolution: [],
       gseSolution: {},
+      boxplotData: [],
     });
 
     // worker filters the data
@@ -508,6 +514,7 @@ class Homepage extends Component {
         clusterLegend: [],
         dgeSolution: [],
         gseSolution: {},
+        boxplotData: [],
       },
       () => {
         this.filterPCs(num);
@@ -539,6 +546,7 @@ class Homepage extends Component {
   computePCA(num) {
     const m = this.state.filteredMatrix;
     if (!m[0] || m[0].length < 1) {
+      this.reportError("The matrix is empty and/or has not loaded yet.\n");
       return;
     }
 
@@ -560,6 +568,7 @@ class Homepage extends Component {
       clusterLegend: [],
       dgeSolution: [],
       gseSolution: {},
+      boxplotData: [],
     });
 
     pca_WorkerInstance = Worker_PCA();
@@ -585,7 +594,7 @@ class Homepage extends Component {
     const { filteredPCs, loading } = this.state;
     const { epsilon, perplexity, iterations } = tsneSettings;
     if (!filteredPCs[0] || filteredPCs[0].length < 1) {
-      alert("Please run PCA first.");
+      this.reportError("Please run PCA first.\n");
       return;
     }
 
@@ -616,7 +625,7 @@ class Homepage extends Component {
     const { clusters, filteredMatrix, filteredFeatures, loading } = this.state;
 
     if (!clusters[0] || clusters.length < 2) {
-      alert("Please perform clustering with k >= 2 first.");
+      this.reportError("Please perform clustering with k >= 2 first.\n");
       return;
     }
 
@@ -646,16 +655,22 @@ class Homepage extends Component {
 
   // trying to implement gene set enrichment
   computeGSE() {
-    const { dgeSolution, geneSets, loading } = this.state;
+    const { dgeSolution, geneSets, loading, filteredFeatures } = this.state;
 
     if (Object.keys(geneSets).length === 0) {
-      alert(
-        "Gene sets are still loading or failed to load. Please wait a few minutes."
+      this.reportError(
+        "Gene sets are still loading or failed to load. Please wait a few minutes.\n"
       );
       return;
     }
+    if (filteredFeatures.length === 0) {
+      this.reportError("Features information is empty and/or missing.\n");
+      return;
+    }
     if (!dgeSolution[0]) {
-      alert("Please perform differential gene expression analysis first.");
+      this.reportError(
+        "Please perform differential gene expression analysis first.\n"
+      );
       return;
     }
 
@@ -670,6 +685,9 @@ class Homepage extends Component {
       if (message.data.solution) {
         const { solution } = message.data;
         loading.gse = false;
+        if (!solution[0]) {
+          this.reportError("No enriched gene sets were found.\n");
+        }
         this.setState({ gseSolution: solution, loading });
         gse_WorkerInstance.terminate();
       }
@@ -714,12 +732,12 @@ class Homepage extends Component {
   setK(k) {
     const { filteredPCs } = this.state;
     if (!filteredPCs[0]) {
-      alert("Please run PCA first.");
+      this.reportError("Please run PCA first.\n");
       return;
     }
 
     if (isNaN(k) || k < 1) {
-      alert("Please specify a positive integer value for k.");
+      this.reportError("Please specify a positive integer value for k.\n");
       return;
     }
 
@@ -734,6 +752,7 @@ class Homepage extends Component {
       clusterLegend: [],
       dgeSolution: [],
       gseSolution: {},
+      boxplotData: [],
     });
     this.setColorsByClusters(filteredPCs, k);
   }
@@ -762,6 +781,39 @@ class Homepage extends Component {
     });
   }
 
+  computeBoxplot(featureName) {
+    const { filteredMatrix, filteredFeatures, clusters } = this.state;
+    const boxplotData = [];
+
+    if (!clusters[0]) {
+      this.reportError("Please perform clustering with k >= 2 first.\n");
+      return;
+    }
+
+    const gene = this.getGene(filteredMatrix, filteredFeatures, featureName);
+    if (gene == null) {
+      this.reportError("Gene could not be found in the matrix.\n");
+      this.setState({ boxplotData: [] });
+      return;
+    }
+
+    const overallStats = QuartileStats(gene);
+    overallStats.x = "All";
+    boxplotData.push(overallStats);
+
+    clusters.forEach((cluster, i) => {
+      const filteredGene = [];
+      cluster.forEach((cellIndex) => {
+        filteredGene.push(gene[cellIndex]);
+      });
+      const groupStats = QuartileStats(filteredGene);
+      groupStats.x = (i + 1).toString();
+      boxplotData.push(groupStats);
+    });
+
+    this.setState({ boxplotData });
+  }
+
   render() {
     return (
       <>
@@ -788,6 +840,7 @@ class Homepage extends Component {
             imageFileHandler={this.imageFileHandler.bind(this)}
             uploadFiles={this.uploadFiles.bind(this)}
             files={this.state.files}
+            reportError={this.reportError.bind(this)}
           />
 
           <div style={{ paddingTop: "5px" }}></div>
@@ -807,6 +860,7 @@ class Homepage extends Component {
             setNumPCs={this.setNumPCs.bind(this)}
             colors={this.state.colors}
             loading={this.state.loading.pca}
+            reportError={this.reportError.bind(this)}
           />
 
           <div style={{ paddingTop: "40px" }}></div>
@@ -815,6 +869,7 @@ class Homepage extends Component {
             tsneSolution={this.state.tsneSolution}
             colors={this.state.colors}
             loading={this.state.loading.tsne}
+            reportError={this.reportError.bind(this)}
           />
 
           <div style={{ paddingTop: "40px" }}></div>
@@ -823,6 +878,7 @@ class Homepage extends Component {
             colors={this.state.colors}
             imageLink={this.state.imageLink}
             loading={this.state.loading.image}
+            reportError={this.reportError.bind(this)}
           />
 
           <div style={{ paddingTop: "40px" }}></div>
@@ -831,6 +887,7 @@ class Homepage extends Component {
             dgeSolution={this.state.dgeSolution}
             numClusters={this.state.k}
             loading={this.state.loading.dge}
+            reportError={this.reportError.bind(this)}
           />
 
           <div style={{ paddingTop: "40px" }}></div>
@@ -838,13 +895,15 @@ class Homepage extends Component {
             computeGSE={this.computeGSE.bind(this)}
             gseSolution={this.state.gseSolution}
             loading={this.state.loading.gse || this.state.loading.geneSets}
+            reportError={this.reportError.bind(this)}
           />
 
           <div style={{ paddingTop: "40px" }}></div>
           <GeneInfo
             reportError={this.reportError.bind(this)}
-            getGene={this.getGene.bind(this)}
-            clusters={this.state.clusters}
+            computeBoxplot={this.computeBoxplot.bind(this)}
+            boxplotData={this.state.boxplotData}
+            colors={this.state.clusterLegend}
           />
         </div>
       </>

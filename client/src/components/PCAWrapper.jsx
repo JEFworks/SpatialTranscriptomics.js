@@ -163,8 +163,12 @@ class PCAWrapper extends Component {
 
   // x = pcX, y = pcY, z = numPCs
   alertParams(x, y, z) {
+    const { reportError } = this.props;
+
     if (isNaN(x) || isNaN(x) || isNaN(y) || x < 1 || y < 1 || z < 1) {
-      alert("Please specify a positive integer value for each parameter.");
+      reportError(
+        "Please specify a positive integer value for each parameter.\n"
+      );
       return true;
     }
 
@@ -172,7 +176,7 @@ class PCAWrapper extends Component {
       this.props.eigenvalues[0] &&
       (x > this.props.eigenvalues.length || y > this.props.eigenvalues.length)
     ) {
-      alert("Please specify PCs that exist.");
+      reportError("Please plot PCs that exist.\n");
       return true;
     }
     return false;
