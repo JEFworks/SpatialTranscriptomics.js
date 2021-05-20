@@ -164,25 +164,25 @@ class Header extends Component {
     k: 10,
   };
 
-  componentDidMount() {
+  componentDidMount = () => {
     this.updateDimensions();
     window.addEventListener("resize", this.updateDimensions.bind(this));
-  }
+  };
 
-  updateDimensions() {
+  updateDimensions = () => {
     this.setState({ resize: true });
-  }
+  };
 
-  selectFeature(event) {
+  selectFeature = (event) => {
     this.setState({ feature: event.target.value.trim().toLowerCase() });
-  }
+  };
 
-  selectK(event) {
+  selectK = (event) => {
     const value = Number.parseInt(event.target.value);
     this.setState({ k: value });
-  }
+  };
 
-  render() {
+  render = () => {
     const { setFeature, setK, loading, noshow } = this.props;
     const { feature, k } = this.state;
 
@@ -196,10 +196,10 @@ class Header extends Component {
         >
           <Toolbar>
             <Title
-              selectFeature={this.selectFeature.bind(this)}
+              selectFeature={this.selectFeature}
               setFeature={setFeature}
               feature={feature}
-              selectK={this.selectK.bind(this)}
+              selectK={this.selectK}
               setK={setK}
               k={k}
               loading={loading}
@@ -210,7 +210,7 @@ class Header extends Component {
         </AppBar>
       </>
     );
-  }
+  };
 }
 
 export default Header;

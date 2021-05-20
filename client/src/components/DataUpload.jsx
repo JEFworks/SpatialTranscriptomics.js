@@ -115,11 +115,11 @@ class VerticalLinearStepper extends Component {
     activeStep: 0,
   };
 
-  setActiveStep(activeStep) {
+  setActiveStep = (activeStep) => {
     this.setState({ activeStep });
-  }
+  };
 
-  handleNext() {
+  handleNext = () => {
     const step = this.state.activeStep;
     const { files, uploadFiles, reportError } = this.props;
     if (step === 0 && files.matrix == null) {
@@ -131,17 +131,17 @@ class VerticalLinearStepper extends Component {
       uploadFiles();
     }
     this.setActiveStep(step + 1);
-  }
+  };
 
-  handleBack() {
+  handleBack = () => {
     this.setActiveStep(this.state.activeStep - 1);
-  }
+  };
 
-  handleReset() {
+  handleReset = () => {
     this.setActiveStep(0);
-  }
+  };
 
-  render() {
+  render = () => {
     const { activeStep } = this.state;
 
     return (
@@ -153,16 +153,13 @@ class VerticalLinearStepper extends Component {
               <StepContent>
                 <GetStepContent step={index} properties={this.props} />
                 <div>
-                  <Button
-                    disabled={activeStep === 0}
-                    onClick={this.handleBack.bind(this)}
-                  >
+                  <Button disabled={activeStep === 0} onClick={this.handleBack}>
                     Back
                   </Button>
                   <Button
                     variant="contained"
                     color="primary"
-                    onClick={this.handleNext.bind(this)}
+                    onClick={this.handleNext}
                   >
                     {activeStep === steps.length - 1 ? "Finish" : "Next"}
                   </Button>
@@ -181,7 +178,7 @@ class VerticalLinearStepper extends Component {
             <Button
               variant="contained"
               color="primary"
-              onClick={this.handleReset.bind(this)}
+              onClick={this.handleReset}
               style={{ marginTop: "10px" }}
             >
               Reset
@@ -190,11 +187,11 @@ class VerticalLinearStepper extends Component {
         )}
       </div>
     );
-  }
+  };
 }
 
 class DataUpload extends Component {
-  render() {
+  render = () => {
     const {
       matrixFileHandler,
       featuresFileHandler,
@@ -244,7 +241,7 @@ class DataUpload extends Component {
         />
       </>
     );
-  }
+  };
 }
 
 export default DataUpload;

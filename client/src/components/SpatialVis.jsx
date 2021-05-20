@@ -161,53 +161,44 @@ class SpatialVis extends Component {
     updatedPixelSize: 8,
   };
 
-  componentDidMount() {
-    this.updateDimensions();
-    window.addEventListener("resize", this.updateDimensions.bind(this));
-  }
-
-  updateDimensions() {
-    this.setState({ resize: true });
-  }
-
-  changeScale(event) {
+  changeScale = (event) => {
     const scale = Number.parseFloat(event.target.value);
     this.setState({ scale: scale });
-  }
+  };
 
-  changeDeltaX(event) {
+  changeDeltaX = (event) => {
     const deltaX = Number.parseInt(event.target.value);
     this.setState({ deltaX: deltaX });
-  }
+  };
 
-  changeDeltaY(event) {
+  changeDeltaY = (event) => {
     const deltaY = Number.parseInt(event.target.value);
     this.setState({ deltaY: deltaY });
-  }
+  };
 
-  changeOpacity(event) {
+  changeOpacity = (event) => {
     const opacity = Number.parseFloat(event.target.value);
     this.setState({ updatedOpacity: opacity });
-  }
+  };
 
-  changePixelSize(event) {
+  changePixelSize = (event) => {
     const pixelSize = Number.parseInt(event.target.value);
     this.setState({ updatedPixelSize: pixelSize });
-  }
+  };
 
-  flipHorizontal() {
+  flipHorizontal = () => {
     this.setState({ horizontalFlipped: this.state.horizontalFlipped * -1 });
-  }
+  };
 
-  flipVertical() {
+  flipVertical = () => {
     this.setState({ verticalFlipped: this.state.verticalFlipped * -1 });
-  }
+  };
 
-  flipXY() {
+  flipXY = () => {
     this.setState({ xyFlipped: !this.state.xyFlipped });
-  }
+  };
 
-  run() {
+  run = () => {
     const {
       deltaX,
       deltaY,
@@ -235,9 +226,9 @@ class SpatialVis extends Component {
       opacity: updatedOpacity,
       pixelSize: updatedPixelSize,
     });
-  }
+  };
 
-  getPixels() {
+  getPixels = () => {
     const { barcodes, reportError, colors } = this.props;
     const pixels = [];
 
@@ -278,9 +269,9 @@ class SpatialVis extends Component {
       reportError("Barcodes information is empty and/or has not loaded.\n");
     }
     return pixels;
-  }
+  };
 
-  render() {
+  render = () => {
     const {
       pixels,
       horizontalFlipped,
@@ -312,19 +303,19 @@ class SpatialVis extends Component {
         <div style={{ display: "flex" }}>
           <div>
             <TypedInput
-              changeDeltaX={this.changeDeltaX.bind(this)}
-              changeDeltaY={this.changeDeltaY.bind(this)}
-              changeScale={this.changeScale.bind(this)}
-              changeOpacity={this.changeOpacity.bind(this)}
-              changePixelSize={this.changePixelSize.bind(this)}
+              changeDeltaX={this.changeDeltaX}
+              changeDeltaY={this.changeDeltaY}
+              changeScale={this.changeScale}
+              changeOpacity={this.changeOpacity}
+              changePixelSize={this.changePixelSize}
             />
             <CheckboxInput
               horizontalFlipped={horizontalFlipped}
               verticalFlipped={verticalFlipped}
               xyFlipped={xyFlipped}
-              flipHorizontal={this.flipHorizontal.bind(this)}
-              flipVertical={this.flipVertical.bind(this)}
-              flipXY={this.flipXY.bind(this)}
+              flipHorizontal={this.flipHorizontal}
+              flipVertical={this.flipVertical}
+              flipXY={this.flipXY}
             />
           </div>
 
@@ -343,7 +334,7 @@ class SpatialVis extends Component {
           variant="contained"
           size="small"
           color="primary"
-          onClick={() => this.run()}
+          onClick={this.run}
         >
           Run Visualization
         </Button>
@@ -358,7 +349,7 @@ class SpatialVis extends Component {
         />
       </>
     );
-  }
+  };
 }
 
 export default SpatialVis;

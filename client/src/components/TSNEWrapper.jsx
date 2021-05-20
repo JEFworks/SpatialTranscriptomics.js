@@ -89,11 +89,11 @@ class TSNEWrapper extends Component {
     },
   };
 
-  getColor(node) {
+  getColor = (node) => {
     return node.index ? this.props.colors[node.index] : "blue";
-  }
+  };
 
-  changeSettings(event, type) {
+  changeSettings = (event, type) => {
     const newSetting = Number.parseInt(event.target.value);
     const { tsneSettings } = this.state;
 
@@ -106,9 +106,9 @@ class TSNEWrapper extends Component {
     }
 
     this.setState({ tsneSettings });
-  }
+  };
 
-  run() {
+  run = () => {
     const { computeTSNE, reportError } = this.props;
     const { tsneSettings } = this.state;
 
@@ -128,7 +128,7 @@ class TSNEWrapper extends Component {
     }
 
     computeTSNE(tsneSettings);
-  }
+  };
 
   render() {
     const { tsneSolution } = this.props;
@@ -156,7 +156,7 @@ class TSNEWrapper extends Component {
         </Typography>
 
         <div style={{ display: "flex" }}>
-          <TypedInput changeSettings={this.changeSettings.bind(this)} />
+          <TypedInput changeSettings={this.changeSettings} />
           {this.props.loading && (
             <CircularProgress
               disableShrink
@@ -172,7 +172,7 @@ class TSNEWrapper extends Component {
           variant="contained"
           size="small"
           color="primary"
-          onClick={() => this.run()}
+          onClick={this.run}
         >
           Run tSNE
         </Button>
@@ -180,7 +180,7 @@ class TSNEWrapper extends Component {
         <div style={{ paddingTop: "20px" }}></div>
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>
-          <Plot data={tsneSolution} getColor={this.getColor.bind(this)} />
+          <Plot data={tsneSolution} getColor={this.getColor} />
           <div style={{ width: "50%" }}></div>
         </div>
       </>

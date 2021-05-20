@@ -5,7 +5,7 @@ import { Alert } from "@material-ui/lab";
 class AlertBanner extends Component {
   render() {
     // produce error message
-    const { errors, open } = this.props;
+    const { errors, open, handleClose } = this.props;
     let errorMsg = "";
     if (errors.includes("Network Error")) {
       errorMsg = "Server not responding.\n";
@@ -17,7 +17,7 @@ class AlertBanner extends Component {
 
     return (
       <Snackbar open={open}>
-        <Alert onClose={() => this.props.handleClose()} severity="error">
+        <Alert onClose={handleClose} severity="error">
           {errorMsg}
         </Alert>
       </Snackbar>

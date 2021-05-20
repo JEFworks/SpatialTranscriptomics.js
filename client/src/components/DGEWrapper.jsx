@@ -80,7 +80,7 @@ class DGEWrapper extends Component {
     y: 1,
   };
 
-  getColor(node) {
+  getColor = (node) => {
     if (node) {
       const { type } = node;
       return type === "upregulated"
@@ -90,9 +90,9 @@ class DGEWrapper extends Component {
         : "black";
     }
     return "black";
-  }
+  };
 
-  run() {
+  run = () => {
     const { computeDGE, numClusters, reportError } = this.props;
     const { x, y } = this.state;
     if (isNaN(x) || isNaN(y) || (x < 1 && x !== -1) || y < 1) {
@@ -111,14 +111,14 @@ class DGEWrapper extends Component {
       return;
     }
     computeDGE(x, y);
-  }
+  };
 
-  setX(event) {
+  setX = (event) => {
     const num = Number.parseInt(event.target.value);
     this.setState({ x: num });
-  }
+  };
 
-  download(data) {
+  download = (data) => {
     if (!data[0]) {
       this.props.reportError("Please run DGE first.\n");
       return;
@@ -136,14 +136,14 @@ class DGEWrapper extends Component {
     element.download = "dge_results.csv";
     document.body.appendChild(element);
     element.click();
-  }
+  };
 
-  setY(event) {
+  setY = (event) => {
     const num = Number.parseInt(event.target.value);
     this.setState({ y: num });
-  }
+  };
 
-  render() {
+  render = () => {
     const { dgeSolution } = this.props;
 
     return (
@@ -167,7 +167,7 @@ class DGEWrapper extends Component {
         </Typography>
 
         <div style={{ display: "flex" }}>
-          <TypedInput setX={this.setX.bind(this)} setY={this.setY.bind(this)} />
+          <TypedInput setX={this.setX} setY={this.setY} />
           {this.props.loading && (
             <CircularProgress
               disableShrink
@@ -184,7 +184,7 @@ class DGEWrapper extends Component {
           size="small"
           color="primary"
           style={{ marginRight: "10px" }}
-          onClick={() => this.run()}
+          onClick={this.run}
         >
           Run DGE
         </Button>
@@ -200,12 +200,12 @@ class DGEWrapper extends Component {
         <div style={{ paddingTop: "20px" }}></div>
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>
-          <Plot data={dgeSolution} getColor={this.getColor.bind(this)} />
+          <Plot data={dgeSolution} getColor={this.getColor} />
           <div style={{ width: "50%" }}></div>
         </div>
       </>
     );
-  }
+  };
 }
 
 export default DGEWrapper;

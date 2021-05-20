@@ -155,12 +155,12 @@ class PCAWrapper extends Component {
     new_pcY: 2,
   };
 
-  getColor(node) {
+  getColor = (node) => {
     return node.index ? this.props.colors[node.index] : "blue";
-  }
+  };
 
   // x = pcX, y = pcY, z = numPCs
-  alertParams(x, y, z) {
+  alertParams = (x, y, z) => {
     const { reportError } = this.props;
 
     if (isNaN(x) || isNaN(x) || isNaN(y) || x < 1 || y < 1 || z < 1) {
@@ -178,9 +178,9 @@ class PCAWrapper extends Component {
       return true;
     }
     return false;
-  }
+  };
 
-  run() {
+  run = () => {
     const { computePCA } = this.props;
     const { updatedNumPCs, new_pcX, new_pcY } = this.state;
 
@@ -188,9 +188,9 @@ class PCAWrapper extends Component {
       this.setState({ numPCs: updatedNumPCs, pcX: new_pcX, pcY: new_pcY });
       computePCA(updatedNumPCs);
     }
-  }
+  };
 
-  applySettings() {
+  applySettings = () => {
     const { setNumPCs } = this.props;
     const { updatedNumPCs, new_pcX, new_pcY } = this.state;
 
@@ -202,24 +202,24 @@ class PCAWrapper extends Component {
         setNumPCs(updatedNumPCs);
       }
     }
-  }
+  };
 
-  selectNumPCs(event) {
+  selectNumPCs = (event) => {
     const num = Number.parseInt(event.target.value);
     this.setState({ updatedNumPCs: num });
-  }
+  };
 
-  set_pcX(event) {
+  set_pcX = (event) => {
     const num = Number.parseInt(event.target.value);
     this.setState({ new_pcX: num });
-  }
+  };
 
-  set_pcY(event) {
+  set_pcY = (event) => {
     const num = Number.parseInt(event.target.value);
     this.setState({ new_pcY: num });
-  }
+  };
 
-  render() {
+  render = () => {
     const { numPCs, pcX, pcY } = this.state;
     const { eigenvectors, eigenvalues, loading } = this.props;
 
@@ -251,9 +251,9 @@ class PCAWrapper extends Component {
 
         <div style={{ display: "flex" }}>
           <TypedInput
-            selectNumPCs={this.selectNumPCs.bind(this)}
-            set_pcX={this.set_pcX.bind(this)}
-            set_pcY={this.set_pcY.bind(this)}
+            selectNumPCs={this.selectNumPCs}
+            set_pcX={this.set_pcX}
+            set_pcY={this.set_pcY}
           />
           {loading && (
             <CircularProgress
@@ -270,7 +270,7 @@ class PCAWrapper extends Component {
           variant="contained"
           size="small"
           color="primary"
-          onClick={() => this.run()}
+          onClick={this.run}
         >
           Run PCA
         </Button>
@@ -279,7 +279,7 @@ class PCAWrapper extends Component {
           size="small"
           color="primary"
           style={{ marginLeft: "10px" }}
-          onClick={() => this.applySettings()}
+          onClick={this.applySettings}
         >
           Apply Settings
         </Button>
@@ -291,7 +291,7 @@ class PCAWrapper extends Component {
             <ScreePlot eigenvalues={eigenvalues} numPCs={numPCs} />
             <Biplot
               eigenvectors={eigenvectors}
-              getColor={this.getColor.bind(this)}
+              getColor={this.getColor}
               pcX={pcX}
               pcY={pcY}
             />
@@ -300,7 +300,7 @@ class PCAWrapper extends Component {
         </div>
       </>
     );
-  }
+  };
 }
 
 export default PCAWrapper;

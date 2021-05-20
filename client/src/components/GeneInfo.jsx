@@ -17,6 +17,10 @@ import {
 
 const paragraph = "rgba(0, 0, 0, 0.54)";
 
+const Info = (props) => {
+  return <></>;
+};
+
 const Plot = (props) => {
   const getColor = (datum) => {
     const { x } = datum;
@@ -39,9 +43,7 @@ const Plot = (props) => {
       height={400}
       width={450}
       domainPadding={20}
-      containerComponent={
-        <VictoryZoomContainer zoomDimension="x" zoomDomain={{ x: [0, 8] }} />
-      }
+      containerComponent={<VictoryZoomContainer zoomDimension="x" />}
     >
       <VictoryBoxPlot
         boxWidth={25}
@@ -54,7 +56,6 @@ const Plot = (props) => {
           median: { stroke: "white", strokeWidth: 2 },
         }}
       />
-
       <VictoryAxis dependentAxis crossAxis />
       <VictoryAxis crossAxis />
     </VictoryChart>
@@ -97,11 +98,11 @@ const TypedInput = (props) => {
 class GeneInfo extends Component {
   state = { feature: "nptxr", title: "", textArray: [] };
 
-  setFeature(event) {
+  setFeature = (event) => {
     this.setState({ feature: event.target.value.trim().toLowerCase() });
-  }
+  };
 
-  run() {
+  run = () => {
     const { feature } = this.state;
     this.props.computeBoxplot(feature);
 
@@ -123,7 +124,7 @@ class GeneInfo extends Component {
       .catch((_error) => {
         this.props.reportError("Gene info could not be retrieved from OMIM.\n");
       });
-  }
+  };
 
   render() {
     return (
@@ -145,16 +146,16 @@ class GeneInfo extends Component {
           Second line of description...
         </Typography>
 
-        <TypedInput onChange={this.setFeature.bind(this)} />
+        <TypedInput onChange={this.setFeature} />
 
         <div style={{ paddingTop: "15px" }}></div>
         <Button
           variant="contained"
           size="small"
           color="primary"
-          onClick={() => this.run()}
+          onClick={this.run}
         >
-          Run boi
+          Run ...
         </Button>
 
         {/* <p>{this.state.title}</p>
@@ -167,6 +168,7 @@ class GeneInfo extends Component {
             </div>
           );
         })} */}
+        {/* <Info /> */}
 
         <div style={{ paddingTop: "20px" }}></div>
         <div style={{ width: "100%", display: "flex" }}>

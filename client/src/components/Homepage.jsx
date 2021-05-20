@@ -84,7 +84,7 @@ class Homepage extends Component {
     imageLink: "",
   }; // remember to update in resetState() too
 
-  componentDidMount() {
+  componentDidMount = () => {
     // get uuid from URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const uuid = urlParams.get("session");
@@ -93,13 +93,13 @@ class Homepage extends Component {
       this.loadDataset();
       this.loadGeneSets();
     });
-  }
+  };
 
-  handleAlertClose() {
+  handleAlertClose = () => {
     this.setState({ alertOpen: false, errors: [] });
-  }
+  };
 
-  reportError(error) {
+  reportError = (error) => {
     const { errors } = this.state;
     if (error.response && !errors.includes(error.response.data)) {
       errors.push(error.response.data);
@@ -112,18 +112,18 @@ class Homepage extends Component {
       errors.push(error);
     }
     this.setState({ errors, alertOpen: true });
-  }
+  };
 
-  terminateWorkers() {
+  terminateWorkers = () => {
     pca_WorkerInstance.terminate();
     tsne_WorkerInstance.terminate();
     kmeans_WorkerInstance.terminate();
     dge_WorkerInstance.terminate();
     gse_WorkerInstance.terminate();
-  }
+  };
 
   // load data
-  async loadDataset() {
+  loadDataset = async () => {
     this.loadImage();
     await this.loadFeatures();
     await this.loadBarcodes();
@@ -133,10 +133,10 @@ class Homepage extends Component {
       loading.upload = false;
       this.setState({ loading });
     });
-  }
+  };
 
   // load genesets
-  async loadGeneSets() {
+  loadGeneSets = async () => {
     const { loading } = this.state;
     axios
       .get(`${api}/genesets`)
@@ -148,9 +148,9 @@ class Homepage extends Component {
       .catch((error) => {
         this.reportError(error);
       });
-  }
+  };
 
-  resetState() {
+  resetState = () => {
     this.setState({
       uuid: null,
       files: {
@@ -193,63 +193,51 @@ class Homepage extends Component {
       alertOpen: false,
       imageLink: "",
     });
-  }
+  };
+
+  makeFile = (event, newFileName) => {
+    const file = event.target.files[0];
+    const copy = file.slice(0, file.size, file.type);
+    const newFile = new File([copy], newFileName, { type: file.type });
+    return newFile;
+  };
 
   // save matrix file to state
-  matrixFileHandler(event) {
+  matrixFileHandler = (event) => {
     const { files } = this.state;
-    const file = event.target.files[0];
-    const copy = file.slice(0, file.size, file.type);
-    const newFile = new File([copy], "matrix.mtx.gz", { type: file.type });
-    files.matrix = newFile;
+    files.matrix = this.makeFile(event, "matrix.mtx.gz");
     this.setState({ files, errors: [] });
-  }
+  };
 
   // save features file to state
-  featuresFileHandler(event) {
+  featuresFileHandler = (event) => {
     const { files } = this.state;
-    const file = event.target.files[0];
-    const copy = file.slice(0, file.size, file.type);
-    const newFile = new File([copy], "features.tsv.gz", { type: file.type });
-    files.features = newFile;
+    files.features = this.makeFile(event, "features.tsv.gz");
     this.setState({ files });
-  }
+  };
 
   // save barcodes file to state
-  barcodesFileHandler(event) {
+  barcodesFileHandler = (event) => {
     const { files } = this.state;
-    const file = event.target.files[0];
-    const copy = file.slice(0, file.size, file.type);
-    const newFile = new File([copy], "barcodes.tsv.gz", { type: file.type });
-    files.barcodes = newFile;
+    files.barcodes = this.makeFile(event, "barcodes.tsv.gz");
     this.setState({ files });
-  }
+  };
 
   // save tissue_positions file to state
-  pixelsFileHandler(event) {
+  pixelsFileHandler = (event) => {
     const { files } = this.state;
-    const file = event.target.files[0];
-    const copy = file.slice(0, file.size, file.type);
-    const newFile = new File([copy], "tissue_positions_list.csv.gz", {
-      type: file.type,
-    });
-    files.pixels = newFile;
+    files.pixels = this.makeFile(event, "tissue_positions_list.csv.gz");
     this.setState({ files });
-  }
+  };
 
   // save image file to state
-  imageFileHandler(event) {
+  imageFileHandler = (event) => {
     const { files } = this.state;
-    const file = event.target.files[0];
-    const copy = file.slice(0, file.size, file.type);
-    const newFile = new File([copy], "tissue_image.png", {
-      type: file.type,
-    });
-    files.image = newFile;
+    files.image = this.makeFile(event, "tissue_image.png");
     this.setState({ files });
-  }
+  };
 
-  loadImage() {
+  loadImage = () => {
     const { loading, uuid } = this.state;
     const imageLink = `${api}/static/${uuid}/tissue_image.png`;
     axios
@@ -261,10 +249,10 @@ class Homepage extends Component {
         loading.image = false;
         this.setState({ loading, imageLink });
       });
-  }
+  };
 
   // upload files to server
-  async uploadFiles() {
+  uploadFiles = async () => {
     const { files } = this.state;
     if (!files.matrix) {
       return;
@@ -296,9 +284,9 @@ class Homepage extends Component {
           this.reportError(error);
         });
     });
-  }
+  };
 
-  async loadFeatures() {
+  loadFeatures = async () => {
     const { uuid } = this.state;
     axios
       .get(`${api}/features/${uuid}`)
@@ -309,9 +297,9 @@ class Homepage extends Component {
       .catch((error) => {
         this.reportError(error);
       });
-  }
+  };
 
-  async loadBarcodes() {
+  loadBarcodes = async () => {
     const { uuid } = this.state;
     axios
       .get(`${api}/barcodes/${uuid}`)
@@ -327,9 +315,9 @@ class Homepage extends Component {
           this.reportError(error);
         });
       });
-  }
+  };
 
-  async loadPixels() {
+  loadPixels = async () => {
     const { uuid, barcodes } = this.state;
     axios
       .get(`${api}/pixels/${uuid}`)
@@ -347,9 +335,9 @@ class Homepage extends Component {
       .catch((error) => {
         this.reportError(error);
       });
-  }
+  };
 
-  async loadMatrix() {
+  loadMatrix = async () => {
     const { uuid } = this.state;
     let count = 0;
     const numBatches = 4;
@@ -403,9 +391,9 @@ class Homepage extends Component {
 
     const { thresholds } = this.state;
     this.handleFilter(thresholds.minRowSum, thresholds.minColSum);
-  }
+  };
 
-  handleFilter(minRowSum, minColSum) {
+  handleFilter = (minRowSum, minColSum) => {
     const {
       matrix,
       thresholds,
@@ -488,9 +476,9 @@ class Homepage extends Component {
         filter_WorkerInstance.terminate();
       }
     });
-  }
+  };
 
-  setNumPCs(num) {
+  setNumPCs = (num) => {
     const m = this.state.filteredMatrix;
     if (!m[0] || m[0].length < 1) {
       return;
@@ -520,10 +508,10 @@ class Homepage extends Component {
         this.filterPCs(num);
       }
     );
-  }
+  };
 
   // filter based on user-specified # of PCs
-  filterPCs(num) {
+  filterPCs = (num) => {
     const { pcs, loading, colorOption, k } = this.state;
     if (!pcs[0]) {
       loading.pca = false;
@@ -541,9 +529,9 @@ class Homepage extends Component {
     if (colorOption === "cluster") {
       this.setColorsByClusters(filteredPCs, k);
     }
-  }
+  };
 
-  computePCA(num) {
+  computePCA = (num) => {
     const m = this.state.filteredMatrix;
     if (!m[0] || m[0].length < 1) {
       this.reportError("The matrix is empty and/or has not loaded yet.\n");
@@ -588,9 +576,9 @@ class Homepage extends Component {
         pca_WorkerInstance.terminate();
       }
     });
-  }
+  };
 
-  computeTSNE(tsneSettings) {
+  computeTSNE = (tsneSettings) => {
     const { filteredPCs, loading } = this.state;
     const { epsilon, perplexity, iterations } = tsneSettings;
     if (!filteredPCs[0] || filteredPCs[0].length < 1) {
@@ -618,10 +606,10 @@ class Homepage extends Component {
         tsne_WorkerInstance.terminate();
       }
     });
-  }
+  };
 
   // x is index of reference cluster, y is index of non-reference cluster
-  computeDGE(x, y) {
+  computeDGE = (x, y) => {
     const { clusters, filteredMatrix, filteredFeatures, loading } = this.state;
 
     if (!clusters[0] || clusters.length < 2) {
@@ -651,10 +639,10 @@ class Homepage extends Component {
         dge_WorkerInstance.terminate();
       }
     });
-  }
+  };
 
   // trying to implement gene set enrichment
-  computeGSE() {
+  computeGSE = () => {
     const { dgeSolution, geneSets, loading, filteredFeatures } = this.state;
 
     if (Object.keys(geneSets).length === 0) {
@@ -693,10 +681,10 @@ class Homepage extends Component {
         gse_WorkerInstance.terminate();
       }
     });
-  }
+  };
 
   // set gene name and compute colors based on expression of this gene
-  setFeature(name) {
+  setFeature = (name) => {
     const { filteredMatrix, filteredFeatures, loading } = this.state;
     kmeans_WorkerInstance.terminate();
     loading.kmeans = false;
@@ -704,7 +692,7 @@ class Homepage extends Component {
 
     const colors = this.getColorsByGene(filteredMatrix, filteredFeatures, name);
     this.setState({ feature: name, colorOption: "gene", colors });
-  }
+  };
 
   getGene(matrix, features, name) {
     return matrix[features.indexOf(name)];
@@ -730,7 +718,7 @@ class Homepage extends Component {
   }
 
   // set K and compute colors by clusters
-  setK(k) {
+  setK = (k) => {
     const { filteredPCs } = this.state;
     if (!filteredPCs[0]) {
       this.reportError("Please run PCA first.\n");
@@ -756,9 +744,9 @@ class Homepage extends Component {
       boxplotData: [],
     });
     this.setColorsByClusters(filteredPCs, k);
-  }
+  };
 
-  setColorsByClusters(pcs, k) {
+  setColorsByClusters = (pcs, k) => {
     const { loading } = this.state;
     loading.kmeans = true;
     loading.dge = false;
@@ -780,9 +768,9 @@ class Homepage extends Component {
         kmeans_WorkerInstance.terminate();
       }
     });
-  }
+  };
 
-  computeBoxplot(featureName) {
+  computeBoxplot = (featureName) => {
     const { filteredMatrix, filteredFeatures, clusters } = this.state;
     const boxplotData = [];
 
@@ -813,14 +801,14 @@ class Homepage extends Component {
     });
 
     this.setState({ boxplotData });
-  }
+  };
 
-  render() {
+  render = () => {
     return (
       <>
         <Header
-          setFeature={this.setFeature.bind(this)}
-          setK={this.setK.bind(this)}
+          setFeature={this.setFeature}
+          setK={this.setK}
           loading={this.state.loading.kmeans}
         />
 
@@ -829,19 +817,19 @@ class Homepage extends Component {
 
           <AlertBanner
             open={this.state.alertOpen}
-            handleClose={this.handleAlertClose.bind(this)}
+            handleClose={this.handleAlertClose}
             errors={this.state.errors}
           />
 
           <DataUpload
-            matrixFileHandler={this.matrixFileHandler.bind(this)}
-            barcodesFileHandler={this.barcodesFileHandler.bind(this)}
-            featuresFileHandler={this.featuresFileHandler.bind(this)}
-            pixelsFileHandler={this.pixelsFileHandler.bind(this)}
-            imageFileHandler={this.imageFileHandler.bind(this)}
-            uploadFiles={this.uploadFiles.bind(this)}
+            matrixFileHandler={this.matrixFileHandler}
+            barcodesFileHandler={this.barcodesFileHandler}
+            featuresFileHandler={this.featuresFileHandler}
+            pixelsFileHandler={this.pixelsFileHandler}
+            imageFileHandler={this.imageFileHandler}
+            uploadFiles={this.uploadFiles}
             files={this.state.files}
-            reportError={this.reportError.bind(this)}
+            reportError={this.reportError}
           />
 
           <div style={{ paddingTop: "5px" }}></div>
@@ -849,28 +837,28 @@ class Homepage extends Component {
             thresholds={this.state.thresholds}
             rowsums={this.state.rowsums.sums}
             colsums={this.state.colsums.sums}
-            handleFilter={this.handleFilter.bind(this)}
+            handleFilter={this.handleFilter}
             loading={this.state.loading.upload}
           />
 
           <div style={{ paddingTop: "40px" }}></div>
           <PCAWrapper
-            computePCA={this.computePCA.bind(this)}
+            computePCA={this.computePCA}
             eigenvectors={this.state.pcs}
             eigenvalues={this.state.eigenvalues}
-            setNumPCs={this.setNumPCs.bind(this)}
+            setNumPCs={this.setNumPCs}
             colors={this.state.colors}
             loading={this.state.loading.pca}
-            reportError={this.reportError.bind(this)}
+            reportError={this.reportError}
           />
 
           <div style={{ paddingTop: "40px" }}></div>
           <TSNEWrapper
-            computeTSNE={this.computeTSNE.bind(this)}
+            computeTSNE={this.computeTSNE}
             tsneSolution={this.state.tsneSolution}
             colors={this.state.colors}
             loading={this.state.loading.tsne}
-            reportError={this.reportError.bind(this)}
+            reportError={this.reportError}
           />
 
           <div style={{ paddingTop: "40px" }}></div>
@@ -879,37 +867,37 @@ class Homepage extends Component {
             colors={this.state.colors}
             imageLink={this.state.imageLink}
             loading={this.state.loading.image}
-            reportError={this.reportError.bind(this)}
+            reportError={this.reportError}
           />
 
           <div style={{ paddingTop: "40px" }}></div>
           <DGEWrapper
-            computeDGE={this.computeDGE.bind(this)}
+            computeDGE={this.computeDGE}
             dgeSolution={this.state.dgeSolution}
             numClusters={this.state.k}
             loading={this.state.loading.dge}
-            reportError={this.reportError.bind(this)}
+            reportError={this.reportError}
           />
 
           <div style={{ paddingTop: "40px" }}></div>
           <GSEWrapper
-            computeGSE={this.computeGSE.bind(this)}
+            computeGSE={this.computeGSE}
             gseSolution={this.state.gseSolution}
             loading={this.state.loading.gse || this.state.loading.geneSets}
-            reportError={this.reportError.bind(this)}
+            reportError={this.reportError}
           />
 
           <div style={{ paddingTop: "40px" }}></div>
           <GeneInfo
-            reportError={this.reportError.bind(this)}
-            computeBoxplot={this.computeBoxplot.bind(this)}
+            reportError={this.reportError}
+            computeBoxplot={this.computeBoxplot}
             boxplotData={this.state.boxplotData}
             colors={this.state.clusterLegend}
           />
         </div>
       </>
     );
-  }
+  };
 }
 
 export default Homepage;

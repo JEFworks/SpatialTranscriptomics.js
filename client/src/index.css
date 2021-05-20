@@ -120,6 +120,11 @@ code {
     height: 345px;
     width: 420px;
   }
+
+  .boxplot {
+    height: 345px;
+    width: 420px;
+  }
 }
 
 @media only screen and (max-width: 600px) {

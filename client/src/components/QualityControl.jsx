@@ -102,16 +102,16 @@ class QualityControl extends Component {
     status1: false,
   };
 
-  changeThreshold(minRowSum, minColSum) {
+  changeThreshold = (minRowSum, minColSum) => {
     if (minRowSum != null) {
       this.setState({ minRowSum, status0: true });
     }
     if (minColSum != null) {
       this.setState({ minColSum, status1: true });
     }
-  }
+  };
 
-  run() {
+  run = () => {
     const { handleFilter } = this.props;
     const { minRowSum, minColSum } = this.state;
     if (this.state.status0) {
@@ -121,9 +121,9 @@ class QualityControl extends Component {
       handleFilter(null, minColSum);
     }
     this.setState({ status0: false, status1: false });
-  }
+  };
 
-  render() {
+  render = () => {
     const { rowsums, colsums, loading } = this.props;
     const { minRowSum, minColSum } = this.state;
 
@@ -165,13 +165,13 @@ class QualityControl extends Component {
             <Figure
               data={rowsums}
               threshold={minRowSum}
-              changeThreshold={this.changeThreshold.bind(this)}
+              changeThreshold={this.changeThreshold}
               type={"rowsum"}
             />
             <Figure
               data={colsums}
               threshold={minColSum}
-              changeThreshold={this.changeThreshold.bind(this)}
+              changeThreshold={this.changeThreshold}
               type={"colsum"}
             />
           </div>
@@ -182,13 +182,13 @@ class QualityControl extends Component {
           variant="contained"
           size="small"
           color="primary"
-          onClick={() => this.run()}
+          onClick={this.run}
         >
           Apply QC Filters
         </Button>
       </>
     );
-  }
+  };
 }
 
 export default QualityControl;

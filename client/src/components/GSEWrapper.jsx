@@ -91,17 +91,17 @@ class GSEWrapper extends Component {
     setIndex: -1,
   };
 
-  handleSelect(event) {
+  handleSelect = (event) => {
     this.setState({ setIndex: event.target.value });
-  }
+  };
 
-  run() {
+  run = () => {
     const { computeGSE } = this.props;
     computeGSE();
     this.setState({ setIndex: 0 });
-  }
+  };
 
-  download(GSE, Genes) {
+  download = (GSE, Genes) => {
     if (GSE == null || Genes == null) {
       this.props.reportError("Please run GSE first.\n");
       return;
@@ -138,9 +138,9 @@ class GSEWrapper extends Component {
     element.download = "gse_results.csv";
     document.body.appendChild(element);
     element.click();
-  }
+  };
 
-  render() {
+  render = () => {
     const { setIndex } = this.state;
     const { gseSolution, loading } = this.props;
     const { Genes, GSE } = gseSolution;
@@ -173,7 +173,7 @@ class GSEWrapper extends Component {
           size="small"
           color="primary"
           style={{ marginRight: "10px" }}
-          onClick={() => this.run()}
+          onClick={this.run}
         >
           Run GSE
         </Button>
@@ -191,7 +191,7 @@ class GSEWrapper extends Component {
           <Dropdown
             list={setIDs}
             index={currSetIndex}
-            handleSelect={this.handleSelect.bind(this)}
+            handleSelect={this.handleSelect}
           />
           {loading && (
             <CircularProgress
@@ -214,7 +214,7 @@ class GSEWrapper extends Component {
         </div>
       </>
     );
-  }
+  };
 }
 
 export default GSEWrapper;
