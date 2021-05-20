@@ -14,8 +14,8 @@ export const performTSNE = (filteredPCs, opt, iterations) => {
   }
   const Y = tsne.getSolution(); // Y is an array of 2-D points that you can plot
 
+  // make 2D embedding
   const embedding = [];
-  // 2D embedding
   Y.forEach((point, index) => {
     const x = point[0] * 7 + 450;
     const y = point[1] * 7 + 300;

@@ -117,7 +117,7 @@ const ScreePlot = (props) => {
 };
 
 const TypedInput = (props) => {
-  const { selectNumPCs, set_pcX, set_pcY } = props;
+  const { selectNumPCs, select_pcX, select_pcY } = props;
   return (
     <FormGroup row style={{ marginTop: "7px" }}>
       <TextField
@@ -132,14 +132,14 @@ const TypedInput = (props) => {
         color="secondary"
         helperText="PC on x-axis"
         defaultValue="1"
-        onChange={set_pcX}
+        onChange={select_pcX}
       />
       <TextField
         style={{ width: "80px" }}
         color="secondary"
         helperText="PC on y-axis"
         defaultValue="2"
-        onChange={set_pcY}
+        onChange={select_pcY}
       />
     </FormGroup>
   );
@@ -159,7 +159,13 @@ class PCAWrapper extends Component {
     return node.index ? this.props.colors[node.index] : "blue";
   };
 
-  // x = pcX, y = pcY, z = numPCs
+  /**
+   * Function to alert user if parameters are bad
+   * @param {*} x the PC to plot on x-axis
+   * @param {*} y the PC to plot on y-axis
+   * @param {*} z number of PCs to use for downstream analysis
+   * @returns true if there are no issues with parameters
+   */
   alertParams = (x, y, z) => {
     const { reportError } = this.props;
 
@@ -209,12 +215,12 @@ class PCAWrapper extends Component {
     this.setState({ updatedNumPCs: num });
   };
 
-  set_pcX = (event) => {
+  select_pcX = (event) => {
     const num = Number.parseInt(event.target.value);
     this.setState({ new_pcX: num });
   };
 
-  set_pcY = (event) => {
+  select_pcY = (event) => {
     const num = Number.parseInt(event.target.value);
     this.setState({ new_pcY: num });
   };
@@ -252,8 +258,8 @@ class PCAWrapper extends Component {
         <div style={{ display: "flex" }}>
           <TypedInput
             selectNumPCs={this.selectNumPCs}
-            set_pcX={this.set_pcX}
-            set_pcY={this.set_pcY}
+            select_pcX={this.select_pcX}
+            select_pcY={this.select_pcY}
           />
           {loading && (
             <CircularProgress

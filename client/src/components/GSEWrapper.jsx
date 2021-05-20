@@ -10,6 +10,7 @@ import {
   Paper,
 } from "@material-ui/core";
 import LineChart from "./Plots/LineChart.jsx";
+import generateCSV from "../functions/generateCSV.jsx";
 
 const paragraph = "rgba(0, 0, 0, 0.54)";
 const blue = "#80d8ff";
@@ -91,6 +92,7 @@ class GSEWrapper extends Component {
     setIndex: -1,
   };
 
+  // select a gene set from dropdown
   handleSelect = (event) => {
     this.setState({ setIndex: event.target.value });
   };
@@ -101,6 +103,7 @@ class GSEWrapper extends Component {
     this.setState({ setIndex: 0 });
   };
 
+  // function to allow user to download GSE results
   download = (GSE, Genes) => {
     if (GSE == null || Genes == null) {
       this.props.reportError("Please run GSE first.\n");
@@ -131,13 +134,7 @@ class GSEWrapper extends Component {
       });
     });
 
-    const CSV = table.join("\n");
-    const element = document.createElement("a");
-    const file = new Blob([CSV], { type: "text/csv" });
-    element.href = URL.createObjectURL(file);
-    element.download = "gse_results.csv";
-    document.body.appendChild(element);
-    element.click();
+    generateCSV(table, "gse_results.csv");
   };
 
   render = () => {

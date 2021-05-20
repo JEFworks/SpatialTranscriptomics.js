@@ -233,14 +233,14 @@ class SpatialVis extends Component {
     const pixels = [];
 
     if (colors.length === 0) {
-      reportError("Matrix is empty and/or has not loaded.\n");
+      reportError("Matrix is empty and/or has not loaded yet.\n");
       return pixels;
     }
 
     if (barcodes[0] != null) {
       if (barcodes[0].x == null || barcodes[0].y == null) {
         reportError(
-          "Pixel location information is empty and/or has not loaded.\n"
+          "Information about the location of one or more pixels is missing and/or has not loaded yet.\n"
         );
         return [];
       }
@@ -266,7 +266,7 @@ class SpatialVis extends Component {
         } catch (_error) {}
       }
     } else {
-      reportError("Barcodes information is empty and/or has not loaded.\n");
+      reportError("Barcodes information is empty and/or has not loaded yet.\n");
     }
     return pixels;
   };

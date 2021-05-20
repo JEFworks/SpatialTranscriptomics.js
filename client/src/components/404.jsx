@@ -27,7 +27,7 @@ const Text = (
 
 const Page404 = () => (
   <>
-    <Header noshow={true} />
+    <Header hideInput={true} />
     <div className="site-container">
       {Graphic}
       {Text}

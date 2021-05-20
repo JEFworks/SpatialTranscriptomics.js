@@ -95,6 +95,7 @@ class Homepage extends Component {
     });
   };
 
+  // close alert banner
   handleAlertClose = () => {
     this.setState({ alertOpen: false, errors: [] });
   };
@@ -195,7 +196,8 @@ class Homepage extends Component {
     });
   };
 
-  makeFile = (event, newFileName) => {
+  // copy file and rename it
+  copyFile = (event, newFileName) => {
     const file = event.target.files[0];
     const copy = file.slice(0, file.size, file.type);
     const newFile = new File([copy], newFileName, { type: file.type });
@@ -205,38 +207,39 @@ class Homepage extends Component {
   // save matrix file to state
   matrixFileHandler = (event) => {
     const { files } = this.state;
-    files.matrix = this.makeFile(event, "matrix.mtx.gz");
+    files.matrix = this.copyFile(event, "matrix.mtx.gz");
     this.setState({ files, errors: [] });
   };
 
   // save features file to state
   featuresFileHandler = (event) => {
     const { files } = this.state;
-    files.features = this.makeFile(event, "features.tsv.gz");
+    files.features = this.copyFile(event, "features.tsv.gz");
     this.setState({ files });
   };
 
   // save barcodes file to state
   barcodesFileHandler = (event) => {
     const { files } = this.state;
-    files.barcodes = this.makeFile(event, "barcodes.tsv.gz");
+    files.barcodes = this.copyFile(event, "barcodes.tsv.gz");
     this.setState({ files });
   };
 
   // save tissue_positions file to state
   pixelsFileHandler = (event) => {
     const { files } = this.state;
-    files.pixels = this.makeFile(event, "tissue_positions_list.csv.gz");
+    files.pixels = this.copyFile(event, "tissue_positions_list.csv.gz");
     this.setState({ files });
   };
 
   // save image file to state
   imageFileHandler = (event) => {
     const { files } = this.state;
-    files.image = this.makeFile(event, "tissue_image.png");
+    files.image = this.copyFile(event, "tissue_image.png");
     this.setState({ files });
   };
 
+  // load the tissue image
   loadImage = () => {
     const { loading, uuid } = this.state;
     const imageLink = `${api}/static/${uuid}/tissue_image.png`;
@@ -286,6 +289,7 @@ class Homepage extends Component {
     });
   };
 
+  // load gene names
   loadFeatures = async () => {
     const { uuid } = this.state;
     axios
@@ -299,6 +303,7 @@ class Homepage extends Component {
       });
   };
 
+  // load cell barcodes
   loadBarcodes = async () => {
     const { uuid } = this.state;
     axios
@@ -317,6 +322,7 @@ class Homepage extends Component {
       });
   };
 
+  // load pixel locations
   loadPixels = async () => {
     const { uuid, barcodes } = this.state;
     axios
@@ -393,6 +399,7 @@ class Homepage extends Component {
     this.handleFilter(thresholds.minRowSum, thresholds.minColSum);
   };
 
+  // filter the matrix
   handleFilter = (minRowSum, minColSum) => {
     const {
       matrix,
@@ -478,6 +485,7 @@ class Homepage extends Component {
     });
   };
 
+  // set the number of PCs to be used in downstream analysis and then filter PCs
   setNumPCs = (num) => {
     const m = this.state.filteredMatrix;
     if (!m[0] || m[0].length < 1) {
@@ -510,7 +518,7 @@ class Homepage extends Component {
     );
   };
 
-  // filter based on user-specified # of PCs
+  // filter the principal components data based on user-specified # of PCs
   filterPCs = (num) => {
     const { pcs, loading, colorOption, k } = this.state;
     if (!pcs[0]) {
@@ -531,6 +539,7 @@ class Homepage extends Component {
     }
   };
 
+  // function to perform Principal Components Analysis
   computePCA = (num) => {
     const m = this.state.filteredMatrix;
     if (!m[0] || m[0].length < 1) {
@@ -578,6 +587,7 @@ class Homepage extends Component {
     });
   };
 
+  // function to compute tSNE embedding
   computeTSNE = (tsneSettings) => {
     const { filteredPCs, loading } = this.state;
     const { epsilon, perplexity, iterations } = tsneSettings;
@@ -608,7 +618,12 @@ class Homepage extends Component {
     });
   };
 
-  // x is index of reference cluster, y is index of non-reference cluster
+  /**
+   * Function to compute differential gene expression between two groups
+   * @param {*} x number of reference cluster
+   * @param {*} y number of non-reference cluster
+   * @returns
+   */
   computeDGE = (x, y) => {
     const { clusters, filteredMatrix, filteredFeatures, loading } = this.state;
 
@@ -641,7 +656,7 @@ class Homepage extends Component {
     });
   };
 
-  // trying to implement gene set enrichment
+  // function to perform Gene Set Enrichment Analysis
   computeGSE = () => {
     const { dgeSolution, geneSets, loading, filteredFeatures } = this.state;
 
@@ -652,7 +667,9 @@ class Homepage extends Component {
       return;
     }
     if (filteredFeatures.length === 0) {
-      this.reportError("Features information is empty and/or missing.\n");
+      this.reportError(
+        "Features information is empty and/or has not loaded yet.\n"
+      );
       return;
     }
     if (!dgeSolution[0]) {
@@ -709,6 +726,7 @@ class Homepage extends Component {
         colors.push(GetRGB(MinMaxNormalize(cell, min, max)));
       });
     } else if (matrix[0]) {
+      // gene not found, heatmap is entirely blue (no expression)
       matrix[0].forEach(() => {
         colors.push("blue");
       });
@@ -746,6 +764,7 @@ class Homepage extends Component {
     this.setColorsByClusters(filteredPCs, k);
   };
 
+  // compute colors by k-means clustering
   setColorsByClusters = (pcs, k) => {
     const { loading } = this.state;
     loading.kmeans = true;
@@ -770,6 +789,7 @@ class Homepage extends Component {
     });
   };
 
+  // compute boxplot to visualize expression of a gene
   computeBoxplot = (featureName) => {
     const { filteredMatrix, filteredFeatures, clusters } = this.state;
     const boxplotData = [];
@@ -786,10 +806,12 @@ class Homepage extends Component {
       return;
     }
 
+    // get whiskers, q1, median, q3 for the gene
     const overallStats = QuartileStats(gene);
     overallStats.x = "All";
     boxplotData.push(overallStats);
 
+    // for each cluster, get the cluster's reads of the gene and compute boxplot statistics
     clusters.forEach((cluster, i) => {
       const filteredGene = [];
       cluster.forEach((cellIndex) => {

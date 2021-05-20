@@ -6,6 +6,7 @@ const rowSums = (matrix, threshold) => {
   const badGenes = [];
 
   matrix.forEach((gene, index) => {
+    // sum the number of reads of this gene over all cells
     const reads = gene.reduce((a, b) => {
       return a + b;
     }, 0);

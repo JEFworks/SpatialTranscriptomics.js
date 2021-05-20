@@ -4,8 +4,9 @@ import { Alert } from "@material-ui/lab";
 
 class AlertBanner extends Component {
   render() {
-    // produce error message
     const { errors, open, handleClose } = this.props;
+
+    // create error string
     let errorMsg = "";
     if (errors.includes("Network Error")) {
       errorMsg = "Server not responding.\n";

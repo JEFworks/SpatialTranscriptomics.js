@@ -8,6 +8,7 @@ import {
   CircularProgress,
 } from "@material-ui/core";
 import ScatterPlot from "./Plots/ScatterPlot.jsx";
+import generateCSV from "../functions/generateCSV.jsx";
 
 const paragraph = "rgba(0, 0, 0, 0.54)";
 const blue = "#80d8ff";
@@ -113,31 +114,28 @@ class DGEWrapper extends Component {
     computeDGE(x, y);
   };
 
+  // set reference cluster #
   setX = (event) => {
     const num = Number.parseInt(event.target.value);
     this.setState({ x: num });
   };
 
+  // function to allow user to download DGE results
   download = (data) => {
     if (!data[0]) {
       this.props.reportError("Please run DGE first.\n");
       return;
     }
 
-    const results = ["feature,-log10(p-value),log2(fold-change)"];
+    const table = ["feature,-log10(p-value),log2(fold-change)"];
     data.forEach((gene) => {
-      results.push(`${gene.name},${gene.p},${gene.fc}`);
+      table.push(`${gene.name},${gene.p},${gene.fc}`);
     });
-    const CSV = results.join("\n");
 
-    const element = document.createElement("a");
-    const file = new Blob([CSV], { type: "text/csv" });
-    element.href = URL.createObjectURL(file);
-    element.download = "dge_results.csv";
-    document.body.appendChild(element);
-    element.click();
+    generateCSV(table, "dge_results.csv");
   };
 
+  // set non-reference cluster #
   setY = (event) => {
     const num = Number.parseInt(event.target.value);
     this.setState({ y: num });

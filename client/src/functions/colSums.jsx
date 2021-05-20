@@ -8,6 +8,7 @@ const colSums = (matrix, threshold) => {
   const badCells = [];
 
   for (let i = 0; i < numCells; i++) {
+    // calculate number of genes in this cell
     let geneCount = 0;
     for (let j = 0; j < numGenes; j++) {
       if (matrix[j][i] > 0) {

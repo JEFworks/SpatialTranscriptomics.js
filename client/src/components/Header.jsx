@@ -22,7 +22,7 @@ const TitleContents = (props) => {
     setK,
     k,
     loading,
-    noshow,
+    hideInput,
     windowWidth,
   } = props.properties;
   const isMobile = windowWidth < 980;
@@ -44,7 +44,7 @@ const TitleContents = (props) => {
         </Link>
       </Typography>
 
-      {!noshow && (
+      {!hideInput && (
         <div style={{ display: "flex", marginTop: isMobile ? "-5px" : "2px" }}>
           <div
             style={{
@@ -183,7 +183,7 @@ class Header extends Component {
   };
 
   render = () => {
-    const { setFeature, setK, loading, noshow } = this.props;
+    const { loading, hideInput } = this.props;
     const { feature, k } = this.state;
 
     return (
@@ -197,13 +197,13 @@ class Header extends Component {
           <Toolbar>
             <Title
               selectFeature={this.selectFeature}
-              setFeature={setFeature}
+              setFeature={this.props.setFeature}
               feature={feature}
               selectK={this.selectK}
-              setK={setK}
+              setK={this.props.setK}
               k={k}
               loading={loading}
-              noshow={noshow}
+              hideInput={hideInput}
               windowWidth={window.innerWidth}
             />
           </Toolbar>

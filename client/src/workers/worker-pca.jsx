@@ -14,6 +14,7 @@ export const performPCA = (m) => {
   const pcs = pca.getEigenvectors().data;
   const eigenvalues = pca.getEigenvalues();
 
+  // do this conversion because PCA function returns an array of Float64Array's
   const pcsCleaned = [];
   pcs.forEach((cell) => {
     pcsCleaned.push([].slice.call(cell));
