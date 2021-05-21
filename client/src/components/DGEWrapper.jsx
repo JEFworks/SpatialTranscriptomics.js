@@ -44,14 +44,14 @@ const TypedInput = (props) => {
         color="secondary"
         helperText="Reference Cluster #"
         defaultValue="-1"
-        onChange={(event) => setX(event)}
+        onChange={setX}
       />
       <TextField
         style={{ width: "100px", marginRight: "15px" }}
         color="secondary"
         helperText="Non-Reference Cluster #"
         defaultValue="1"
-        onChange={(event) => setY(event)}
+        onChange={setY}
       />
     </FormGroup>
   );

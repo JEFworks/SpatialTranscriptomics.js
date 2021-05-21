@@ -35,6 +35,8 @@ let kmeans_WorkerInstance = Worker_KMEANS();
 let dge_WorkerInstance = Worker_DGE();
 let gse_WorkerInstance = Worker_GSE();
 
+const stjsAPI = axios.create({ baseURL: api });
+
 class Homepage extends Component {
   state = {
     uuid: null,
@@ -139,8 +141,8 @@ class Homepage extends Component {
   // load genesets
   loadGeneSets = async () => {
     const { loading } = this.state;
-    axios
-      .get(`${api}/genesets`)
+    stjsAPI
+      .get("/genesets")
       .then((response) => {
         const geneSets = JSON.parse(response.data);
         loading.geneSets = false;
@@ -242,15 +244,15 @@ class Homepage extends Component {
   // load the tissue image
   loadImage = () => {
     const { loading, uuid } = this.state;
-    const imageLink = `${api}/static/${uuid}/tissue_image.png`;
-    axios
+    const imageLink = `/static/${uuid}/tissue_image.png`;
+    stjsAPI
       .get(imageLink)
       .catch(() => {
         this.reportError("Tissue image file was not found.\n");
       })
       .finally(() => {
         loading.image = false;
-        this.setState({ loading, imageLink });
+        this.setState({ loading, imageLink: `${api}${imageLink}` });
       });
   };
 
@@ -278,8 +280,8 @@ class Homepage extends Component {
     this.resetState();
 
     this.setState({ uuid }, () => {
-      axios
-        .post(`${api}/upload/${uuid}`, data, {})
+      stjsAPI
+        .post("/upload", data, { params: { uuid: uuid } })
         .then((_response) => {
           this.loadDataset();
         })
@@ -292,8 +294,8 @@ class Homepage extends Component {
   // load gene names
   loadFeatures = async () => {
     const { uuid } = this.state;
-    axios
-      .get(`${api}/features/${uuid}`)
+    stjsAPI
+      .get("/features", { params: { uuid: uuid } })
       .then((response) => {
         const features = JSON.parse(response.data);
         this.setState({ features });
@@ -306,8 +308,8 @@ class Homepage extends Component {
   // load cell barcodes
   loadBarcodes = async () => {
     const { uuid } = this.state;
-    axios
-      .get(`${api}/barcodes/${uuid}`)
+    stjsAPI
+      .get("/barcodes", { params: { uuid: uuid } })
       .then((response) => {
         const barcodes = JSON.parse(response.data);
         this.setState({ barcodes }, () => {
@@ -316,7 +318,7 @@ class Homepage extends Component {
       })
       .catch((error) => {
         this.reportError(error);
-        axios.get(`${api}/pixels/${uuid}`).catch((error) => {
+        stjsAPI.get("/pixels", { params: { uuid: uuid } }).catch((error) => {
           this.reportError(error);
         });
       });
@@ -325,8 +327,8 @@ class Homepage extends Component {
   // load pixel locations
   loadPixels = async () => {
     const { uuid, barcodes } = this.state;
-    axios
-      .get(`${api}/pixels/${uuid}`)
+    stjsAPI
+      .get("/pixels", { params: { uuid: uuid } })
       .then((response) => {
         const pixels = JSON.parse(response.data);
         // augment barcodes array with pixel info (e.g. "ENG1" -> {barcode: "ENG1", x: 10, y: 5})
@@ -351,8 +353,10 @@ class Homepage extends Component {
 
     // load the matrix in 4 batches
     while (count < numBatches && !errorOccured) {
-      await axios
-        .get(`${api}/matrix/${uuid}/${count}/${numBatches}`)
+      await stjsAPI
+        .get("/matrix", {
+          params: { uuid: uuid, count: count, numBatches: numBatches },
+        })
         .then((response) => {
           const res = JSON.parse(response.data);
           const m = new SparseMatrix(res.rows, res.columns);

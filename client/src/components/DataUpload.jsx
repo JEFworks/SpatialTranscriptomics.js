@@ -190,58 +190,57 @@ class VerticalLinearStepper extends Component {
   };
 }
 
-class DataUpload extends Component {
-  render = () => {
-    const {
-      matrixFileHandler,
-      featuresFileHandler,
-      barcodesFileHandler,
-      pixelsFileHandler,
-      imageFileHandler,
-      uploadFiles,
-      files,
-    } = this.props;
+const DataUpload = (props) => {
+  const {
+    matrixFileHandler,
+    featuresFileHandler,
+    barcodesFileHandler,
+    pixelsFileHandler,
+    imageFileHandler,
+    uploadFiles,
+    files,
+    reportError,
+  } = props;
 
-    return (
-      <>
-        <div style={{ display: "flex" }}>
-          <Typography
-            color="primary"
-            style={{
-              marginTop: "20px",
-              marginBottom: "10px",
-              fontWeight: 500,
-            }}
-            variant="h5"
-          >
-            Data Upload
-          </Typography>
-        </div>
-
+  return (
+    <>
+      <div style={{ display: "flex" }}>
         <Typography
-          style={{ fontWeight: 400, color: paragraph, marginBottom: "-5px" }}
-          variant="body1"
+          color="primary"
+          style={{
+            marginTop: "20px",
+            marginBottom: "10px",
+            fontWeight: 500,
+          }}
+          variant="h5"
         >
-          By default, a dataset of 20 genes x 2698 cells from a coronal brain
-          tissue is loaded.
-          <br></br>
-          To work with your own dataset, upload the appropriate files below. The
-          only required file is the matrix file.
+          Data Upload
         </Typography>
+      </div>
 
-        <VerticalLinearStepper
-          files={files}
-          matrixFileHandler={matrixFileHandler}
-          featuresFileHandler={featuresFileHandler}
-          barcodesFileHandler={barcodesFileHandler}
-          pixelsFileHandler={pixelsFileHandler}
-          imageFileHandler={imageFileHandler}
-          uploadFiles={uploadFiles}
-          reportError={this.props.reportError}
-        />
-      </>
-    );
-  };
-}
+      <Typography
+        style={{ fontWeight: 400, color: paragraph, marginBottom: "-5px" }}
+        variant="body1"
+      >
+        By default, a dataset of 20 genes x 2698 cells from a coronal brain
+        tissue is loaded.
+        <br></br>
+        To work with your own dataset, upload the appropriate files below. The
+        only required file is the matrix file.
+      </Typography>
+
+      <VerticalLinearStepper
+        files={files}
+        matrixFileHandler={matrixFileHandler}
+        featuresFileHandler={featuresFileHandler}
+        barcodesFileHandler={barcodesFileHandler}
+        pixelsFileHandler={pixelsFileHandler}
+        imageFileHandler={imageFileHandler}
+        uploadFiles={uploadFiles}
+        reportError={reportError}
+      />
+    </>
+  );
+};
 
 export default DataUpload;

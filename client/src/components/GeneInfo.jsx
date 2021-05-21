@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import axios from "axios";
-import omimApiKey from "../omimApiKey.jsx";
+import api from "../api.jsx";
 import {
   Typography,
   Button,
@@ -17,6 +17,8 @@ import {
 } from "victory";
 import Title from "./Plots/PlotTitle.jsx";
 
+const stjsAPI = axios.create({ baseURL: api });
+
 const paragraph = "rgba(0, 0, 0, 0.54)";
 
 const Info = (props) => {
@@ -25,7 +27,7 @@ const Info = (props) => {
   return (
     <Paper
       className="geneinfo-plot"
-      style={{ overflowY: "scroll" }}
+      style={{ overflowY: "auto" }}
       variant="outlined"
       elevation={3}
     >
@@ -142,18 +144,16 @@ class GeneInfo extends Component {
 
   run = () => {
     const { feature } = this.state;
+
+    // compute boxplot statistics
     this.props.computeBoxplot(feature);
 
-    axios
-      .get(
-        `https://api.omim.org/api/entry/search?search=${feature}&include=text:description&include=text:cloning&format=json&start=0&limit=1&apiKey=${omimApiKey}`
-      )
-      .then((response) => {
-        const {
-          textSectionList,
-          titles,
-        } = response.data.omim.searchResponse.entryList[0].entry;
-
+    // get information about gene from OMIM
+    stjsAPI
+      .get("/omim", { params: { geneName: feature } })
+      .then((res) => {
+        const response = JSON.parse(res.data);
+        const { textSectionList, titles } = response;
         this.setState({
           title: titles.preferredTitle,
           textArray: textSectionList,
@@ -161,6 +161,7 @@ class GeneInfo extends Component {
       })
       .catch((_error) => {
         this.props.reportError("Gene info could not be retrieved from OMIM.\n");
+        this.setState({ title: "", textArray: [] });
       });
   };
 

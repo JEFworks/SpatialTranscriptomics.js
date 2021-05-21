@@ -1,4 +1,3 @@
-import React, { Component } from "react";
 import { Grid } from "@material-ui/core";
 
 const LegendElement = (props) => {
@@ -31,21 +30,19 @@ const LegendElement = (props) => {
   );
 };
 
-class Legend extends Component {
-  render() {
-    const { colors } = this.props;
-    if (colors.length === 0) return <></>;
+const Legend = (props) => {
+  const { colors } = props;
+  if (colors.length === 0) return <></>;
 
-    return (
-      <div className="legend">
-        <Grid container direction="column">
-          {colors.map((color, i) => {
-            return <LegendElement key={i} color={color} name={i + 1} />;
-          })}
-        </Grid>
-      </div>
-    );
-  }
-}
+  return (
+    <div className="legend">
+      <Grid container direction="column">
+        {colors.map((color, i) => {
+          return <LegendElement key={i} color={color} name={i + 1} />;
+        })}
+      </Grid>
+    </div>
+  );
+};
 
 export default Legend;

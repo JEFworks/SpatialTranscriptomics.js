@@ -13,4 +13,4 @@ node_modules/
 build/
 package-lock.json
 client/.eslintcache
-client/src/omimApiKey.jsx
+backend/omimApiKey.jsx
