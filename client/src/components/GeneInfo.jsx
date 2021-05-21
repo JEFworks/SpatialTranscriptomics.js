@@ -13,12 +13,64 @@ import {
   VictoryBoxPlot,
   VictoryAxis,
   VictoryZoomContainer,
+  VictoryLabel,
 } from "victory";
+import Title from "./Plots/PlotTitle.jsx";
 
 const paragraph = "rgba(0, 0, 0, 0.54)";
 
 const Info = (props) => {
-  return <></>;
+  const { geneName, textArray } = props;
+
+  return (
+    <Paper
+      className="geneinfo-plot"
+      style={{ overflowY: "scroll" }}
+      variant="outlined"
+      elevation={3}
+    >
+      <div style={{ margin: "0 25px 5px 0" }}>
+        <Title title={"Gene Information"} />
+      </div>
+
+      <div style={{ marginBottom: "20px", marginRight: "20px" }}>
+        <Typography
+          style={{ fontWeight: 500, marginBottom: "5px" }}
+          variant="body2"
+        >
+          {geneName}
+        </Typography>
+        {textArray.map((entry, i) => {
+          const { textSectionContent, textSectionTitle } = entry.textSection;
+          return (
+            <div key={i}>
+              <Typography
+                style={{
+                  fontWeight: 400,
+                  fontStyle: "italic",
+                  marginBottom: "5px",
+                }}
+                variant="body2"
+              >
+                {textSectionTitle}
+              </Typography>
+              <Typography
+                style={{
+                  fontWeight: 400,
+                  textAlign: "justify",
+                  textJustify: "inter-word",
+                  marginBottom: "10px",
+                }}
+                variant="body2"
+              >
+                {textSectionContent}
+              </Typography>
+            </div>
+          );
+        })}
+      </div>
+    </Paper>
+  );
 };
 
 const Plot = (props) => {
@@ -27,22 +79,11 @@ const Plot = (props) => {
     return x === "All" ? "black" : props.colors[parseInt(x) - 1];
   };
 
-  const Title = (
-    <Typography
-      variant="body1"
-      align="center"
-      color="primary"
-      style={{ fontWeight: 500 }}
-    >
-      {"Gene Box Plot.."}
-    </Typography>
-  );
-
   const Boxplot = (
     <VictoryChart
-      height={400}
-      width={450}
-      domainPadding={20}
+      height={450}
+      width={550}
+      domainPadding={30}
       containerComponent={<VictoryZoomContainer zoomDimension="x" />}
     >
       <VictoryBoxPlot
@@ -56,26 +97,23 @@ const Plot = (props) => {
           median: { stroke: "white", strokeWidth: 2 },
         }}
       />
-      <VictoryAxis dependentAxis crossAxis />
+      <VictoryAxis
+        dependentAxis
+        crossAxis
+        label={"# of reads per cell"}
+        axisLabelComponent={<VictoryLabel dy={-15} />}
+      />
       <VictoryAxis crossAxis />
     </VictoryChart>
   );
 
   return (
-    <div>
-      <Paper
-        className="boxplot"
-        style={{
-          padding: "15px 0 0 0",
-          backgroundColor: "transparent",
-        }}
-        variant="outlined"
-        elevation={3}
-      >
-        {Title}
-        {props.data[0] && Boxplot}
-      </Paper>
-    </div>
+    <Paper className="geneinfo-plot" variant="outlined" elevation={3}>
+      <div style={{ margin: "0 25px -15px 0" }}>
+        <Title title={"Expression Box Plot"} />
+      </div>
+      {props.data[0] && Boxplot}
+    </Paper>
   );
 };
 
@@ -134,7 +172,7 @@ class GeneInfo extends Component {
           color="primary"
           variant="h5"
         >
-          Gene info...
+          Gene Expression
         </Typography>
 
         <Typography
@@ -155,25 +193,19 @@ class GeneInfo extends Component {
           color="primary"
           onClick={this.run}
         >
-          Run ...
+          Run
         </Button>
-
-        {/* <p>{this.state.title}</p>
-        {this.state.textArray.map((entry, i) => {
-          const { textSectionContent, textSectionTitle } = entry.textSection;
-          return (
-            <div key={i}>
-              <div>{textSectionTitle}</div>
-              <div>{textSectionContent}</div>
-            </div>
-          );
-        })} */}
-        {/* <Info /> */}
 
         <div style={{ paddingTop: "20px" }}></div>
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>
-          <Plot data={this.props.boxplotData} colors={this.props.colors} />
+          <div className="GeneInfo-flex">
+            <Plot data={this.props.boxplotData} colors={this.props.colors} />
+            <Info
+              geneName={this.state.title}
+              textArray={this.state.textArray}
+            />
+          </div>
           <div style={{ width: "50%" }}></div>
         </div>
       </>
