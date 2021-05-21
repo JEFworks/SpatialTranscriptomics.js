@@ -54,17 +54,23 @@ app.get("/api", (_req, res) => {
 
 app.get("/api/omim", (req, res) => {
   const { geneName } = req.query;
-  const key = JSON.parse(omimApiKey);
+  const key = omimApiKey;
   axios
     .get(
       `https://api.omim.org/api/entry/search?search=${geneName}&include=text:description&include=text:cloning&format=json&start=0&limit=1&apiKey=${key}`
     )
-    .then((omimRes) => {
-      const data = omimRes.data.omim.searchResponse.entryList[0].entry;
-      res.json(JSON.stringify(data));
+    .then((response) => {
+      const data = response.data.omim.searchResponse.entryList[0].entry;
+      const { textSectionList, titles } = data;
+      res.json(
+        JSON.stringify({
+          title: titles.preferredTitle,
+          textArray: textSectionList,
+        })
+      );
     })
-    .catch((error) => {
-      res.status(400).send(error);
+    .catch((_error) => {
+      res.status(400).send("Gene info could not be retrieved from OMIM.\n");
     });
 });
 

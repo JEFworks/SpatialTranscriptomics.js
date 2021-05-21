@@ -65,7 +65,7 @@ const Info = (props) => {
                 }}
                 variant="body2"
               >
-                {textSectionContent}
+                {textSectionContent.replaceAll("{", "").replaceAll("}", "")}
               </Typography>
             </div>
           );
@@ -151,16 +151,13 @@ class GeneInfo extends Component {
     // get information about gene from OMIM
     stjsAPI
       .get("/omim", { params: { geneName: feature } })
-      .then((res) => {
-        const response = JSON.parse(res.data);
-        const { textSectionList, titles } = response;
-        this.setState({
-          title: titles.preferredTitle,
-          textArray: textSectionList,
-        });
+      .then((response) => {
+        const data = JSON.parse(response.data);
+        const { title, textArray } = data;
+        this.setState({ title, textArray });
       })
-      .catch((_error) => {
-        this.props.reportError("Gene info could not be retrieved from OMIM.\n");
+      .catch((error) => {
+        this.props.reportError(error);
         this.setState({ title: "", textArray: [] });
       });
   };

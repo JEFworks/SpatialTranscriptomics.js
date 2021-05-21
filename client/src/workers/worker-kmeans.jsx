@@ -42,9 +42,7 @@ export const performKMeans = (pcs, k) => {
   }
 
   // sort the map so colors[i] is the color of cells[i]
-  const sortedColorsMap = new Map(
-    [...colorsMap].sort((a, b) => parseInt(a) - parseInt(b))
-  );
+  const sortedColorsMap = new Map([...colorsMap].sort((a, b) => a[0] - b[0]));
   const colors = [...sortedColorsMap.values()];
 
   self.postMessage({
