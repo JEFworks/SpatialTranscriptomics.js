@@ -7,6 +7,7 @@ import {
   FormGroup,
   CircularProgress,
 } from "@material-ui/core";
+import Title from "./Plots/PlotTitle.jsx";
 import ScatterPlot from "./Plots/ScatterPlot.jsx";
 import generateCSV from "../functions/generateCSV.jsx";
 
@@ -18,17 +19,6 @@ const Plot = (props) => {
   const { data, getColor } = props;
   const obj = [{ id: "", data: data && data.length > 0 ? data : [] }];
 
-  const Title = (
-    <Typography
-      variant="body1"
-      align="center"
-      color="primary"
-      style={{ paddingBottom: "5px", fontWeight: 500 }}
-    >
-      {"Volcano Plot"}
-    </Typography>
-  );
-
   const Scatterplot = (
     <div style={{ width: "100%", height: "100%" }}>
       <ScatterPlot data={obj} getColor={getColor} type={"dge"} />
@@ -37,16 +27,8 @@ const Plot = (props) => {
 
   return (
     <div>
-      <Paper
-        className="volcano"
-        style={{
-          padding: "15px 15px 40px 15px",
-          backgroundColor: "transparent",
-        }}
-        variant="outlined"
-        elevation={3}
-      >
-        {Title}
+      <Paper className="volcano" variant="outlined" elevation={3}>
+        <Title title="Volcano Plot" />
         {Scatterplot}
       </Paper>
     </div>
@@ -56,7 +38,7 @@ const Plot = (props) => {
 const TypedInput = (props) => {
   const { setX, setY } = props;
   return (
-    <FormGroup row style={{ marginTop: "7px" }} className="dgeFlex">
+    <FormGroup row style={{ marginTop: "7px" }}>
       <TextField
         style={{ width: "100px", marginRight: "15px" }}
         color="secondary"

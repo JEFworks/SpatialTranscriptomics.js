@@ -8,6 +8,7 @@ import {
   CircularProgress,
 } from "@material-ui/core";
 import ScatterPlot from "./Plots/ScatterPlot.jsx";
+import Title from "./Plots/PlotTitle.jsx";
 
 const paragraph = "rgba(0, 0, 0, 0.54)";
 const blue = "#80d8ff";
@@ -15,17 +16,6 @@ const blue = "#80d8ff";
 const Plot = (props) => {
   const { data, getColor } = props;
   const obj = [{ id: "", data: data }];
-
-  const Title = (
-    <Typography
-      variant="body1"
-      align="center"
-      color="primary"
-      style={{ paddingBottom: "5px", fontWeight: 500 }}
-    >
-      {"tSNE"}
-    </Typography>
-  );
 
   const Scatterplot = (
     <div style={{ width: "100%", height: "100%" }}>
@@ -35,16 +25,8 @@ const Plot = (props) => {
 
   return (
     <div>
-      <Paper
-        className="tsne-plot"
-        style={{
-          padding: "15px 15px 15px 15px",
-          backgroundColor: "transparent",
-        }}
-        variant="outlined"
-        elevation={3}
-      >
-        {Title}
+      <Paper className="tsne-plot" variant="outlined" elevation={3}>
+        <Title title={"tSNE"} />
         {Scatterplot}
       </Paper>
     </div>

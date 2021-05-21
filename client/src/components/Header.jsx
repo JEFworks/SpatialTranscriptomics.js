@@ -140,11 +140,7 @@ const gitButton = (
     disableRipple
     edge="end"
     color="primary"
-    style={{
-      marginRight: "-10px",
-      marginBottom: "-4px",
-      backgroundColor: "transparent",
-    }}
+    style={{ marginRight: "-10px", marginBottom: "-4px" }}
     aria-label="menu"
   >
     <Link

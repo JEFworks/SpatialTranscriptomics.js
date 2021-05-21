@@ -17,7 +17,7 @@ code {
   margin: 0 auto;
   width: 90%;
   padding-top: 70px;
-  padding-bottom: 70px;
+  padding-bottom: 100px;
 }
 
 .legend {
@@ -31,7 +31,6 @@ code {
   max-height: 150px;
   overflow: scroll;
   background: rgba(255, 255, 255, 0.8);
-  /* opacity: 1; */
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
   border-radius: 5px;
 }
@@ -49,42 +48,73 @@ code {
   display: inline-flex;
 }
 
+.GeneInfo-flex {
+  display: inline-flex;
+}
+
+.qc-plot {
+  padding: 15px 20px 90px 20px;
+  margin: 0 10px 20px 10px;
+  height: 300px;
+  width: 400px;
+}
+
 .scree-plot {
   height: 450px;
   width: 370px;
+  padding: 15px 15px 40px 15px;
+  margin: 0 10px 0 10px;
 }
 
 .biplot {
   height: 450px;
   width: 480px;
-}
-
-.volcano {
-  height: 450px;
-  width: 550px;
-}
-
-.boxplot {
-  height: 450px;
-  width: 550px;
-}
-
-.gse-plot {
-  height: 450px;
-  width: 70vw;
+  padding: 15px 15px 40px 15px;
+  margin: 0 10px 0 10px;
 }
 
 .tsne-plot {
   height: 480px;
   width: 525px;
+  padding: 15px;
+}
+
+.volcano {
+  height: 450px;
+  width: 550px;
+  padding: 15px 15px 40px 15px;
+}
+
+.gse-plot {
+  height: 450px;
+  width: 70vw;
+  padding: 15px 15px 30px 15px;
+}
+
+.geneinfo-plot {
+  height: 350px;
+  width: 450px;
+  margin: 0 10px 0 10px;
+  padding: 15px 0 0 25px;
 }
 
 .icon-404 {
   display: block;
-  margin-top: 40px;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 40px auto 0 auto;
   width: 600px;
+}
+
+@media only screen and (max-width: 970px) {
+  .QC-flex {
+    display: grid;
+  }
+
+  .qc-plot {
+    padding: 15px 20px 90px 20px;
+    margin: 0 0 20px 0;
+    height: 300px;
+    width: 400px;
+  }
 }
 
 @media only screen and (max-width: 1050px) {
@@ -95,34 +125,14 @@ code {
   .scree-plot {
     height: 400px;
     width: 420px;
+    padding: 15px 15px 40px 15px;
+    margin: 0;
   }
 
   .biplot {
-    margin-top: 20px;
+    margin: 20px 0 0 0;
+    padding: 15px 15px 40px 15px;
     height: 400px;
-    width: 420px;
-  }
-}
-
-@media only screen and (max-width: 900px) {
-  .QC-flex {
-    display: grid;
-  }
-}
-
-@media only screen and (max-width: 650px) {
-  .volcano {
-    height: 345px;
-    width: 420px;
-  }
-
-  .gse-plot {
-    height: 345px;
-    width: 420px;
-  }
-
-  .boxplot {
-    height: 345px;
     width: 420px;
   }
 }
@@ -131,6 +141,47 @@ code {
   .tsne-plot {
     height: 385px;
     width: 420px;
+    padding: 15px;
+  }
+}
+
+@media only screen and (max-width: 650px) {
+  .volcano {
+    height: 345px;
+    width: 420px;
+    padding: 15px 15px 40px 15px;
+  }
+
+  .gse-plot {
+    height: 345px;
+    width: 420px;
+    padding: 15px 15px 30px 15px;
+  }
+}
+
+@media only screen and (max-width: 1070px) and (min-width: 700px) {
+  .GeneInfo-flex {
+    display: grid;
+  }
+
+  .geneinfo-plot {
+    height: 500px;
+    width: 600px;
+    margin: 0 0 20px 0;
+    padding: 15px 0px 0 25px;
+  }
+}
+
+@media only screen and (max-width: 700px) {
+  .GeneInfo-flex {
+    display: grid;
+  }
+
+  .geneinfo-plot {
+    height: 345px;
+    width: 420px;
+    margin: 0 0 20px 0;
+    padding: 15px 0px 0 25px;
   }
 }
 
@@ -143,9 +194,7 @@ code {
 
   .icon-404 {
     display: block;
-    margin-top: 50px;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 50px auto 0 auto;
     width: 350px;
   }
 }
@@ -159,9 +208,7 @@ code {
 
   .icon-404 {
     display: block;
-    margin-top: 0px;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 0 auto 0 auto;
     width: 350px;
   }
 }

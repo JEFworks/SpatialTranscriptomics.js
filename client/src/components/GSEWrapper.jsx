@@ -10,6 +10,7 @@ import {
   Paper,
 } from "@material-ui/core";
 import LineChart from "./Plots/LineChart.jsx";
+import Title from "./Plots/PlotTitle.jsx";
 import generateCSV from "../functions/generateCSV.jsx";
 
 const paragraph = "rgba(0, 0, 0, 0.54)";
@@ -21,17 +22,6 @@ const Plot = (props) => {
   const { geneSet, mhg, pvalue, threshold } = result;
 
   const obj = [{ id: "", data: mhg ? mhg : [] }];
-
-  const Title = (
-    <Typography
-      variant="body1"
-      align="center"
-      color="primary"
-      style={{ paddingBottom: "5px", fontWeight: 500 }}
-    >
-      Enrichment Plot
-    </Typography>
-  );
 
   const Linechart = (
     <div style={{ width: "100%", height: "100%" }}>
@@ -48,16 +38,8 @@ const Plot = (props) => {
 
   return (
     <div>
-      <Paper
-        className="gse-plot"
-        style={{
-          padding: "15px 15px 40px 15px",
-          backgroundColor: "transparent",
-        }}
-        variant="outlined"
-        elevation={3}
-      >
-        {Title}
+      <Paper className="gse-plot" variant="outlined" elevation={3}>
+        <Title title="Enrichment Plot" />
         {Linechart}
       </Paper>
     </div>

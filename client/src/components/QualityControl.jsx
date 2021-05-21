@@ -7,6 +7,7 @@ import {
   CircularProgress,
 } from "@material-ui/core";
 import Histogram from "./Plots/Histogram.jsx";
+import Title from "./Plots/PlotTitle.jsx";
 
 const paragraph = "rgba(0, 0, 0, 0.54)";
 const blue = "#80d8ff";
@@ -21,19 +22,6 @@ const Figure = (props) => {
     leftBound = sums[0].range;
     rightBound = sums[sums.length - 1].range;
   }
-
-  const Title = (
-    <Typography
-      variant="body1"
-      align="center"
-      color="primary"
-      style={{ paddingBottom: "5px", fontWeight: 500 }}
-    >
-      {type === "rowsum"
-        ? "# of Reads of a Gene"
-        : "# of Genes Detected in a Cell"}
-    </Typography>
-  );
 
   const HistogramPlot = (
     <div style={{ width: "100%", height: "110%" }}>
@@ -67,30 +55,17 @@ const Figure = (props) => {
     />
   );
 
+  const title =
+    type === "rowsum"
+      ? "# of Reads of a Gene"
+      : "# of Genes Detected in a Cell";
+
   return (
-    <div
-      style={{
-        height: "300px",
-        width: "100%",
-        paddingRight: "20px",
-        paddingBottom: "125px",
-      }}
-    >
-      <Paper
-        style={{
-          padding: "15px 20px 90px 15px",
-          width: "350px",
-          height: "100%",
-          backgroundColor: "transparent",
-        }}
-        variant="outlined"
-        elevation={3}
-      >
-        {Title}
-        {HistogramPlot}
-        {Toggle}
-      </Paper>
-    </div>
+    <Paper className="qc-plot" variant="outlined" elevation={3}>
+      <Title title={title} />
+      {HistogramPlot}
+      {Toggle}
+    </Paper>
   );
 };
 

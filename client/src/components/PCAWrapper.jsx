@@ -9,6 +9,7 @@ import {
 } from "@material-ui/core";
 import LineChart from "./Plots/LineChart.jsx";
 import ScatterPlot from "./Plots/ScatterPlot.jsx";
+import Title from "./Plots/PlotTitle.jsx";
 
 const paragraph = "rgba(0, 0, 0, 0.54)";
 const blue = "#80d8ff";
@@ -25,17 +26,6 @@ const Biplot = (props) => {
     });
   }
 
-  const Title = (
-    <Typography
-      variant="body1"
-      align="center"
-      color="primary"
-      style={{ paddingBottom: "5px", fontWeight: 500 }}
-    >
-      {"Biplot"}
-    </Typography>
-  );
-
   const Scatterplot = (
     <div style={{ width: "100%", height: "100%" }}>
       <ScatterPlot
@@ -49,20 +39,10 @@ const Biplot = (props) => {
   );
 
   return (
-    <div>
-      <Paper
-        className="biplot"
-        style={{
-          padding: "15px 15px 40px 15px",
-          backgroundColor: "transparent",
-        }}
-        variant="outlined"
-        elevation={3}
-      >
-        {Title}
-        {Scatterplot}
-      </Paper>
-    </div>
+    <Paper className="biplot" variant="outlined" elevation={3}>
+      <Title title={"Biplot"} />
+      {Scatterplot}
+    </Paper>
   );
 };
 
@@ -74,17 +54,6 @@ const ScreePlot = (props) => {
       obj[0].data.push({ x: index + 1, y: eigenvalue });
     });
   }
-
-  const Title = (
-    <Typography
-      variant="body1"
-      align="center"
-      color="primary"
-      style={{ paddingBottom: "5px", fontWeight: 500 }}
-    >
-      {"Scree Plot"}
-    </Typography>
-  );
 
   const Linechart = (
     <div style={{ width: "100%", height: "100%" }}>
@@ -99,20 +68,10 @@ const ScreePlot = (props) => {
   );
 
   return (
-    <div style={{ marginRight: "20px" }}>
-      <Paper
-        className="scree-plot"
-        style={{
-          padding: "15px 15px 40px 15px",
-          backgroundColor: "transparent",
-        }}
-        variant="outlined"
-        elevation={3}
-      >
-        {Title}
-        {Linechart}
-      </Paper>
-    </div>
+    <Paper className="scree-plot" variant="outlined" elevation={3}>
+      <Title title="Scree Plot" />
+      {Linechart}
+    </Paper>
   );
 };
 
@@ -276,6 +235,7 @@ class PCAWrapper extends Component {
           variant="contained"
           size="small"
           color="primary"
+          style={{ marginRight: "10px" }}
           onClick={this.run}
         >
           Run PCA
@@ -284,7 +244,6 @@ class PCAWrapper extends Component {
           variant="contained"
           size="small"
           color="primary"
-          style={{ marginLeft: "10px" }}
           onClick={this.applySettings}
         >
           Apply Settings

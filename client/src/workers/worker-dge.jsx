@@ -9,6 +9,8 @@ const getReferenceGroup = (clusters, indexToExclude) => {
   return ret;
 };
 
+// xNum is # of reference group
+// yNum is # of non-reference group
 export const performDGE = (
   clusters,
   filteredMatrix,
@@ -95,5 +97,6 @@ export const performDGE = (
     }
   }
 
+  // return dgeSolution, which is an array of { name (geneName), p, fc, type (upregulated, down, etc), and x and y (for plotting)}
   self.postMessage({ solution: dgeSolution });
 };

@@ -622,7 +622,6 @@ class Homepage extends Component {
    * Function to compute differential gene expression between two groups
    * @param {*} x number of reference cluster
    * @param {*} y number of non-reference cluster
-   * @returns
    */
   computeDGE = (x, y) => {
     const { clusters, filteredMatrix, filteredFeatures, loading } = this.state;
