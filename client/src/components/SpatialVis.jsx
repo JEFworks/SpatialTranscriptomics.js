@@ -62,21 +62,21 @@ const TypedInput = (props) => {
         style={{ width: "50px", marginRight: "15px" }}
         color="secondary"
         helperText="ΔX"
-        defaultValue="0"
+        defaultValue="30"
         onChange={changeDeltaX}
       />
       <TextField
         style={{ width: "50px", marginRight: "15px" }}
         color="secondary"
         helperText="ΔY"
-        defaultValue="1965"
+        defaultValue="1945"
         onChange={changeDeltaY}
       />
       <TextField
         style={{ width: "250px", marginRight: "15px" }}
         color="secondary"
         helperText="Scale (< 1 to downscale or > 1 to upscale)"
-        defaultValue="0.176"
+        defaultValue="0.170"
         onChange={changeScale}
       />
       <TextField
@@ -149,9 +149,9 @@ const CheckboxInput = (props) => {
 class SpatialVis extends Component {
   state = {
     pixels: [],
-    deltaX: 0,
-    deltaY: 1965,
-    scale: 0.176,
+    deltaX: 30,
+    deltaY: 1945,
+    scale: 0.17,
     horizontalFlipped: 1,
     verticalFlipped: -1,
     xyFlipped: false,

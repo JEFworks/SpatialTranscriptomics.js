@@ -170,6 +170,7 @@ class Homepage extends Component {
       filteredFeatures: [],
       barcodes: [],
       filteredBarcodes: [],
+      thresholds: { minRowSum: 2, minColSum: 1 },
       rowsums: {},
       colsums: {},
       eigenvalues: [],
@@ -703,6 +704,46 @@ class Homepage extends Component {
     });
   };
 
+  // compute boxplot to visualize expression of a gene
+  computeBoxplot = (featureName) => {
+    const { filteredMatrix, filteredFeatures, clusters } = this.state;
+    const boxplotData = [];
+
+    if (!clusters[0]) {
+      this.reportError("Please perform clustering with k >= 2 first.\n");
+      return;
+    }
+
+    const gene = this.getGene(filteredMatrix, filteredFeatures, featureName);
+    if (gene == null) {
+      this.reportError("Gene could not be found in the matrix.\n");
+      this.setState({ boxplotData: [] });
+      return;
+    }
+
+    // get whiskers, q1, median, q3 for the gene
+    const overallStats = QuartileStats(gene);
+    overallStats.x = "All";
+    boxplotData.push(overallStats);
+
+    // for each cluster, get the cluster's reads of the gene and compute boxplot statistics
+    clusters.forEach((cluster, i) => {
+      const filteredGene = [];
+      cluster.forEach((cellIndex) => {
+        filteredGene.push(gene[cellIndex]);
+      });
+      const groupStats = QuartileStats(filteredGene);
+      groupStats.x = (i + 1).toString();
+      boxplotData.push(groupStats);
+    });
+
+    this.setState({ boxplotData });
+  };
+
+  getGene(matrix, features, name) {
+    return matrix[features.indexOf(name)];
+  }
+
   // set gene name and compute colors based on expression of this gene
   setFeature = (name) => {
     const { filteredMatrix, filteredFeatures, loading } = this.state;
@@ -713,10 +754,6 @@ class Homepage extends Component {
     const colors = this.getColorsByGene(filteredMatrix, filteredFeatures, name);
     this.setState({ feature: name, colorOption: "gene", colors });
   };
-
-  getGene(matrix, features, name) {
-    return matrix[features.indexOf(name)];
-  }
 
   getColorsByGene(matrix, features, featureName) {
     const colors = [];
@@ -790,42 +827,6 @@ class Homepage extends Component {
         kmeans_WorkerInstance.terminate();
       }
     });
-  };
-
-  // compute boxplot to visualize expression of a gene
-  computeBoxplot = (featureName) => {
-    const { filteredMatrix, filteredFeatures, clusters } = this.state;
-    const boxplotData = [];
-
-    if (!clusters[0]) {
-      this.reportError("Please perform clustering with k >= 2 first.\n");
-      return;
-    }
-
-    const gene = this.getGene(filteredMatrix, filteredFeatures, featureName);
-    if (gene == null) {
-      this.reportError("Gene could not be found in the matrix.\n");
-      this.setState({ boxplotData: [] });
-      return;
-    }
-
-    // get whiskers, q1, median, q3 for the gene
-    const overallStats = QuartileStats(gene);
-    overallStats.x = "All";
-    boxplotData.push(overallStats);
-
-    // for each cluster, get the cluster's reads of the gene and compute boxplot statistics
-    clusters.forEach((cluster, i) => {
-      const filteredGene = [];
-      cluster.forEach((cellIndex) => {
-        filteredGene.push(gene[cellIndex]);
-      });
-      const groupStats = QuartileStats(filteredGene);
-      groupStats.x = (i + 1).toString();
-      boxplotData.push(groupStats);
-    });
-
-    this.setState({ boxplotData });
   };
 
   render = () => {
@@ -914,10 +915,10 @@ class Homepage extends Component {
 
           <div style={{ paddingTop: "40px" }}></div>
           <GeneInfo
-            reportError={this.reportError}
             computeBoxplot={this.computeBoxplot}
             boxplotData={this.state.boxplotData}
             colors={this.state.clusterLegend}
+            reportError={this.reportError}
           />
         </div>
       </>

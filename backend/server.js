@@ -13,7 +13,7 @@ const { omimApiKey } = require("./omimApiKey.jsx");
 
 // delete localhost from this list when deploying
 const corsOptions = {
-  origin: ["https://stjs.me", "https://www.stjs.me"],
+  origin: ["https://stjs.me", "https://www.stjs.me", "http://localhost:8000"],
   optionsSuccessStatus: 200, // For legacy browser support
 };
 

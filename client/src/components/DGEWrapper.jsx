@@ -109,9 +109,9 @@ class DGEWrapper extends Component {
       return;
     }
 
-    const table = ["feature,-log10(p-value),log2(fold-change)"];
+    const table = [["feature", "-log10(p-value)", "log2(fold-change)"]];
     data.forEach((gene) => {
-      table.push(`${gene.name},${gene.p},${gene.fc}`);
+      table.push([gene.name, gene.p, gene.fc]);
     });
 
     generateCSV(table, "dge_results.csv");
@@ -140,10 +140,10 @@ class DGEWrapper extends Component {
           style={{ fontWeight: 400, color: paragraph }}
           variant="body1"
         >
-          First line of description...
-          <br></br>
-          Second line of description... (-1 for comparison against all other
-          clusters)
+          This analysis identifies genes that are significantlly expressed at
+          different levels between two conditions (e.g. cluster 1 vs cluster 2).
+          To compare a cluster against all other clusters, set reference cluster
+          # as -1.
         </Typography>
 
         <div style={{ display: "flex" }}>

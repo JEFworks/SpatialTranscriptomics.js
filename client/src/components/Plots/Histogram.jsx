@@ -1,4 +1,3 @@
-import React, { Component } from "react";
 import { ResponsiveBar } from "@nivo/bar";
 
 const red = "#ff80ab";
@@ -47,41 +46,36 @@ const yAxis = {
   legendOffset: -40,
 };
 
-class Histogram extends Component {
-  render() {
-    const { props } = this;
-    const { min } = props;
+const Histogram = (props) => {
+  const { min } = props;
 
-    const data = !props.data
-      ? [{ range: 0, frequency: 0, color: "black" }]
-      : props.data.map((datum) => {
-          return {
-            range: datum.range.toFixed(1),
-            frequency: datum.frequency,
-            color: setColor(datum.range, min),
-          };
-        });
+  const data = !props.data
+    ? [{ range: 0, frequency: 0, color: "black" }]
+    : props.data.map((datum) => {
+        return {
+          range: datum.range.toFixed(1),
+          frequency: datum.frequency,
+          color: setColor(datum.range, min),
+        };
+      });
 
-    return (
-      <>
-        <ResponsiveBar
-          theme={{ textColor: "black" }}
-          data={data}
-          keys={["frequency"]}
-          indexBy="range"
-          margin={{ top: 5, right: 0, bottom: 50, left: 45 }}
-          colors={getColor}
-          markers={data.length < 1 ? null : markers(getMarkerLine(data, min))}
-          axisBottom={xAxis(props.xLabel)}
-          axisLeft={yAxis}
-          enableLabel={false}
-          enableGridX={false}
-          enableGridY={false}
-          isInteractive={false}
-        />
-      </>
-    );
-  }
-}
+  return (
+    <ResponsiveBar
+      theme={{ textColor: "black" }}
+      data={data}
+      keys={["frequency"]}
+      indexBy="range"
+      margin={{ top: 5, right: 0, bottom: 50, left: 45 }}
+      colors={getColor}
+      markers={data.length < 1 ? null : markers(getMarkerLine(data, min))}
+      axisBottom={xAxis(props.xLabel)}
+      axisLeft={yAxis}
+      enableLabel={false}
+      enableGridX={false}
+      enableGridY={false}
+      isInteractive={false}
+    />
+  );
+};
 
 export default Histogram;

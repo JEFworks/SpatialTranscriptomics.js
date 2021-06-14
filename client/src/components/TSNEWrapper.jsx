@@ -26,7 +26,7 @@ const Plot = (props) => {
   return (
     <div>
       <Paper className="tsne-plot" variant="outlined" elevation={3}>
-        <Title title={"tSNE"} />
+        <Title title={"t-SNE"} />
         {Scatterplot}
       </Paper>
     </div>
@@ -112,7 +112,7 @@ class TSNEWrapper extends Component {
     computeTSNE(tsneSettings);
   };
 
-  render() {
+  render = () => {
     const { tsneSolution } = this.props;
 
     return (
@@ -122,14 +122,14 @@ class TSNEWrapper extends Component {
           style={{ marginBottom: "10px", fontWeight: 500 }}
           variant="h5"
         >
-          t-distributed Stochastic Neighbor Embedding (tSNE)
+          t-distributed Stochastic Neighbor Embedding (t-SNE)
         </Typography>
 
         <Typography
           style={{ fontWeight: 400, color: paragraph }}
           variant="body1"
         >
-          Produce a tSNE map to map the principal components onto a 2D space,
+          Produce a t-SNE map to map the principal components onto a 2D space,
           while preserving local distances between cells.
           <br></br>
           Epsilon is the learning rate, perplexity is the # of neighboring cells
@@ -156,7 +156,7 @@ class TSNEWrapper extends Component {
           color="primary"
           onClick={this.run}
         >
-          Run tSNE
+          Run t-SNE
         </Button>
 
         <div style={{ paddingTop: "20px" }}></div>
@@ -167,7 +167,7 @@ class TSNEWrapper extends Component {
         </div>
       </>
     );
-  }
+  };
 }
 
 export default TSNEWrapper;

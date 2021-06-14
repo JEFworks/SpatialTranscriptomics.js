@@ -162,7 +162,7 @@ class GeneInfo extends Component {
       });
   };
 
-  render() {
+  render = () => {
     return (
       <>
         <Typography
@@ -177,9 +177,10 @@ class GeneInfo extends Component {
           style={{ fontWeight: 400, color: paragraph }}
           variant="body1"
         >
-          First line of description...
+          Run this module to view a gene's expression levels across groups, and
+          view info about the gene from OMIM.
           <br></br>
-          Second line of description...
+          (will change to bar graph of average gene expression in each cluster)
         </Typography>
 
         <TypedInput onChange={this.setFeature} />
@@ -208,7 +209,7 @@ class GeneInfo extends Component {
         </div>
       </>
     );
-  }
+  };
 }
 
 export default GeneInfo;

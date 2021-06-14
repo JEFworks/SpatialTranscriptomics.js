@@ -126,12 +126,13 @@ class QualityControl extends Component {
           style={{ marginBottom: "20px", fontWeight: 400, color: paragraph }}
           variant="body1"
         >
-          Use the range selectors to set the minimum threshold for each QC
-          metric.
-          <br></br>
-          Cells and genes below these thresholds are removed from the expression
-          matrix for downstream analysis. Genes not expressed in any cells were
-          automatically removed.
+          Use the range selectors to set the minimum threshold for each quality
+          control metric. Cells and genes below these thresholds are removed
+          from the expression matrix for downstream analysis. Increasing the
+          threshold for # of reads per gene filters out lowly expressed genes,
+          while increasing the threshold for # of genes detected in a cell
+          filters out cells with few reads overall. Genes not expressed in any
+          cells were automatically removed.
         </Typography>
 
         <div style={{ width: "100%", display: "flex" }}>

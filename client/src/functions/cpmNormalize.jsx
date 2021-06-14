@@ -21,8 +21,7 @@ const cpmNormalize = (m) => {
     // divided by total number of reads (over all features) in the cell.
     // multiply this by 10^6 for a nice number
     for (let j = 0; j < nrow; j++) {
-      matrix[j][i] = m[j][i] / colsums[i];
-      matrix[j][i] *= Math.pow(10, 6);
+      matrix[j][i] = (m[j][i] / colsums[i]) * Math.pow(10, 6);
     }
   }
 
