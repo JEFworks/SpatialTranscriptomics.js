@@ -14,3 +14,5 @@ build/
 package-lock.json
 client/.eslintcache
 backend/omimApiKey.jsx
+temp/.RData
+temp/.RDataTmp

@@ -21,6 +21,8 @@ import DGEWrapper from "./DGEWrapper.jsx";
 import GSEWrapper from "./GSEWrapper.jsx";
 import GeneInfo from "./GeneInfo.jsx";
 
+import cpmNormalize from "../functions/cpmNormalize.jsx";
+
 import Worker_FILTER from "workerize-loader!../workers/worker-filter.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
 import Worker_PCA from "workerize-loader!../workers/worker-pca.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
 import Worker_TSNE from "workerize-loader!../workers/worker-tsne.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
@@ -469,14 +471,14 @@ class Homepage extends Component {
 
         // compute colors based on a specific gene
         const colors = this.getColorsByGene(
-          filteredData.matrix,
+          cpmNormalize(filteredData.matrix),
           filteredData.features,
           feature
         );
 
         loading.upload = false;
         this.setState({
-          filteredMatrix: filteredData.matrix,
+          filteredMatrix: cpmNormalize(filteredData.matrix),
           filteredFeatures: filteredData.features,
           filteredBarcodes: filteredData.barcodes,
           thresholds: data.thresholds,
