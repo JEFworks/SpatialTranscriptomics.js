@@ -22,7 +22,7 @@ const cpmNormalize = (m) => {
     // multiply this by 10^6 for a nice number
     for (let j = 0; j < nrow; j++) {
       matrix[j][i] = (m[j][i] / colsums[i]) * Math.pow(10, 6);
-      matrix[j][i] = Math.log10(matrix[j][i] + 1);
+      // matrix[j][i] = Math.log10(matrix[j][i] + 1);
     }
   }
 

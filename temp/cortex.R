@@ -108,24 +108,24 @@ map2col <- function(x, pal=colorRampPalette(c('blue', 'grey', 'red'))(100), na.c
 }
 
 
-dir <- 'filtered_feature_bc_matrix/'
-cd <- readMM(paste0(dir, 'test.mtx.gz'))
-print(cd)
-
-mat <- as(cd, "dgeMatrix")
-
-## center data myself (make mean 0)
-m <- t(mat)
-m <- t(m) - colMeans(m)
-
-library(RSpectra)
-pca <- RSpectra::svds(
-  A    = t(m),
-  k    = 4,
-  opts = list(
-    center = FALSE, scale = FALSE, maxitr = 2000, tol = 1e-10
-  )
-)
+# dir <- 'filtered_feature_bc_matrix/'
+# cd <- readMM(paste0(dir, 'test.mtx.gz'))
+# print(cd)
+# 
+# mat <- as(cd, "dgeMatrix")
+# 
+# ## center data myself (make mean 0)
+# m <- t(mat)
+# m <- t(m) - colMeans(m)
+# 
+# library(RSpectra)
+# pca <- RSpectra::svds(
+#   A    = t(m),
+#   k    = 4,
+#   opts = list(
+#     center = FALSE, scale = FALSE, maxitr = 2000, tol = 1e-10
+#   )
+# )
 
 
 ######## read in data
@@ -157,7 +157,7 @@ cd.filter <- cd.filter[,vi]
 ######## Counts per million (CPM) normalization
 mat <- Matrix::t(Matrix::t(cd.filter)/Matrix::colSums(cd.filter))
 mat <- mat * 1e6
-hist(log10(mat[1,]+1))
+# hist(log10(mat[1,]+1))
 # mat <- log10(mat + 1)
 dim(mat)
 
@@ -208,14 +208,14 @@ plotEmbedding(pcs[,1:2], main=g, col=gexp,
 ## TSNE embedding with regular PCs
 ## Can also use UMAP (try it out for yourself) using the uwot package
 library(Rtsne)
-emb <- Rtsne::Rtsne(pcs,
+emb.tsne <- Rtsne::Rtsne(pcs,
                     is_distance=FALSE,
                     perplexity=30,
                     max_iter=500,
                     num_threads=1,
                     verbose=FALSE)$Y
-rownames(emb) <- rownames(pcs)
-plotEmbedding(emb, col = gexp, main='tSNE', xlab = "t-SNE X", ylab = "t-SNE Y")
+rownames(emb.tsne) <- rownames(pcs)
+plotEmbedding(emb.tsne, col = gexp, main='tSNE', xlab = "t-SNE X", ylab = "t-SNE Y")
 
 
 ### SPATIAL
@@ -243,3 +243,21 @@ tissueSpotRotation$V5 <- tissueSpotRotation$V5 * -1
 plotEmbedding(tissueSpotRotation, col=gexp, 
               cex=1, xlab=NA, ylab=NA,
               verbose=FALSE)
+
+set.seed(0)
+cl <- kmeans(pcs, 10)
+cl$cluster
+col <- rainbow(length(unique(cl$cluster)))[cl$cluster]
+names(col) <- names(cl$cluster)
+
+plotEmbedding(emb.tsne, col = col, main='tSNE', xlab = "t-SNE X", ylab = "t-SNE Y")
+# par(xpd=TRUE)
+legend(legend=c(1:10), col=col, x="topright", lty = 1, lwd = 5, inset=c(-0.35,0))
+plotEmbedding(pcs[,1:2], main=g, col=col,xlab='PC1', ylab='PC2')
+
+par(mfrow=c(1,1), mar=rep(4,4))
+plotEmbedding(tissueSpotRotation, col=col, 
+              cex=1, xlab=NA, ylab=NA,
+              verbose=FALSE)
+legend(legend=c(1:10), col=col, x="topright", lty = 1, lwd = 5, inset=c(-0.17,0))
+

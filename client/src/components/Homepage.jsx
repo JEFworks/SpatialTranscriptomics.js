@@ -21,6 +21,8 @@ import DGEWrapper from "./DGEWrapper.jsx";
 import GSEWrapper from "./GSEWrapper.jsx";
 import GeneInfo from "./GeneInfo.jsx";
 
+import generateCSV from "../functions/generateCSV.jsx";
+
 import cpmNormalize from "../functions/cpmNormalize.jsx";
 
 import Worker_FILTER from "workerize-loader!../workers/worker-filter.jsx"; // eslint-disable-line import/no-webpack-loader-syntax
@@ -827,6 +829,21 @@ class Homepage extends Component {
           clusterLegend,
         });
         kmeans_WorkerInstance.terminate();
+
+        const table = [["cell", "cluster"]];
+        // data.forEach((gene) => {
+        //   table.push([gene.name, gene.p, gene.fc]);
+        // });
+
+        clusters.forEach((cluster, i) => {
+          cluster.forEach((cell) => {
+            const id = this.state.filteredBarcodes[cell].barcode;
+            // const color = colors[cell]
+            table.push([id, i]);
+          });
+        });
+
+        generateCSV(table, "cluster_results.csv");
       }
     });
   };
