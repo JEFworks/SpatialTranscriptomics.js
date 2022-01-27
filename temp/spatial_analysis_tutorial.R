@@ -7,7 +7,7 @@
 library(Matrix)
 
 ######## read in data
-dir <- '~/Documents/GitHub/SpatialTranscriptomics.js/data/coronal_brain/filtered_feature_bc_matrix/filtered/'
+dir <- 'filtered_feature_bc_matrix/filtered/'
 cd <- readMM(paste0(dir, 'filtered_matrix.mtx.gz'))
 genes <- read.csv(paste0(dir, 'filtered_features.tsv.gz'), sep='\t', header=FALSE)
 cells <- read.csv(paste0(dir, 'barcodes.tsv.gz'), sep='\t', header=FALSE)
@@ -27,7 +27,7 @@ head(cd)
 hist(log10(colSums(cd)+1)) ## distribution of genes per cell ie. library size (log scale)
 hist(log10(colSums(cd>0)+1)) ## distribution of unique gene species per cell ie. library complexity (log scale)
 hist(log10(rowSums(cd)+1)) ## distribution of cells per gene (log scale)
-vi <- rowSums(cd) > 3000 ## pick a filtering threshold
+vi <- rowSums(cd) > 1000 ## pick a filtering threshold
 table(vi)
 cd.filter <- cd[vi,]
 vi <- colSums(cd) > 100 ## pick a filtering threshold
@@ -49,28 +49,28 @@ dim(mat)
 ## we will instead install a faster implementation
 #install.packages("RSpectra")
 library(RSpectra)
-#pca <- RSpectra::svds(
-#  A    = t(mat),
-#  k    = 20,
-#  opts = list(
-#    center = TRUE, scale = TRUE, maxitr = 2000, tol = 1e-10
-#  )
-#)
-
-## Scale and center data myself
-m <- t(mat)
-m <- t(t(m) - colMeans(m))
-colMeans(m) ## double check mean is ~0
-m <- scale(m)
-apply(m, 2, var) ## double check var is 1
-
 pca <- RSpectra::svds(
-  A    = m,
-  k    = 20,
-  opts = list(
-    center = FALSE, scale = FALSE, maxitr = 2000, tol = 1e-10
-  )
+ A    = t(mat),
+ k    = 20,
+ opts = list(
+   center = TRUE, scale = TRUE, maxitr = 2000, tol = 1e-10
+ )
 )
+
+# ## Scale and center data myself
+# m <- t(mat)
+# m <- t(t(m) - colMeans(m))
+# colMeans(m) ## double check mean is ~0
+# m <- scale(m)
+# apply(m, 2, var) ## double check var is 1
+
+# pca <- RSpectra::svds(
+#   A    = m,
+#   k    = 20,
+#   opts = list(
+#     center = FALSE, scale = FALSE, maxitr = 2000, tol = 1e-10
+#   )
+# )
 
 ## look at elbow plot to check what is reasonable number of pcs
 val <- pca$d
@@ -79,10 +79,9 @@ points(val)
 N <- 10
 abline(v=N, col='red')
 pcs <- pca$u[, 1:N]
-print(ncol(pca$u))
 rownames(pcs) <- colnames(mat)
 colnames(pcs) <- paste0('PC', 1:N)
-tail(pcs)
+head(pcs)
 
 ############# PCA plots
 par(mfrow=c(2,2), mar=rep(4,4))
@@ -161,6 +160,7 @@ plot(pcs[,1:2], col=col, pch=".")
 
 ## Since this is spatial data, we can also see where these
 ## transcriptional clusters are spatially
+dir <- '~/Documents/Github/SpatialTranscriptomics.js/backend/example_data/coronal_brain/'
 positions <- read.csv(paste0(dir, 'spatial/tissue_positions_list.csv.gz'),
                 header=FALSE)
 head(positions)
@@ -179,4 +179,3 @@ plot(pos[names(col),], col=col, pch=16)
 #write.table(rownames(cd), paste0(dir, 'filtered_feature_bc_matrix/features.tsv'), sep='\t', quote=FALSE, col.names=FALSE)
 #write.table(colnames(cd), paste0(dir, 'filtered_feature_bc_matrix/barcodes.tsv'), sep='\t', quote=FALSE, col.names=FALSE)
 #write.table(pos, paste0(dir, 'spatial/tissue_positions_list.csv'), sep='\t', quote=FALSE, col.names=FALSE)
-

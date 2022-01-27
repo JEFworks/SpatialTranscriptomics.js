@@ -1,3 +1,5 @@
+/* Code from JEFworks/tsne-online */
+
 // create main global object
 // eslint-disable-next-line
 var tsnejs = tsnejs || { REVISION: "ALPHA" };

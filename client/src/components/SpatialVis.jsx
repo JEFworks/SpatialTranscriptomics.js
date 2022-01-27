@@ -8,181 +8,246 @@ import {
   FormControlLabel,
   Checkbox,
   Button,
+  CircularProgress,
 } from "@material-ui/core";
 
-const primary = "#094067";
-const paragraph = "#5f6c7b";
-const tertiary = "#90b4ce";
+const paragraph = "rgba(0, 0, 0, 0.54)";
+const secondary = "#90b4ce";
+const blue = "#80d8ff";
 
-const LeafletWrapper = (pixels, colors) => {
+const LeafletWrapper = (props) => {
+  const { pixels, colors, opacity, pixelSize, imageLink } = props;
   const bounds = [
     [0, 0],
     [1921, 2000],
   ];
 
   return (
-    <>
-      <Map
-        crs={L.CRS.Simple}
-        minZoom={-2}
-        bounds={bounds}
-        style={{ height: "500px", width: "100%" }}
-      >
-        <ImageOverlay bounds={bounds} url="/images/tissue_image.png" />
-        {pixels.length === colors.length &&
-          pixels.map((pixel, index) => {
-            return (
-              <Circle
-                key={pixel.center}
-                center={pixel.center}
-                color="transparent"
-                fillColor={colors[index] ? colors[index] : "blue"}
-                fillOpacity={1}
-                radius={8}
-              />
-            );
-          })}
-      </Map>
-    </>
+    <Map
+      crs={L.CRS.Simple}
+      minZoom={-2}
+      bounds={bounds}
+      style={{ height: "500px", width: "100%" }}
+    >
+      <ImageOverlay bounds={bounds} url={imageLink} />
+      {pixels.length === colors.length &&
+        pixels.map((pixel, index) => {
+          return (
+            <Circle
+              key={pixel.center}
+              center={pixel.center}
+              color="transparent"
+              fillColor={colors[index] ? colors[index] : "blue"}
+              fillOpacity={opacity}
+              radius={pixelSize}
+            />
+          );
+        })}
+    </Map>
   );
 };
 
-const TypedInput = (changeDeltaX, changeDeltaY, changeScale) => {
+const TypedInput = (props) => {
+  const {
+    changeDeltaX,
+    changeDeltaY,
+    changeScale,
+    changeOpacity,
+    changePixelSize,
+  } = props;
+
   return (
-    <>
-      <FormGroup row style={{ marginTop: "7px" }}>
-        <TextField
-          style={{ width: "50px", marginRight: "15px" }}
-          helperText="ΔX"
-          defaultValue="0"
-          onChange={changeDeltaX}
-        />
-        <TextField
-          style={{ width: "50px", marginRight: "15px" }}
-          helperText="ΔY"
-          defaultValue="1965"
-          onChange={changeDeltaY}
-        />
-        <TextField
-          style={{ width: "250px" }}
-          helperText="Scale (< 1 to downscale or > 1 to upscale)"
-          defaultValue="0.176"
-          onChange={changeScale}
-        />
-      </FormGroup>
-    </>
+    <FormGroup row style={{ marginTop: "7px" }}>
+      <TextField
+        style={{ width: "50px", marginRight: "15px" }}
+        color="secondary"
+        helperText="ΔX"
+        defaultValue="30"
+        onChange={changeDeltaX}
+      />
+      <TextField
+        style={{ width: "50px", marginRight: "15px" }}
+        color="secondary"
+        helperText="ΔY"
+        defaultValue="1945"
+        onChange={changeDeltaY}
+      />
+      <TextField
+        style={{ width: "250px", marginRight: "15px" }}
+        color="secondary"
+        helperText="Scale (< 1 to downscale or > 1 to upscale)"
+        defaultValue="0.170"
+        onChange={changeScale}
+      />
+      <TextField
+        style={{ width: "90px", marginRight: "15px" }}
+        color="secondary"
+        helperText="Opacity (0 - 1)"
+        defaultValue="1"
+        onChange={changeOpacity}
+      />
+      <TextField
+        style={{ width: "60px" }}
+        color="secondary"
+        helperText="Pixel Size"
+        defaultValue="8"
+        onChange={changePixelSize}
+      />
+    </FormGroup>
   );
 };
 
-const CheckboxInput = (
-  horizontalFlipped,
-  flipHorizontal,
-  verticalFlipped,
-  flipVertical,
-  xyFlipped,
-  flipXY
-) => {
+const CheckboxInput = (props) => {
+  const {
+    horizontalFlipped,
+    flipHorizontal,
+    verticalFlipped,
+    flipVertical,
+    xyFlipped,
+    flipXY,
+  } = props;
+
   return (
-    <>
-      <FormGroup row style={{ marginTop: "5px" }}>
-        <FormControlLabel
-          control={
-            <Checkbox
-              disableRipple
-              style={{ backgroundColor: "transparent", color: tertiary }}
-              checked={horizontalFlipped === -1}
-              onChange={flipHorizontal}
-            />
-          }
-          label="Flip Horizontally"
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              disableRipple
-              style={{ backgroundColor: "transparent", color: tertiary }}
-              checked={verticalFlipped === -1}
-              onChange={flipVertical}
-            />
-          }
-          label="Flip Vertically"
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              disableRipple
-              style={{ backgroundColor: "transparent", color: tertiary }}
-              checked={xyFlipped}
-              onChange={flipXY}
-            />
-          }
-          label="Swap X and Y Coordinates"
-        />
-      </FormGroup>
-    </>
+    <FormGroup row style={{ marginTop: "5px" }}>
+      <FormControlLabel
+        control={
+          <Checkbox
+            disableRipple
+            style={{ color: secondary }}
+            checked={horizontalFlipped === -1}
+            onChange={flipHorizontal}
+          />
+        }
+        label="Flip Horizontally"
+      />
+      <FormControlLabel
+        control={
+          <Checkbox
+            disableRipple
+            style={{ color: secondary }}
+            checked={verticalFlipped === -1}
+            onChange={flipVertical}
+          />
+        }
+        label="Flip Vertically"
+      />
+      <FormControlLabel
+        control={
+          <Checkbox
+            disableRipple
+            style={{ color: secondary }}
+            checked={xyFlipped}
+            onChange={flipXY}
+          />
+        }
+        label="Swap X and Y Coordinates"
+      />
+    </FormGroup>
   );
 };
 
 class SpatialVis extends Component {
   state = {
     pixels: [],
-    deltaX: 0,
-    deltaY: 1965,
-    scale: 0.176,
+    deltaX: 30,
+    deltaY: 1945,
+    scale: 0.17,
     horizontalFlipped: 1,
     verticalFlipped: -1,
     xyFlipped: false,
+    opacity: 1,
+    updatedOpacity: 1,
+    pixelSize: 8,
+    updatedPixelSize: 8,
   };
 
-  getPixels = this.getPixels.bind(this);
-  changeDeltaX = this.changeDeltaX.bind(this);
-  changeDeltaY = this.changeDeltaY.bind(this);
-  changeScale = this.changeScale.bind(this);
-  flipHorizontal = this.flipHorizontal.bind(this);
-  flipVertical = this.flipVertical.bind(this);
-  flipXY = this.flipXY.bind(this);
-
-  changeScale(event) {
+  changeScale = (event) => {
     const scale = Number.parseFloat(event.target.value);
-    this.setState({ scale: isNaN(scale) ? 1 : scale });
-  }
+    this.setState({ scale: scale });
+  };
 
-  changeDeltaX(event) {
+  changeDeltaX = (event) => {
     const deltaX = Number.parseInt(event.target.value);
-    this.setState({ deltaX: isNaN(deltaX) ? 0 : deltaX });
-  }
+    this.setState({ deltaX: deltaX });
+  };
 
-  changeDeltaY(event) {
+  changeDeltaY = (event) => {
     const deltaY = Number.parseInt(event.target.value);
-    this.setState({ deltaY: isNaN(deltaY) ? 0 : deltaY });
-  }
+    this.setState({ deltaY: deltaY });
+  };
 
-  flipHorizontal() {
+  changeOpacity = (event) => {
+    const opacity = Number.parseFloat(event.target.value);
+    this.setState({ updatedOpacity: opacity });
+  };
+
+  changePixelSize = (event) => {
+    const pixelSize = Number.parseInt(event.target.value);
+    this.setState({ updatedPixelSize: pixelSize });
+  };
+
+  flipHorizontal = () => {
     this.setState({ horizontalFlipped: this.state.horizontalFlipped * -1 });
-  }
+  };
 
-  flipVertical() {
+  flipVertical = () => {
     this.setState({ verticalFlipped: this.state.verticalFlipped * -1 });
-  }
+  };
 
-  flipXY() {
+  flipXY = () => {
     this.setState({ xyFlipped: !this.state.xyFlipped });
-  }
+  };
 
-  run() {
+  run = () => {
+    const {
+      deltaX,
+      deltaY,
+      scale,
+      updatedOpacity,
+      updatedPixelSize,
+    } = this.state;
+
+    if (
+      isNaN(deltaX) ||
+      isNaN(deltaY) ||
+      isNaN(scale) ||
+      isNaN(updatedOpacity) ||
+      isNaN(updatedPixelSize)
+    ) {
+      this.props.reportError(
+        "Please specify a number value for each parameter.\n"
+      );
+      return;
+    }
+
     const pixels = this.getPixels();
-    this.setState({ pixels });
-  }
+    this.setState({
+      pixels,
+      opacity: updatedOpacity,
+      pixelSize: updatedPixelSize,
+    });
+  };
 
-  getPixels() {
-    const { barcodes, numCells } = this.props;
+  getPixels = () => {
+    const { barcodes, reportError, colors } = this.props;
     const pixels = [];
 
-    if (numCells > 0 && barcodes[0]) {
-      if (!barcodes[0].x || !barcodes[0].y) return [];
+    if (colors.length === 0) {
+      reportError("Matrix is empty and/or has not loaded yet.\n");
+      return pixels;
+    }
 
-      for (let i = 0; i < numCells; i++) {
+    if (barcodes[0] != null) {
+      if (barcodes[0].x == null || barcodes[0].y == null) {
+        reportError(
+          "Information about the location of one or more pixels is missing and/or has not loaded yet.\n"
+        );
+        return [];
+      }
+
+      for (let i = 0; i < barcodes.length; i++) {
         try {
+          // x is the x-coordinate, y is the y-coordinate
           const { x, y } = barcodes[i];
           const {
             xyFlipped,
@@ -198,70 +263,93 @@ class SpatialVis extends Component {
           pixels.push({
             center: !xyFlipped ? [centerX, centerY] : [centerY, centerX],
           });
-        } catch (error) {}
+        } catch (_error) {}
       }
+    } else {
+      reportError("Barcodes information is empty and/or has not loaded yet.\n");
     }
     return pixels;
-  }
+  };
 
-  render() {
-    const {
-      changeDeltaX,
-      changeDeltaY,
-      changeScale,
-      flipHorizontal,
-      flipVertical,
-      flipXY,
-    } = this;
+  render = () => {
     const {
       pixels,
       horizontalFlipped,
       verticalFlipped,
       xyFlipped,
+      opacity,
+      pixelSize,
     } = this.state;
-    const { colors } = this.props;
+    const { colors, imageLink } = this.props;
+    const isMobile = window.innerWidth < 700;
 
     return (
       <>
         <Typography
-          style={{ marginBottom: "10px", fontWeight: 500, color: primary }}
+          style={{ marginBottom: "10px", fontWeight: 500 }}
+          color="primary"
           variant="h5"
         >
           Spatial Visualization
         </Typography>
+
         <Typography
-          style={{ marginBottom: "0px", fontWeight: 400, color: paragraph }}
+          style={{ fontWeight: 400, color: paragraph }}
           variant="body1"
         >
-          Enter description here.
+          Run this visualization to map results spatially onto the tissue.
         </Typography>
 
-        {TypedInput(changeDeltaX, changeDeltaY, changeScale)}
-        {CheckboxInput(
-          horizontalFlipped,
-          flipHorizontal,
-          verticalFlipped,
-          flipVertical,
-          xyFlipped,
-          flipXY
-        )}
+        <div style={{ display: "flex" }}>
+          <div>
+            <TypedInput
+              changeDeltaX={this.changeDeltaX}
+              changeDeltaY={this.changeDeltaY}
+              changeScale={this.changeScale}
+              changeOpacity={this.changeOpacity}
+              changePixelSize={this.changePixelSize}
+            />
+            <CheckboxInput
+              horizontalFlipped={horizontalFlipped}
+              verticalFlipped={verticalFlipped}
+              xyFlipped={xyFlipped}
+              flipHorizontal={this.flipHorizontal}
+              flipVertical={this.flipVertical}
+              flipXY={this.flipXY}
+            />
+          </div>
+
+          {!isMobile && this.props.loading && (
+            <CircularProgress
+              disableShrink
+              size={40}
+              thickness={5}
+              style={{ color: blue, marginTop: "14px", marginLeft: "30px" }}
+            />
+          )}
+        </div>
 
         <div style={{ paddingTop: "10px" }}></div>
         <Button
           variant="contained"
           size="small"
           color="primary"
-          style={{ backgroundColor: primary }}
-          onClick={() => this.run()}
+          onClick={this.run}
         >
           Run Visualization
         </Button>
-        <div style={{ paddingTop: "20px" }}></div>
 
-        {LeafletWrapper(pixels, colors)}
+        <div style={{ paddingTop: "20px" }}></div>
+        <LeafletWrapper
+          pixels={pixels}
+          colors={colors}
+          opacity={opacity}
+          pixelSize={pixelSize}
+          imageLink={imageLink}
+        />
       </>
     );
-  }
+  };
 }
 
 export default SpatialVis;

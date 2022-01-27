@@ -1,68 +1,84 @@
-import React, { Component } from "react";
 import { ResponsiveLine } from "@nivo/line";
 
 const red = "#ff80ab";
-const blue = "#80d8ff";
 
-const markers = (max, loading) => [
+const markers = (redLineLabel, redLine, max) => [
   {
     axis: "x",
-    value: max,
+    value: redLine >= max ? max : redLine,
+    legend: redLineLabel,
     lineStyle: {
-      stroke: !loading ? red : "transparent",
+      stroke: red,
       strokeWidth: 1,
+    },
+    textStyle: {
+      fill: red,
     },
   },
 ];
 
-class LineChart extends Component {
-  render() {
-    const { props } = this;
-    const { data, max } = props;
+const LineChart = (props) => {
+  const {
+    data,
+    redLine,
+    redLineLabel,
+    max,
+    xLabel,
+    yLabel,
+    tickValues,
+    type,
+  } = props;
 
-    return (
-      <>
-        <ResponsiveLine
-          data={data}
-          margin={{ top: 10, right: 10, bottom: 50, left: 50 }}
-          xScale={{ type: "point" }}
-          yScale={{
-            type: "linear",
-            min: "auto",
-            max: "auto",
-            stacked: true,
-            reverse: false,
-          }}
-          enableGridX={false}
-          enableGridY={false}
-          axisTop={null}
-          axisRight={null}
-          axisBottom={{
-            orient: "bottom",
-            tickSize: 5,
-            tickPadding: 5,
-            tickRotation: 0,
-            legend: "principal components",
-            legendOffset: 40,
-            legendPosition: "middle",
-          }}
-          axisLeft={{
-            orient: "left",
-            tickSize: 5,
-            tickPadding: 5,
-            tickRotation: 0,
-            legend: "eigenvalues",
-            legendOffset: -40,
-            legendPosition: "middle",
-          }}
-          pointSize={10}
-          pointBorderWidth={0.5}
-          markers={markers(max, data[0].data.length < 1)}
-          colors={blue}
-        />
-      </>
-    );
-  }
-}
+  return (
+    <ResponsiveLine
+      data={data}
+      margin={{
+        top: 10,
+        right: type === "gse" ? 20 : 10,
+        bottom: type === "gse" ? 70 : 50,
+        left: 50,
+      }}
+      xScale={{ type: "point" }}
+      yScale={{
+        type: "linear",
+        min: "auto",
+        max: "auto",
+        stacked: true,
+      }}
+      enableGridX={false}
+      enableGridY={false}
+      axisTop={null}
+      axisRight={null}
+      axisBottom={{
+        orient: "bottom",
+        tickSize: type === "gse" ? 15 : 5,
+        tickPadding: 5,
+        tickRotation: type === "gse" ? 90 : 0,
+        legend: xLabel,
+        legendOffset: 40,
+        legendPosition: "middle",
+        tickValues: tickValues,
+      }}
+      axisLeft={{
+        orient: "left",
+        tickSize: 5,
+        tickPadding: 5,
+        tickRotation: 0,
+        legend: yLabel,
+        legendOffset: -40,
+        legendPosition: "middle",
+      }}
+      pointSize={type === "gse" ? 0 : 7}
+      pointBorderWidth={0.5}
+      markers={
+        data[0].data.length < 1
+          ? null
+          : markers(redLineLabel, redLine, max ? max : Infinity)
+      }
+      colors={["black"]}
+      animate={false}
+    />
+  );
+};
 
 export default LineChart;

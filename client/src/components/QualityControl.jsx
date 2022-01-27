@@ -1,113 +1,71 @@
 import React, { Component } from "react";
-import { Typography, Paper, Slider, Button } from "@material-ui/core";
-import Histogram from "./plots/Histogram.jsx";
+import {
+  Typography,
+  Paper,
+  Slider,
+  Button,
+  CircularProgress,
+} from "@material-ui/core";
+import Histogram from "./Plots/Histogram.jsx";
+import Title from "./Plots/PlotTitle.jsx";
 
-const primary = "#094067";
-const paragraph = "#5f6c7b";
-const tertiary = "#90b4ce";
+const paragraph = "rgba(0, 0, 0, 0.54)";
+const blue = "#80d8ff";
 
-const marks = (min, max) => {
-  const list = [];
-  for (let i = min; i < max; i += 0.5)
-    list.push({ value: i, label: i.toFixed(1) });
-  return list;
-};
+const Figure = (props) => {
+  const { data, threshold, changeThreshold, type } = props;
+  const sums = !data ? [] : data;
 
-const Figure = (rowsums, colsums, thresholds, changeThreshold, type) => {
-  const sums = !rowsums ? [] : type === "rowsum" ? rowsums : colsums;
-
-  let minIndex = 0;
-  let maxIndex = 10;
+  let leftBound = 0;
+  let rightBound = 0;
   if (sums && sums.length > 0) {
-    minIndex = -1;
-    maxIndex = sums.length;
-    sums.forEach((datum, index) => {
-      if (datum.frequency > 0 && minIndex === -1) minIndex = index;
-      if (datum.frequency > 0) maxIndex = index;
-    });
-    minIndex = Math.max(0, minIndex - 1);
-    maxIndex = Math.min(maxIndex + 2, sums.length);
+    leftBound = sums[0].range;
+    rightBound = sums[sums.length - 1].range;
   }
 
-  const Title = (
-    <>
-      <Typography
-        variant="body1"
-        align="center"
-        style={{ paddingBottom: "5px", fontWeight: 500, color: primary }}
-      >
-        {type === "rowsum"
-          ? "# of Reads per Gene"
-          : "# of Genes Detected per Cell"}
-      </Typography>
-    </>
-  );
-
   const HistogramPlot = (
-    <>
-      <div style={{ width: "100%", height: "100%" }}>
-        <Histogram
-          xLabel={
-            type === "rowsum"
-              ? "log10(reads per gene + 1)"
-              : "log10(genes per cell + 1)"
-          }
-          data={sums}
-          min={type === "rowsum" ? thresholds.minRowSum : thresholds.minColSum}
-          lowerLimit={minIndex}
-          upperLimit={maxIndex}
-        />
-      </div>
-    </>
+    <div style={{ width: "100%", height: "110%" }}>
+      <Histogram
+        xLabel={
+          type === "rowsum"
+            ? "log10(# of reads of a gene + 1)"
+            : "log10(# of genes detected in a cell + 1)"
+        }
+        data={sums}
+        min={threshold}
+      />
+    </div>
   );
 
   const Toggle = (
-    <>
-      <Slider
-        style={{ marginLeft: "20px", width: "90%", color: tertiary }}
-        onChange={(_event, value) =>
-          changeThreshold(
-            type === "rowsum" ? value : null,
-            type === "colsum" ? value : null
-          )
-        }
-        marks={marks(minIndex / 2, maxIndex / 2)}
-        defaultValue={2.0}
-        step={0.5}
-        min={minIndex / 2}
-        max={maxIndex / 2 - 0.5}
-        valueLabelDisplay="auto"
-      />
-    </>
+    <Slider
+      style={{ marginLeft: "20px", width: "90%" }}
+      color="secondary"
+      onChange={(_event, value) =>
+        changeThreshold(
+          type === "rowsum" ? value : null,
+          type === "colsum" ? value : null
+        )
+      }
+      defaultValue={type === "rowsum" ? 2.0 : 1.0}
+      step={type === "rowsum" ? 0.5 : 0.1}
+      min={leftBound}
+      max={rightBound}
+      valueLabelDisplay="auto"
+    />
   );
 
+  const title =
+    type === "rowsum"
+      ? "# of Reads of a Gene"
+      : "# of Genes Detected in a Cell";
+
   return (
-    <>
-      <div
-        style={{
-          height: "250px",
-          width: "100%",
-          paddingRight: "15px",
-          paddingLeft: "15px",
-          paddingBottom: "125px",
-        }}
-      >
-        <Paper
-          style={{
-            padding: "15px 20px 90px 15px",
-            width: "370px",
-            height: "100%",
-            backgroundColor: "transparent",
-          }}
-          variant="outlined"
-          elevation={3}
-        >
-          {Title}
-          {HistogramPlot}
-          {Toggle}
-        </Paper>
-      </div>
-    </>
+    <Paper className="qc-plot" variant="outlined" elevation={3}>
+      <Title title={title} />
+      {HistogramPlot}
+      {Toggle}
+    </Paper>
   );
 };
 
@@ -119,80 +77,94 @@ class QualityControl extends Component {
     status1: false,
   };
 
-  changeThreshold = this.changeThreshold.bind(this);
-  run = this.run.bind(this);
+  changeThreshold = (minRowSum, minColSum) => {
+    if (minRowSum != null) {
+      this.setState({ minRowSum, status0: true });
+    }
+    if (minColSum != null) {
+      this.setState({ minColSum, status1: true });
+    }
+  };
 
-  changeThreshold(minRowSum, minColSum) {
-    if (minRowSum !== null) this.setState({ minRowSum, status0: true });
-    if (minColSum !== null) this.setState({ minColSum, status1: true });
-  }
-
-  run() {
-    const { props } = this;
+  run = () => {
+    const { handleFilter } = this.props;
     const { minRowSum, minColSum } = this.state;
-    if (this.state.status0) props.handleFilter(minRowSum, null);
-    if (this.state.status1) props.handleFilter(null, minColSum);
+    if (this.state.status0) {
+      handleFilter(minRowSum, null);
+    }
+    if (this.state.status1) {
+      handleFilter(null, minColSum);
+    }
     this.setState({ status0: false, status1: false });
-  }
+  };
 
-  render() {
-    const { props, state } = this;
-    const { rowsums, colsums } = props;
-    const { minRowSum, minColSum } = state;
-    const thresholds = { minRowSum: minRowSum, minColSum: minColSum };
+  render = () => {
+    const { rowsums, colsums, loading } = this.props;
+    const { minRowSum, minColSum } = this.state;
 
     return (
       <>
-        <Typography
-          style={{ marginBottom: "10px", fontWeight: 500, color: primary }}
-          variant="h5"
-        >
-          Quality Control
-        </Typography>
+        <div style={{ display: "flex" }}>
+          <Typography
+            color="primary"
+            style={{ marginBottom: "10px", fontWeight: 500 }}
+            variant="h5"
+          >
+            Quality Control (QC)
+          </Typography>
+          {loading && (
+            <CircularProgress
+              disableShrink
+              size={40}
+              thickness={5}
+              style={{ color: blue, marginTop: "-5px", marginLeft: "30px" }}
+            />
+          )}
+        </div>
+
         <Typography
           style={{ marginBottom: "20px", fontWeight: 400, color: paragraph }}
           variant="body1"
         >
-          Use the range selectors to change the minimum threshold for each
-          quality control metric. Cells and genes below these thresholds will be
-          removed from the expression matrix for downstream analysis. Genes not
-          expressed in any cells were removed before computing quality control.
+          Use the range selectors to set the minimum threshold for each quality
+          control metric. Cells and genes below these thresholds are removed
+          from the expression matrix for downstream analysis. Increasing the
+          threshold for # of reads per gene filters out lowly expressed genes,
+          while increasing the threshold for # of genes detected in a cell
+          filters out cells with few reads overall. Genes not expressed in any
+          cells were automatically removed.
         </Typography>
 
         <div style={{ width: "100%", display: "flex" }}>
           <div style={{ width: "50%" }}></div>
           <div className="QC-flex">
-            {Figure(
-              rowsums,
-              colsums,
-              thresholds,
-              this.changeThreshold,
-              "rowsum"
-            )}
-            {Figure(
-              rowsums,
-              colsums,
-              thresholds,
-              this.changeThreshold,
-              "colsum"
-            )}
+            <Figure
+              data={rowsums}
+              threshold={minRowSum}
+              changeThreshold={this.changeThreshold}
+              type={"rowsum"}
+            />
+            <Figure
+              data={colsums}
+              threshold={minColSum}
+              changeThreshold={this.changeThreshold}
+              type={"colsum"}
+            />
           </div>
           <div style={{ width: "50%" }}></div>
         </div>
 
-        <div style={{ paddingTop: "0px" }}></div>
         <Button
           variant="contained"
           size="small"
           color="primary"
-          style={{ backgroundColor: primary }}
-          onClick={() => this.run()}
+          onClick={this.run}
         >
-          Apply Filters
+          Apply QC Filters
         </Button>
       </>
     );
-  }
+  };
 }
 
 export default QualityControl;

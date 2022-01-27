@@ -1,5 +1,9 @@
+/* Code adapted from http://www.andrewnoske.com/wiki/Code_-_heatmaps_and_color_gradients */
+
 const GetRGB = (val) => {
-  if (val == null) return "transparent";
+  if (val == null) {
+    return "transparent";
+  }
   const colors = [
     [0, 0, 255],
     [255, 255, 255],

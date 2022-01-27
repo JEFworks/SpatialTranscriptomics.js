@@ -1,4 +1,3 @@
-import React, { Component } from "react";
 import { ResponsiveBar } from "@nivo/bar";
 
 const red = "#ff80ab";
@@ -6,16 +5,25 @@ const blue = "#80d8ff";
 const getColor = (bar) => bar.data.color;
 
 const setColor = (val, min) => {
-  if (val < min) return red;
-  else return blue;
+  return val < min ? red : blue;
 };
 
-const markers = (min, loading) => [
+const getMarkerLine = (data, min) => {
+  const length = data.length;
+  for (let i = 0; i < length; i++) {
+    if (data[i].range >= min) {
+      return data[i].range;
+    }
+  }
+  return min.toFixed(1);
+};
+
+const markers = (markerLine) => [
   {
     axis: "x",
-    value: min.toFixed(1),
+    value: markerLine,
     lineStyle: {
-      stroke: !loading ? red : "transparent",
+      stroke: red,
       strokeWidth: 1,
     },
   },
@@ -24,7 +32,7 @@ const markers = (min, loading) => [
 const xAxis = (label) => ({
   tickSize: 5,
   tickPadding: 5,
-  tickRotation: 0,
+  tickRotation: 90,
   legend: label,
   legendPosition: "middle",
   legendOffset: 40,
@@ -38,41 +46,36 @@ const yAxis = {
   legendOffset: -40,
 };
 
-class Histogram extends Component {
-  render() {
-    const { props } = this;
-    const { min, lowerLimit, upperLimit } = props;
+const Histogram = (props) => {
+  const { min } = props;
 
-    const data = !props.data
-      ? []
-      : props.data.slice(lowerLimit, upperLimit).map((datum) => {
-          return {
-            range: datum.range.toFixed(1),
-            frequency: datum.frequency,
-            color: setColor(datum.range, min),
-          };
-        });
+  const data = !props.data
+    ? [{ range: 0, frequency: 0, color: "black" }]
+    : props.data.map((datum) => {
+        return {
+          range: datum.range.toFixed(1),
+          frequency: datum.frequency,
+          color: setColor(datum.range, min),
+        };
+      });
 
-    return (
-      <>
-        <ResponsiveBar
-          theme={{ textColor: "black" }}
-          data={data}
-          keys={["frequency"]}
-          indexBy="range"
-          margin={{ top: 5, right: 0, bottom: 50, left: 45 }}
-          colors={getColor}
-          markers={markers(min, data.length < 1)}
-          axisBottom={xAxis(props.xLabel)}
-          axisLeft={yAxis}
-          enableLabel={false}
-          enableGridX={false}
-          enableGridY={false}
-          isInteractive={false}
-        />
-      </>
-    );
-  }
-}
+  return (
+    <ResponsiveBar
+      theme={{ textColor: "black" }}
+      data={data}
+      keys={["frequency"]}
+      indexBy="range"
+      margin={{ top: 5, right: 0, bottom: 50, left: 45 }}
+      colors={getColor}
+      markers={data.length < 1 ? null : markers(getMarkerLine(data, min))}
+      axisBottom={xAxis(props.xLabel)}
+      axisLeft={yAxis}
+      enableLabel={false}
+      enableGridX={false}
+      enableGridY={false}
+      isInteractive={false}
+    />
+  );
+};
 
 export default Histogram;
